@@ -1,3 +1,29 @@
+from flask import *
+from flask_socketio import *
+
+app = Flask(__name__)
+socketio = SocketIO(app)
+
+@app.route('/')
+def Arrivée():
+    return render_template('clientgraphique')
+
+
+
+
+@socketio.on('message')
+def handle_message(data):
+    print("Message reçu : ",data)
+    emit("Renvoie",data)
+    print("Renvoie 1 fait")
+    emit("Renvoie2","Samy va avoir du boulot")
+    print("Renvoie 2 fait")
+
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True)
+
+
 def motExiste(mot):
     with open('Ressources/Dico.txt', 'r', encoding='utf-8') as fichier:
         mots_dictionnaire = {ligne.strip().upper() for ligne in fichier}
