@@ -19,9 +19,11 @@ Vincent :
 Intégrateur
 
 Pour lancer le serveur, écrire dans un terminal:
-    -lancer le fichier python server.py :
-        -aller à l'adresse http://127.0.0.1:5000/ pour l'interface graphique
-        -Lancer client.py dans un autre cmd pour l'interface texte
+    
+    - lancer le fichier python server.py :
+        
+        - aller à l'adresse http://127.0.0.1:5000/ pour l'interface graphique
+        - Lancer client.py dans un autre cmd pour l'interface texte
 
 
 
