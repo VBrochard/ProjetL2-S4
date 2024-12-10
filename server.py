@@ -43,7 +43,7 @@ def genererToutesLesCombis(s):
     return result
 
 def plusLongDansUneListe(l):
-    return max(liste_mots, key=len)        
+    return max(liste_mots, key=len)
 
 def motLePlusLong(s):
     genererToutesLesCombis(s)
