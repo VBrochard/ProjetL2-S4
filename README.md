@@ -24,3 +24,5 @@ Pour lancer le serveur, écrire dans un terminal:
     -flask run
     -aller à l'adresse http://127.0.0.1:5000/ 
 
+Remarque : lors de l'ouverture d'un nouveau terminal, il est important de se souvenir d'activer l'environnement virtuel et de définir les variables d'environnement FLASK_ENV et FLASK_APP.
+
