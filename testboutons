@@ -1,0 +1,84 @@
+<!DOCTYPE html> 
+<html lang="fr"> 
+    <head> 
+        <meta charset="UTF-8"> 
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <title>Le Plus Long Mot</title> 
+        <script src="https://cdn.tailwindcss.com"></script> 
+        <style> .draggable { cursor: grab; } .droppable { border: 2px dashed #ddd; } </style> 
+    </head> 
+    <body class="bg-gray-100"> 
+        <div class="max-w-4xl mx-auto mt-10 p-5 bg-white rounded-lg shadow" id="game-container"> 
+            <h1 class="text-2xl font-bold text-center text-gray-700">Client Graphique</h1> 
+            <!-- Section initiale --> 
+             <div id="initial-section"> 
+                <button id="connect-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"> Connecter au Serveur </button> 
+                <button id="game-btn" class="mt-5 px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600"> Entrer dans le jeu : Le Plus Long Mot </button> 
+            </div> 
+            <!-- Jeu "Le Plus Long Mot" --> 
+             <div id="game-section" class="hidden"> 
+                <div class="grid grid-cols-2 gap-5"> 
+                    <!-- Colonne de gauche : Lettres aléatoires --> 
+                     <div id="letters-column" class="p-5 bg-gray-200 rounded shadow"> 
+                        <h2 class="text-lg font-bold mb-3 text-center">Lettres Aléatoires</h2> 
+                        <div id="random-letters" class="grid grid-cols-5 gap-2">
+                             <!-- Colonne de droite : Réorganisation --> 
+                              <div id="organize-column" class="p-5 bg-gray-200 rounded shadow"> 
+                                <h2 class="text-lg font-bold mb-3 text-center">Ranger les Lettres</h2> 
+                                <div id="organized-letters" class="grid grid-cols-5 gap-2"> 
+                                    <!-- Lettres à ranger --> 
+                                    </div> </div> </div> </div> </div> 
+                                    <script> const connectBtn = document.getElementById("connect-btn"); 
+                                    const gameBtn = document.getElementById("game-btn");
+                                     const initialSection = document.getElementById("initial-section");
+                                      const gameSection = document.getElementById("game-section"); 
+                                      const randomLettersContainer = document.getElementById("random-letters"); 
+                                      const organizedLettersContainer = document.getElementById("organized-letters"); 
+                                      // Fonction pour générer une lettre aléatoire 
+                                      function getRandomLetter() { const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                                       return letters.charAt(Math.floor(Math.random() * letters.length)); }
+                                        // Fonction pour démarrer le jeu
+                                         function startGame() { 
+                                            // Masquer la section initiale et afficher le jeu
+                                             initialSection.classList.add("hidden");
+                                              gameSection.classList.remove("hidden");
+                                               // Générer 10 lettres aléatoires 
+                                               randomLettersContainer.innerHTML = ""; 
+                                               for (let i = 0; i < 10; i++) { const letterBox = document.createElement("div");
+                                                letterBox.textContent = getRandomLetter(); 
+                                                letterBox.className = "draggable p-4 bg-blue-400 text-white text-center rounded shadow"; 
+                                                letterBox.setAttribute("draggable", "true"); 
+                                                letterBox.setAttribute("data-id", i); 
+                                                // Ajouter les événements de glisser-déposer 
+                                                letterBox.addEventListener("dragstart", handleDragStart);
+                                                 randomLettersContainer.appendChild(letterBox); } // Préparer les cases vides dans la colonne d'organisation
+                                                  organizedLettersContainer.innerHTML = "";
+                                                   for (let i = 0; i < 10; i++) { const emptyBox = document.createElement("div");
+                                                   emptyBox.className = "droppable p-4 bg-gray-300 text-center rounded shadow";
+                                                    emptyBox.setAttribute("data-id", i);
+                                                     // Ajouter les événements de glisser-déposer
+                                                      emptyBox.addEventListener("dragover", handleDragOver); 
+                                                      emptyBox.addEventListener("drop", handleDrop); 
+                                                      organizedLettersContainer.appendChild(emptyBox); } } 
+                                                      // Événement : Démarrer le jeu 
+                                                      gameBtn.addEventListener("click", startGame); 
+                                                      // Gestion des événements de glisser-déposer 
+                                                      let draggedElement = null;
+                                                       function handleDragStart(event) { draggedElement = event.target; event.dataTransfer.effectAllowed = "move"; }
+                                                       function handleDragOver(event) { event.preventDefault(); event.dataTransfer.dropEffect = "move"; }
+                                                        function handleDrop(event) { event.preventDefault(); 
+                                                            if (draggedElement) { 
+                                                                // Si une lettre est déjà présente, la replacer dans la colonne de gauche 
+                                                                if (event.target.textContent) { const returnBox = document.createElement("div"); 
+                                                                returnBox.textContent = event.target.textContent; 
+                                                                returnBox.className = "draggable p-4 bg-blue-400 text-white text-center rounded shadow"; 
+                                                                returnBox.setAttribute("draggable", "true"); 
+                                                                returnBox.addEventListener("dragstart", handleDragStart); 
+                                                                randomLettersContainer.appendChild(returnBox); }
+                                                                 // Déplacer l'élément dans la case cible
+                                                                event.target.textContent = draggedElement.textContent;
+                                                                 draggedElement.remove(); } } 
+                                                                 // Connexion au serveur
+                                                                  connectBtn.addEventListener("click", () => { alert("Connecté au serveur ! (Simulation)"); }); </script> 
+                                                                  </body> 
+</html>
