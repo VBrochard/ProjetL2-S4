@@ -1,6 +1,19 @@
 # projetProgGroupe22
 
-Test Git Vincent du 4 décembre
-Test Git Bastien du 4 décembre
+Phase 1 :
 
-Tous vierge tous frais prêt pour le projet.
+Dhia :
+
+Interface Graphique
+
+Samy :
+
+Serveur Python
+
+Bastien :
+
+Interface texte en python
+
+Vincent :
+
+Intégrateur
