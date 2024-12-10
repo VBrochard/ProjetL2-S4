@@ -1,14 +1,20 @@
 import socketio
 
 sio = socketio.Client()
-sio.connect('http://localhost:8000')
+sio.connect('http://localhost:5000')
+print("Connecté !")
 
-sio.emit('message', {'from': 'client'})
+message = "bonjour"
+sio.emit('message', message)
+
+@sio.event
+def Renvoie2(data):
+    print(data)
 
 
-@sio.on('response')
-def response(data):
-    print(data)  # {'from': 'server'}
+@sio.event
+def Renvoie(data):
+    print(data)
 
-    sio.disconnect()
-    exit(0)
+
+

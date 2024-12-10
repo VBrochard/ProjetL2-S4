@@ -1,24 +1,23 @@
 from flask import Flask
-from flask_socketio import SocketIO, emit
-import logging
+from flask_socketio import SocketIO, emit, send
 
 app = Flask(__name__)
-
-@app.route('/')
-def hello():
-    return 'Hello, World!'
-
 socketio = SocketIO(app)
 
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.ERROR)
+#@app.route('/')
+#def hello():
+#    print("Connecté")
+#    return 'Hello'
+
+
 
 
 @socketio.on('message')
-def message(data):
-    print(data)  # {'from': 'client'}
-    emit('response', {'from': 'server'})
+def handle_message(data):
+    print("Message reçu : ",data)
+    emit("Renvoie",data)
+    emit("Renvoie2","Samy va avoir du boulot")
 
 
 if __name__ == '__main__':
-    socketio.run(app, port=8000, debug=True)
+    socketio.run(app)
