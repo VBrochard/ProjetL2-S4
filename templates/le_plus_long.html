@@ -1,9 +1,26 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Le Plus Long Mot</title>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script>
+        const socket = io('localhost:5000') /* Remplacer localhost par l'adresse du serv si besoin */
+        let deck = []
+        let ListeJoueur = []
+
+        socket.on('Lancement', (data) => {
+            ListeJoueur = data
+        })
+
+        socket.on('tirageLettres', (data) => {
+            deck = data
+            initialiserGrille()
+        })
+
+    </script>
     <style>
         body {
             margin: 0;
@@ -67,7 +84,8 @@
 
         .button-container {
             display: flex;
-            gap: 10px; /* Ajout d'un espace entre les boutons */
+            gap: 10px;
+            /* Ajout d'un espace entre les boutons */
             margin-top: 20px;
         }
 
@@ -84,22 +102,26 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Le Plus Long Mot</h1>
     <div id="timer">30</div>
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
-    
+
     <!-- Conteneur des boutons -->
     <div class="button-container">
         <!-- Bouton Retour -->
         <button onclick="window.location.href='index.html'">Retour</button>
         <!-- Bouton Valider -->
         <button id="bouton-valider">Valider</button>
+        <input id="nom" placeholder="Tapez votre nom" type="text" required />
+        <button id="arrivee" onclick="ConnexionServeur()"">Se connecter</button>
     </div>
-    
+
     <!-- Message de temps écoulé -->
-    <div id="message-temps-ecoule">Temps écoulé!</div>
+    <div id=" message-temps-ecoule">Temps écoulé!
+    </div>
 
     <script>
         let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
@@ -107,12 +129,11 @@
         let timerInterval; // Intervalle pour le compte à rebours
         let jeuTermine = false; // Indicateur si le jeu est terminé
 
-        /**
-         * Génère 10 lettres aléatoires de l'alphabet
-         */
-        function genererLettresAleatoires() {
-            const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            return Array.from({ length: 10 }, () => lettres[Math.floor(Math.random() * lettres.length)]);
+
+        function ConnexionServeur() {
+            nomJoueur = nom.value;
+            if (String(nomJoueur))
+                socket.emit('AnnonceJoueur', nomJoueur)
         }
 
         /**
@@ -122,16 +143,15 @@
             const ligne1 = document.getElementById('ligne-1');
             const ligne2 = document.getElementById('ligne-2');
 
-            const lettres = genererLettresAleatoires();
 
             // Remplit la première ligne avec des lettres aléatoires
-            lettres.forEach(lettre => {
-                const caseLettre = creerCaseDeplacable(lettre);
+            deck.forEach(deck => {
+                const caseLettre = creerCaseDeplacable(deck);
                 ligne1.appendChild(caseLettre);
             });
 
             // Remplit la deuxième ligne avec des cases vides
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 7; i++) {
                 const caseVide = creerCaseVide();
                 ligne2.appendChild(caseVide);
             }
@@ -239,7 +259,7 @@
         /**
          * Fonction pour valider la grille (exemple d'action pour le bouton "Valider")
          */
-        document.getElementById('bouton-valider').addEventListener('click', function() {
+        document.getElementById('bouton-valider').addEventListener('click', function () {
             alert("Grille validée !");
         });
 
@@ -247,7 +267,7 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
-            timerInterval = setInterval(function() {
+            timerInterval = setInterval(function () {
                 tempsRestant--;
                 document.getElementById('timer').textContent = tempsRestant;
 
@@ -264,8 +284,7 @@
 
         // Initialisation des grilles et démarrage du compteur
         initialiserGrille();
-        demarrerCompteur();
     </script>
 </body>
-</html>
 
+</html>
