@@ -44,14 +44,18 @@ def Lancement(data):
     print("La partie commence !")
     print("Joueurs:")
     for joueur in data:
-        print("-"+joueur)
+        print("-"+ joueur[0], "Score :",joueur[1])
 
 
 
 @sio.event
 def résultat(data):
-    print("Le gagnant est: ")#Nom du vainqueur
-    print("Il gagne x points")#Afficher le score retourné
+    print("Le gagnant est :", data.nom )#Nom du vainqueur
+    print("Il gagne", data.PointGagnée, "points","avec le mot :", data.MotGagnant)#Afficher le score retourné
+    print("Le meilleur mot possible était :",data.meilleurPossible)
+    for joueur in data.ListeScore:
+        print("-"+ joueur[0], "Score :",joueur[1])
+    recommencerPartie("a")
 
 
 
@@ -72,11 +76,10 @@ def tirageLettres(data):
         affichage+=lettre+" "
     print(Fore.GREEN+"Lettres disponibles:",Fore.RED+affichage)
     print(Style.RESET_ALL)
-    recommencerPartie("a")
     propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
     propositionMot = propositionMot.upper()
     if contientBonnesLettres(propositionMot,tirage):
-        sio.emit("envoiMot",propositionMot)
+        sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
     else:
         while contientBonnesLettres(propositionMot,tirage) == False:
             propositionMot = input("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
@@ -86,4 +89,6 @@ def tirageLettres(data):
 
 sio.wait()
 
+
+#METTRE UN WAIT A LAFFICHAGE DES JOUEURS
 
