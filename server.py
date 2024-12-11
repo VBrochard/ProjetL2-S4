@@ -2,7 +2,7 @@ from flask import *
 from flask_socketio import *
 
 app = Flask(__name__)
-socketio = SocketIO(app, ping_timeout=10)
+socketio = SocketIO(app, cors_allowed_origins="*", transports=["websocket"])
 
 
 taille_deck = 7
@@ -23,7 +23,7 @@ def handle_message(data):
 if __name__ == '__main__':
     socketio.run(app, debug=True)
 
-lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H":}
+lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H":2}
 
 def motExiste(mot):
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:

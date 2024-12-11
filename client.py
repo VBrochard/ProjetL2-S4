@@ -21,15 +21,9 @@ def connect():
     print("Bienvenue",nomJoueur)
 
 try:
-    sio.connect('http://localhost:5000')
+    sio.connect('http://localhost:5000',transports=["websocket"])
 except Exception as e:
     print("Impossible de se connecter")
-
-
-
-
-
-
 
 
 sio.wait()
