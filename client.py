@@ -45,7 +45,7 @@ def Lancement(data):
     print("Joueurs:")
     for joueur in data:
         print("-"+ joueur[0], "Score :",joueur[1])
-
+    time.sleep(2)
 
 
 @sio.event
@@ -66,6 +66,8 @@ def recommencerPartie(data):
     if rejouer == "n":
         print("Au revoir")
         sio.disconnect()
+    
+
 
 
 
