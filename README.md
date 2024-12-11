@@ -5,18 +5,22 @@ Phase 1 :
 Dhia :
 
 Interface Graphique Crée
+Index qui emmène au different jeu
+
+Le mot le plus long :
+    interface graphique crée avec lettre déplaçable, et chrono implémentée
 
 Samy :
 
-Serveur Python fonctionnel avec les premieres fonction de jeu
+Serveur Python fonctionnel avec les fonctions du jeu
 
 Bastien :
 
-Interface texte en python
+Interface texte en python avec quelque fonction utile
 
 Vincent :
 
-Intégrateur
+Intégrateur , résolveur de bug
 
 Pour lancer le serveur, écrire dans un terminal:
     
