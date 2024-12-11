@@ -26,7 +26,6 @@ print(Fore.GREEN+"*************************************************")
 print(Style.RESET_ALL)
 nomJoueur = input("Entrez votre nom pour rejoindre: ")
 
-
 @sio.event
 def connect():
     sio.emit('AnnonceJoueur',nomJoueur)
@@ -50,6 +49,7 @@ def Lancement(data):
 
 @sio.event
 def résultat(data):
+    print("Donnée reçu :",data)
     print("Le gagnant est :", data.get("nom"))#Nom du vainqueur
     print("Il gagne", data.get("PointGagnée"), "points","avec le mot :", data.get("MotGagnant"))#Afficher le score retourné
     print("Le meilleur mot possible était :",data.get("meilleurPossible"))

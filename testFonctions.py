@@ -12,7 +12,6 @@ def motExiste(mot):
 
 def motLePlusLong(s):
     max_mot = ""
-    
     for i in range(len(s), 0, -1): 
         for combi in permutations(s, i):
             mot = ''.join(combi)
@@ -47,3 +46,5 @@ def genererUnDeck():
         a = randint(0, sommeDesFreq())
         deck.append(eniemeCarte(a))
     return deck
+
+

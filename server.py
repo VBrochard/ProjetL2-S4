@@ -11,6 +11,9 @@ ListeJoueurs = []
 NbrJoueurs = 2
 taille_deck = 7
 deck = []
+MeilleurMotJoueur = ""
+NomMeilleurJoueur = ""
+MeilleurPossible = ""
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
@@ -28,7 +31,6 @@ def motExiste(mot):
 
 def motLePlusLong(s):
     max_mot = ""
-    
     for i in range(len(s), 0, -1): 
         for combi in permutations(s, i):
             mot = ''.join(combi)
@@ -67,7 +69,8 @@ def LeMotlepluslong():
 
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
-    ListeJoueurs.append((data,0))
+    global ListeJoueurs
+    ListeJoueurs.append([str(data),0])
     print(data, "Rejoint la partie")
     if len(ListeJoueurs) == NbrJoueurs:
         socketio.emit('Lancement',ListeJoueurs)
@@ -76,24 +79,36 @@ def handle_AnnonceJoueur(data):
 @socketio.on('envoiMot')
 def handle_envoieMot(data):
     global TokenReponse
-    MeilleurMotJoueur = ""
-    NomMeilleurJoueur = ""
-    if (motExiste(data.get("mot")) and len(data.get("mot")) > len(MeilleurMotJoueur)):
+    global MeilleurMotJoueur
+    global NomMeilleurJoueur
+    global ListeJoueurs
+    global MeilleurPossible
+    if ((motExiste(data.get("mot"))) and (len(data.get("mot")) > len(MeilleurMotJoueur))):
         MeilleurMotJoueur = data.get("mot")
         NomMeilleurJoueur = data.get("nom")
     TokenReponse += 1
     if TokenReponse == NbrJoueurs:
         MeilleurPossible = motLePlusLong(deck)
-        for sous_liste in ListeJoueurs:
-            if sous_liste[0] == NomMeilleurJoueur: 
-                sous_liste[1] + len(MeilleurMotJoueur) 
+        for joueur in ListeJoueurs:
+            if joueur[0] == NomMeilleurJoueur: 
+                joueur[1] += len(MeilleurMotJoueur) 
                 break
-        socketio.emit('résultat', {"nom" : NomMeilleurJoueur, "ListeScore" : ListeJoueurs, "PointGagnée" : len(MeilleurMotJoueur), "meilleurPossible" : MeilleurPossible,"MotGagnant" : MeilleurMotJoueur})
+        print(MeilleurMotJoueur)
+        print(NomMeilleurJoueur)
+        print(ListeJoueurs)
+        print(MeilleurPossible)
+        socketio.emit('résultat', {
+            "nom" : NomMeilleurJoueur,
+            "ListeScore" : ListeJoueurs,
+            "PointGagnée" : len(MeilleurMotJoueur),
+            "meilleurPossible" : MeilleurPossible,
+            "MotGagnant" : MeilleurMotJoueur
+            })
         TokenReponse = 0
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
 
 
-#TRANSFORMER LES data. en data.get("")
+#Fonction meilleur mot possible ne fonctionne pas dans le serv mais oui dans testFonction
 
