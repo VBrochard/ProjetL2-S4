@@ -108,6 +108,3 @@ def handle_envoieMot(data):
 if __name__ == '__main__':
     socketio.run(app, debug=True)
 
-
-#Fonction meilleur mot possible ne fonctionne pas dans le serv mais oui dans testFonction
-

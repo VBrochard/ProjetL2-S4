@@ -13,10 +13,11 @@ Le mot le plus long :
 Samy :
 
 Serveur Python fonctionnel avec les fonctions du jeu
+Toute les communications du serveur sont prêtes
 
 Bastien :
 
-Interface texte en python avec quelque fonction utile
+Interface texte en python qui communique avec le serveur et affiche les bons résultats
 
 Vincent :
 
@@ -27,7 +28,9 @@ Pour lancer le serveur, écrire dans un terminal:
     - lancer le fichier python server.py :
         
         - aller à l'adresse http://127.0.0.1:5000/ pour l'interface graphique
-        - Lancer client.py dans un autre cmd pour l'interface texte
+        - Lancer client.py dans un cmd pour l'interface texte
+        
+        Le jeu est réglée pour 2 joueurs actuellement pour les test
 
 
 
