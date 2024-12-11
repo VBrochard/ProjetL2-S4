@@ -87,7 +87,7 @@ def tirageLettres(data):
         while contientBonnesLettres(propositionMot,tirage) == False:
             propositionMot = input("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
             propositionMot = propositionMot.upper()
-        sio.emit("envoiMot",propositionMot)
+        sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
 
 
 sio.wait()
