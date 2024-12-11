@@ -34,7 +34,6 @@ def motLePlusLong(s):
             mot = ''.join(combi)
             if motExiste(mot) and len(mot) > len(max_mot):
                 max_mot = mot
-    
     return max_mot
 
 
@@ -87,7 +86,7 @@ def handle_envoieMot(data):
         MeilleurPossible = motLePlusLong(deck)
         for sous_liste in ListeJoueurs:
             if sous_liste[0] == NomMeilleurJoueur: 
-                sous_liste[1] + 1 
+                sous_liste[1] + len(MeilleurMotJoueur) 
                 break
         socketio.emit('résultat', {"nom" : NomMeilleurJoueur, "ListeScore" : ListeJoueurs, "PointGagnée" : len(MeilleurMotJoueur), "meilleurPossible" : MeilleurPossible,"MotGagnant" : MeilleurMotJoueur})
         TokenReponse = 0
