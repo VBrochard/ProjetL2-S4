@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Plus Long Mot</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to bottom, #d1fae5, #047857);
+            color: white;
+            text-align: center;
+        }
+
+        .grille {
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .case {
+            width: 40px;
+            height: 40px;
+            background-color: #10b981;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .case.vide {
+            background-color: #6ee7b7;
+            color: transparent;
+            cursor: default;
+        }
+
+        .case.en-train-de-deplacer {
+            opacity: 0.5;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #1d4ed8;
+        }
+
+        .button-container {
+            display: flex;
+            gap: 10px; /* Ajout d'un espace entre les boutons */
+            margin-top: 20px;
+        }
+
+        #timer {
+            font-size: 24px;
+            margin: 20px;
+        }
+
+        #message-temps-ecoule {
+            color: red;
+            font-size: 30px;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Le Plus Long Mot</h1>
+    <div id="timer">30</div>
+    <div class="grille" id="ligne-1"></div>
+    <div class="grille" id="ligne-2"></div>
+    
+    <!-- Conteneur des boutons -->
+    <div class="button-container">
+        <!-- Bouton Retour -->
+        <button onclick="window.location.href='index.html'">Retour</button>
+        <!-- Bouton Valider -->
+        <button id="bouton-valider">Valider</button>
+    </div>
+    
+    <!-- Message de temps écoulé -->
+    <div id="message-temps-ecoule">Temps écoulé!</div>
+
+    <script>
+        let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
+        let tempsRestant = 30; // Temps de départ en secondes
+        let timerInterval; // Intervalle pour le compte à rebours
+        let jeuTermine = false; // Indicateur si le jeu est terminé
+
+        /**
+         * Génère 10 lettres aléatoires de l'alphabet
+         */
+        function genererLettresAleatoires() {
+            const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            return Array.from({ length: 10 }, () => lettres[Math.floor(Math.random() * lettres.length)]);
+        }
+
+        /**
+         * Initialise les grilles avec les lettres et les cases vides
+         */
+        function initialiserGrille() {
+            const ligne1 = document.getElementById('ligne-1');
+            const ligne2 = document.getElementById('ligne-2');
+
+            const lettres = genererLettresAleatoires();
+
+            // Remplit la première ligne avec des lettres aléatoires
+            lettres.forEach(lettre => {
+                const caseLettre = creerCaseDeplacable(lettre);
+                ligne1.appendChild(caseLettre);
+            });
+
+            // Remplit la deuxième ligne avec des cases vides
+            for (let i = 0; i < 10; i++) {
+                const caseVide = creerCaseVide();
+                ligne2.appendChild(caseVide);
+            }
+        }
+
+        /**
+         * Crée une case avec une lettre qui peut être déplacée
+         * @param {string} lettre - La lettre à afficher dans la case
+         */
+        function creerCaseDeplacable(lettre) {
+            const caseLettre = document.createElement('div');
+            caseLettre.classList.add('case');
+            caseLettre.textContent = lettre;
+
+            // Rendre la case déplaçable
+            caseLettre.setAttribute('draggable', true);
+            caseLettre.addEventListener('dragstart', gererDebutDeplacement);
+            caseLettre.addEventListener('dragend', gererFinDeplacement);
+
+            // Permettre le dépôt dans cette case
+            caseLettre.addEventListener('dragover', gererSurvol);
+            caseLettre.addEventListener('drop', gererDepot);
+
+            return caseLettre;
+        }
+
+        /**
+         * Crée une case vide
+         */
+        function creerCaseVide() {
+            const caseVide = document.createElement('div');
+            caseVide.classList.add('case', 'vide');
+
+            // Permettre le dépôt dans cette case
+            caseVide.addEventListener('dragover', gererSurvol);
+            caseVide.addEventListener('drop', gererDepot);
+
+            return caseVide;
+        }
+
+        /**
+         * Gère le début du déplacement d'une case
+         * @param {DragEvent} e 
+         */
+        function gererDebutDeplacement(e) {
+            if (jeuTermine) return; // Empêche le déplacement si le jeu est terminé
+            caseEnDeplacement = e.target; // Stocke la case qui est déplacée
+            e.dataTransfer.setData('text/plain', e.target.textContent);
+            e.target.classList.add('en-train-de-deplacer');
+        }
+
+        /**
+         * Gère la fin du déplacement d'une case
+         * @param {DragEvent} e 
+         */
+        function gererFinDeplacement(e) {
+            if (jeuTermine) return; // Empêche le déplacement si le jeu est terminé
+            e.target.classList.remove('en-train-de-deplacer');
+        }
+
+        /**
+         * Permet le survol d'une case par une autre en déplacement
+         * @param {DragEvent} e 
+         */
+        function gererSurvol(e) {
+            if (jeuTermine) return; // Empêche le déplacement si le jeu est terminé
+            e.preventDefault(); // Permet le dépôt
+        }
+
+        /**
+         * Gère le dépôt d'une lettre dans une nouvelle case
+         * @param {DragEvent} e 
+         */
+        function gererDepot(e) {
+            if (jeuTermine) return; // Empêche le déplacement si le jeu est terminé
+            e.preventDefault();
+
+            const lettre = e.dataTransfer.getData('text/plain');
+            if (e.target.classList.contains('vide') || e.target.classList.contains('case')) {
+                // Place la lettre dans la case cible
+                e.target.textContent = lettre;
+                e.target.classList.remove('vide');
+
+                // Rend la case cible déplaçable
+                e.target.setAttribute('draggable', true);
+                e.target.addEventListener('dragstart', gererDebutDeplacement);
+                e.target.addEventListener('dragend', gererFinDeplacement);
+
+                // Permet de déposer dans cette case
+                e.target.addEventListener('dragover', gererSurvol);
+                e.target.addEventListener('drop', gererDepot);
+
+                // Vide la case d'origine
+                if (caseEnDeplacement) {
+                    caseEnDeplacement.textContent = '';
+                    caseEnDeplacement.classList.add('vide');
+                    caseEnDeplacement.removeAttribute('draggable');
+                    caseEnDeplacement.removeEventListener('dragstart', gererDebutDeplacement);
+                    caseEnDeplacement.removeEventListener('dragend', gererFinDeplacement);
+                    caseEnDeplacement = null;
+                }
+            }
+        }
+
+        /**
+         * Fonction pour valider la grille (exemple d'action pour le bouton "Valider")
+         */
+        document.getElementById('bouton-valider').addEventListener('click', function() {
+            alert("Grille validée !");
+        });
+
+        /**
+         * Démarre le compte à rebours de 30 secondes
+         */
+        function demarrerCompteur() {
+            timerInterval = setInterval(function() {
+                tempsRestant--;
+                document.getElementById('timer').textContent = tempsRestant;
+
+                if (tempsRestant <= 0) {
+                    clearInterval(timerInterval);
+                    jeuTermine = true;
+                    document.getElementById('message-temps-ecoule').style.display = 'block'; // Affiche le message
+                    // Désactive les interactions avec les cases
+                    const cases = document.querySelectorAll('.case');
+                    cases.forEach(caseElem => caseElem.setAttribute('draggable', false));
+                }
+            }, 1000); // Mise à jour toutes les secondes
+        }
+
+        // Initialisation des grilles et démarrage du compteur
+        initialiserGrille();
+        demarrerCompteur();
+    </script>
+</body>
+</html>
+
