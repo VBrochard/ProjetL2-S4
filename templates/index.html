@@ -1,9 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client Graphique de Jeu</title>
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script>const socket = io('localhost:5000')</script>
     <style>
         body {
             margin: 0;
@@ -29,7 +32,8 @@
         }
 
         button {
-            background-color: #ef4444; /* Rouge */
+            background-color: #ef4444;
+            /* Rouge */
             color: white;
             border: none;
             border-radius: 8px;
@@ -40,7 +44,8 @@
         }
 
         button:hover {
-            background-color: #dc2626; /* Rouge foncé */
+            background-color: #dc2626;
+            /* Rouge foncé */
             transform: scale(1.05);
         }
 
@@ -49,6 +54,7 @@
         }
     </style>
 </head>
+
 <body>
     <h1>Client Graphique de Jeu</h1>
     <div class="button-container">
@@ -58,19 +64,23 @@
     </div>
 
     <script>
-        document.getElementById('btn-long-word').addEventListener('click', function() {
+        document.getElementById('btn-long-word').addEventListener('click', function () {
+            socket.emit('message', 'Message du client graphique')
+            console.log('Message envoyée')
             window.location.href = 'le_plus_long.html'; // Redirige vers une nouvelle page
+
         });
 
-        document.getElementById('btn-opti-mot').addEventListener('click', function() {
+        document.getElementById('btn-opti-mot').addEventListener('click', function () {
             alert("Opti'Mot");
         });
 
-        document.getElementById('btn-quit').addEventListener('click', function() {
+        document.getElementById('btn-quit').addEventListener('click', function () {
             if (confirm('Voulez-vous vraiment quitter?')) {
                 window.close();
             }
         });
     </script>
 </body>
+
 </html>

@@ -4,23 +4,25 @@ from random import *
 from itertools import permutations
 
 app = Flask(__name__)
-socketio = SocketIO(app, cors_allowed_origins="*", transports=["websocket"])
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 @app.route('/')
 def Arrivée():
-    return render_template('clientgraphique')
+    socketio.emit('connecté')
+    return render_template('index.html')
+
+@app.route('/le_plus_long.html')
+def LeMotlepluslong():
+    return render_template('le_plus_long.html')
 
 @socketio.on('message')
 def handle_message(data):
-    print("Message reçu : ",data)
-    emit("Renvoie",data)
-    print("Renvoie 1 fait")
-    emit("Renvoie2","Samy va avoir du boulot")
-    print("Renvoie 2 fait")
+    print("message recu lecture en cours \n")
+    print("Message reçu : ", data)
 
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True,log_output=True)
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}

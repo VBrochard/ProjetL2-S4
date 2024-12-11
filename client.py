@@ -23,13 +23,17 @@ nomJoueur = input("Entrez votre nom pour rejoindre: ")
 
 @sio.event
 def connect():
-    sio.emit('connexionJoueur',{"nomJoueur":nomJoueur})
+    sio.emit('message',nomJoueur)
     print("Bienvenue",nomJoueur)
 
+
+
 try:
-    sio.connect('http://localhost:5000',transports=["websocket"])
+    sio.connect('http://localhost:5000')
 except Exception as e:
     print("Impossible de se connecter")
+
+
 
 
 #@sio.event
