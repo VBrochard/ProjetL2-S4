@@ -1,6 +1,7 @@
 from flask import *
 from flask_socketio import *
 from random import *
+from itertools import permutations
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*", transports=["websocket"])
@@ -26,31 +27,27 @@ lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I
 
 cartes_freq = [carte for carte, freq in lettres_freq.items() for _ in range(freq)]
 
-def motExiste(mot):
+def ouvrirDico():
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
-        mots_dictionnaire = {ligne.strip().upper() for ligne in fichier}
-        if mot.upper() in mots_dictionnaire:
-            return True
-        else:
-            return False
+        return {ligne.strip().upper() for ligne in fichier}
 
-def genererToutesLesCombis(s):
-    result = []
-    def permuter(prefixe, remaining):
-        if motExiste(prefixe):
-            result.append(prefixe)
-        for i in range(len(remaining)):
-            permuter(prefixe + remaining[i], remaining[:i] + remaining[i+1:])
-    permuter("", s)
-    return result
+dico = ouvrirDico()
 
-def plusLongDansUneListe(l):
-    return max(l, key=len)
+def motExiste(mot):
+    return mot.upper() in dico
 
 def motLePlusLong(s):
-    b = genererToutesLesCombis(s)
-    a = plusLongDansUneListe(b)
-    return f"Le mot le plus long avec ces lettres est '{a}'"
+    max_mot = ""
+    
+    for i in range(len(s), 0, -1): 
+        for combi in permutations(s, i):
+            mot = ''.join(combi)
+            if motExiste(mot) and len(mot) > len(max_mot):
+                max_mot = mot
+    
+    return f"Le mot le plus long avec ces lettres est '{max_mot}'"
+
+
 
 def sommeDesFreq():
     b = 0
