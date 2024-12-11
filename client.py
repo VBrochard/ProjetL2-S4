@@ -21,14 +21,21 @@ def connect():
     print("Bienvenue",nomJoueur)
 
 try:
-    sio.connect('http://localhost:5000')
+    sio.connect('http://localhost:5000',transports=["websocket"])
 except Exception as e:
     print("Impossible de se connecter")
 
 
+lettres = ["A","K","L","O"]
+#@sio.event
+def tirageLettres(data):
+    tirage = data
+    affichage = ""
+    for lettre in tirage:
+        affichage+=lettre+" "
+    print("Lettres disponibles:",affichage)
 
-
-
+tirageLettres(lettres)
 
 
 
