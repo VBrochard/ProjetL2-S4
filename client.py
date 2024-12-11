@@ -56,12 +56,12 @@ def résultat(data):
     ListeScore = data.get("ListeScore")
     for joueur in ListeScore:
         print("-"+ joueur[0], "Score :",joueur[1])
-    recommencerPartie("a")
+    recommencerPartie()
 
 
 
 #@sio.event
-def recommencerPartie(data):
+def recommencerPartie():
     rejouer = input("Voulez-vous refaire une partie ? [y/n] : ")
     if rejouer == "n":
         print("Au revoir")
