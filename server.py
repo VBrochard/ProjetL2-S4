@@ -3,7 +3,7 @@ from flask_socketio import *
 from random import *
 
 app = Flask(__name__)
-socketio = SocketIO(app, ping_timeout=10)
+socketio = SocketIO(app, cors_allowed_origins="*", transports=["websocket"])
 
 @app.route('/')
 def Arrivée():
