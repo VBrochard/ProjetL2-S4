@@ -5,13 +5,19 @@ tirage = []
 
 
 def contientBonnesLettres(mot, tirage):
-    for lettre in mot:
-        if lettre.upper() not in tirage:
-            return False
-    return True
-
+    if mot == "":
+        return True
+        
+    lettreDepart = mot[0]
+    for elt in range(len(tirage)-1):
+        if lettreDepart == tirage[elt]:
+            tirage.pop(elt)
+            return True and contientBonnesLettres(mot[1:],tirage)
+    
+    return False
 
 print("***************************************\nBienvenue dans le jeu du mot le plus long\n***************************************")
+print(contientBonnesLettres("AAC",["A","C","B","A"]))
 nomJoueur = input("Entrez votre nom pour rejoindre: ")
 
 
@@ -26,7 +32,6 @@ except Exception as e:
     print("Impossible de se connecter")
 
 
-lettres = ["A","K","L","O"]
 #@sio.event
 def tirageLettres(data):
     tirage = data
@@ -34,8 +39,16 @@ def tirageLettres(data):
     for lettre in tirage:
         affichage+=lettre+" "
     print("Lettres disponibles:",affichage)
+    propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
+    propositionMot = propositionMot.upper()
+    if contientBonnesLettres(propositionMot,tirage):
+        sio.emit("envoiMot",propositionMot)
+    else:
+        while contientBonnesLettres(propositionMot,tirage) == False:
+            propositionMot = input("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
+            propositionMot = propositionMot.upper()
+        sio.emit("envoiMot",propositionMot)
 
-tirageLettres(lettres)
 
 
 
