@@ -50,10 +50,11 @@ def Lancement(data):
 
 @sio.event
 def résultat(data):
-    print("Le gagnant est :", data.nom )#Nom du vainqueur
-    print("Il gagne", data.PointGagnée, "points","avec le mot :", data.MotGagnant)#Afficher le score retourné
-    print("Le meilleur mot possible était :",data.meilleurPossible)
-    for joueur in data.ListeScore:
+    print("Le gagnant est :", data.get("nom"))#Nom du vainqueur
+    print("Il gagne", data.get("PointGagnée"), "points","avec le mot :", data.get("MotGagnant"))#Afficher le score retourné
+    print("Le meilleur mot possible était :",data.get("meilleurPossible"))
+    ListeScore = data.get("ListeScore")
+    for joueur in ListeScore:
         print("-"+ joueur[0], "Score :",joueur[1])
     recommencerPartie("a")
 

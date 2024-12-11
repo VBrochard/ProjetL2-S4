@@ -89,11 +89,11 @@ def handle_envoieMot(data):
             if sous_liste[0] == NomMeilleurJoueur: 
                 sous_liste[1] + 1 
                 break
-        socketio.emit('résultat',{"nom" : NomMeilleurJoueur, "ListeScore" : ListeJoueurs, "PointGagnée" : len(MeilleurMotJoueur), "meilleurPossible" : MeilleurPossible,"MotGagnant" : MeilleurMotJoueur})
+        socketio.emit('résultat', {"nom" : NomMeilleurJoueur, "ListeScore" : ListeJoueurs, "PointGagnée" : len(MeilleurMotJoueur), "meilleurPossible" : MeilleurPossible,"MotGagnant" : MeilleurMotJoueur})
         TokenReponse = 0
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True,log_output=True)
+    socketio.run(app, debug=True)
 
 
 #TRANSFORMER LES data. en data.get("")
