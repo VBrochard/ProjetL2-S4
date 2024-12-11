@@ -29,9 +29,8 @@ nomJoueur = input("Entrez votre nom pour rejoindre: ")
 
 @sio.event
 def connect():
-    sio.emit('message',nomJoueur)
-    print("Bienvenue",nomJoueur)
-    
+    sio.emit('AnnonceJoueur',nomJoueur)
+    print("Bienvenue",nomJoueur, "\n")
 
 
 
@@ -41,11 +40,12 @@ except Exception as e:
     print("Impossible de se connecter")
 
 @sio.event
-def commencerPartie(data):
+def Lancement(data):
     print("La partie commence !")
     print("Joueurs:")
     for joueur in data:
         print("-"+joueur)
+
 
 
 @sio.event
@@ -57,8 +57,9 @@ def résultat(data):
 
 #@sio.event
 def recommencerPartie(data):
-    rejouer = input("Voulez-vous refaire une partie ?[y/n]")
+    rejouer = input("Voulez-vous refaire une partie ? [y/n] : ")
     if rejouer == "n":
+        print("Au revoir")
         sio.disconnect()
 
 
@@ -71,6 +72,7 @@ def tirageLettres(data):
         affichage+=lettre+" "
     print(Fore.GREEN+"Lettres disponibles:",Fore.RED+affichage)
     print(Style.RESET_ALL)
+    recommencerPartie("a")
     propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
     propositionMot = propositionMot.upper()
     if contientBonnesLettres(propositionMot,tirage):
@@ -81,7 +83,7 @@ def tirageLettres(data):
             propositionMot = propositionMot.upper()
         sio.emit("envoiMot",propositionMot)
 
-recommencerPartie("a")
+
 sio.wait()
 
 

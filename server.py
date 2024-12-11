@@ -6,23 +6,9 @@ from itertools import permutations
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-@app.route('/')
-def Arrivée():
-    socketio.emit('connecté')
-    return render_template('index.html')
-
-@app.route('/le_plus_long.html')
-def LeMotlepluslong():
-    return render_template('le_plus_long.html')
-
-@socketio.on('message')
-def handle_message(data):
-    print("message recu lecture en cours \n")
-    print("Message reçu : ", data)
-
-
-if __name__ == '__main__':
-    socketio.run(app, debug=True,log_output=True)
+ListeJoueurs = []
+NbrJoueurs = 2
+TokenReponse = 0
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
@@ -69,5 +55,24 @@ def genererUnDeck():
         deck.append(eniemeCarte(a))
     return deck
 
+@app.route('/')
+def Arrivée():
+    socketio.emit('connecté')
+    return render_template('index.html')
 
-print(motLePlusLong("abc"))
+@app.route('/le_plus_long.html')
+def LeMotlepluslong():
+    return render_template('le_plus_long.html')
+
+@socketio.on('AnnonceJoueur')
+def handle_AnnonceJoueur(data):
+    ListeJoueurs.append(data)
+    print(data, "Rejoint la partie")
+    if len(ListeJoueurs) == NbrJoueurs:
+        socketio.emit('Lancement',ListeJoueurs)
+        socketio.emit('tirageLettres',genererUnDeck())
+
+if __name__ == '__main__':
+    socketio.run(app, debug=True,log_output=True)
+
+
