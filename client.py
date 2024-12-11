@@ -1,23 +1,35 @@
 import socketio
 
 sio = socketio.Client()
-sio.connect('http://localhost:5000')
-print("Connecté !")
+tirage = []
 
-message = "bonjour"
-sio.emit('message', message)
-print("envoie du message")
+
+def contientBonnesLettres(mot, tirage):
+    for lettre in mot:
+        if lettre.upper() not in tirage:
+            return False
+    return True
+
+
+print("***************************************\nBienvenue dans le jeu du mot le plus long\n***************************************")
+nomJoueur = input("Entrez votre nom pour rejoindre: ")
+
 
 @sio.event
-def Renvoie2(data):
-    print("evenement recu 2")
-    print(data)
+def connect():
+    sio.emit('connexionJoueur',{"nomJoueur":nomJoueur})
+    print("Bienvenue",nomJoueur)
+
+try:
+    sio.connect('http://localhost:5000')
+except Exception as e:
+    print("Impossible de se connecter")
 
 
-@sio.event
-def Renvoie(data):
-    print("evenement recu 1 ")
-    print(data)
+
+
+
+
 
 
 sio.wait()
