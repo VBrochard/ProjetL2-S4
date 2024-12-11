@@ -52,6 +52,7 @@ def eniemeCarte(n):
 
 
 def genererUnDeck():
+    global deck
     deck = []
     for i in range(taille_deck):
         a = randint(0, sommeDesFreq())
@@ -78,6 +79,7 @@ def handle_AnnonceJoueur(data):
 
 @socketio.on('envoiMot')
 def handle_envoieMot(data):
+    global deck
     global TokenReponse
     global MeilleurMotJoueur
     global NomMeilleurJoueur
@@ -87,16 +89,13 @@ def handle_envoieMot(data):
         MeilleurMotJoueur = data.get("mot")
         NomMeilleurJoueur = data.get("nom")
     TokenReponse += 1
+    MeilleurPossible = motLePlusLong(deck)
     if TokenReponse == NbrJoueurs:
-        MeilleurPossible = motLePlusLong(deck)
+        
         for joueur in ListeJoueurs:
             if joueur[0] == NomMeilleurJoueur: 
                 joueur[1] += len(MeilleurMotJoueur) 
                 break
-        print(MeilleurMotJoueur)
-        print(NomMeilleurJoueur)
-        print(ListeJoueurs)
-        print(MeilleurPossible)
         socketio.emit('résultat', {
             "nom" : NomMeilleurJoueur,
             "ListeScore" : ListeJoueurs,
