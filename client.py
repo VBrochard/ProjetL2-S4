@@ -42,6 +42,8 @@ except Exception as e:
 @sio.event
 def Lancement(data):
     print("La partie commence !")
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
     print("Joueurs:")
     for joueur in data:
         print("-"+ joueur[0], "Score :",joueur[1])
@@ -53,10 +55,16 @@ def résultat(data):
     
     print("Le gagnant est :", data.get("nom"))#Nom du vainqueur
     print("Il gagne", data.get("PointGagnée"), "points","avec le mot :", data.get("MotGagnant"))#Afficher le score retourné
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
     print("Le meilleur mot possible était :",data.get("meilleurPossible"))
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
     ListeScore = data.get("ListeScore")
     for joueur in ListeScore:
         print("-"+ joueur[0], "Score :",joueur[1])
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
     pret = input("Appuyer sur entrée pour le prochain tour")
     sio.emit('nouveauTour')
 
@@ -77,6 +85,8 @@ def tirageLettres(data):
     affichage = ""
     for lettre in tirage:
         affichage+=lettre+" "
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
     print(Fore.GREEN+"Lettres disponibles:",Fore.RED+affichage)
     print(Style.RESET_ALL)
     propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
