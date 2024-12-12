@@ -57,12 +57,8 @@ def résultat(data):
     ListeScore = data.get("ListeScore")
     for joueur in ListeScore:
         print("-"+ joueur[0], "Score :",joueur[1])
-
-    pret = input("Appuyer sur Entrée pour le prochain tour")
-    if pret == "":
-        sio.emit('nouveauTour')
-    
-        
+    pret = input("Appuyer sur entrée pour le prochain tour")
+    sio.emit('nouveauTour')
 
 
 
@@ -72,7 +68,6 @@ def recommencerPartie():
     if rejouer == "n":
         print("Au revoir")
         sio.disconnect()
-    
 
 
 

@@ -118,7 +118,7 @@ def handle_envoieMot(data):
                 nomsVainqueurs.append(joueur[0])
                 scoresVainqueurs.append(joueur[1])
         if len(nomsVainqueurs)>0:
-            socketio.emit('victoire',{"nomsVainqueurs":nomsVainqueurs,"scoresVainqueurs":scoresVainqueurs})
+            socketio.emit('victoire',{"nomsVainqueurs":nomsVainqueurs,"tableauScores":ListeJoueurs})
         else:
             socketio.emit('résultat', {
                 "nom" : NomMeilleurJoueur,
