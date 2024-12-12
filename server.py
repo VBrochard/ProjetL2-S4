@@ -77,6 +77,9 @@ def retireDoublon(liste):
             listeRes.append(elt)
     return listeRes
 
+@app.route('/Ressources/<path:filename>')
+def ressources(filename):
+    return send_from_directory('Ressources', filename)
 
 @app.route('/')
 def Arrivée():
