@@ -8,7 +8,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 TokenReponse = int(0)
 ListeJoueurs = []
-NbrJoueurs = 4
+NbrJoueurs = 2
 taille_deck = 7
 deck = []
 MeilleurMotsJoueur = []
@@ -91,7 +91,7 @@ def LeMotlepluslong():
 def handle_AnnonceJoueur(data):
     global ListeJoueurs
     ListeJoueurs.append([str(data),0])
-    ListeJoueurs.append([data,0])
+    
     print(data, "Rejoint la partie")
     if len(ListeJoueurs) == NbrJoueurs:
         socketio.emit('Lancement',ListeJoueurs)
@@ -158,6 +158,7 @@ def handle_envoieMot(data):
                 "MotGagnant" : retireDoublon(MeilleurMotsJoueur)
                 })
         TokenReponse = 0
+        NomMeilleursJoueurs = []
         MeilleurMotsJoueur = []
         listePropositions = []
         listeMots = []
