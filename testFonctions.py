@@ -48,3 +48,12 @@ def genererUnDeck():
     return deck
 
 
+def retireDoublon(liste):
+    listeRes = []
+    for elt in liste:
+        if elt not in listeRes:
+            listeRes.append(elt)
+    return listeRes
+
+
+print(retireDoublon(["Samy","Samy","Vincent","Bastien","Vincent","Samy"]))
