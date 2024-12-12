@@ -116,19 +116,13 @@ def handle_envoieMot(data):
     global listePropositions
     global listeMots
 
-    
     listePropositions.append([data.get("nom"),data.get("mot")])
-    
     listeMots.append(data.get("mot"))
     
-
- 
     TokenReponse += 1
-    print(TokenReponse)
     MeilleurPossible = motLePlusLong(deck)
     nomsVainqueurs = []
     scoresVainqueurs = []
-    print(MeilleurMotsJoueur)
     if TokenReponse == NbrJoueurs:
 
         tailleMotPlusGrand = motMax(listeMots)

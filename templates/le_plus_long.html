@@ -14,8 +14,8 @@
 
         socket.on('victoire', (data) => {
             var msg =
-            "Félicitation à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n"+
-            "Récapitulatif final des scores : \n" + data.tableauScores
+                "Félicitation à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n" +
+                "Récapitulatif final des scores : \n" + data.tableauScores
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -31,8 +31,8 @@
             deck = data
             var ligne1 = document.getElementById('ligne-1');
             var ligne2 = document.getElementById('ligne-2');
-            ligne1.innerHTML=""
-            ligne2.innerHTML=""
+            ligne1.innerHTML = ""
+            ligne2.innerHTML = ""
             initialiserGrille()
         })
 
@@ -43,13 +43,18 @@
             var PointGagner = data.PointGagnée
             var MeilleurPossible = data.meilleurPossible
             var MeilleurMotJoueur = data.MotGagnant
-            var msg = 
-            "Le gagnant du tour est : " + NomMeilleurJoueur + '\n' +
-            "Il remporte " + PointGagner + " Points " +
-            "avec le mot : " + MeilleurMotJoueur + "\n" +
-            "Le meilleur mot possible était : " + MeilleurPossible + "\n" +
-            "La liste des scores est : " + ListeJoueurs +"\n\n"+
-            "Appuyer sur le bouton pret pour le prochain tour"
+            var recapScore = ""
+            ListeJoueurs.forEach(item => {
+                recapScore += `${item[0]} :  ${item[1]} points\n`;
+            });
+            var msg =
+                "Le gagnant du tour est : " + NomMeilleurJoueur + '\n' +
+                "Il remporte " + PointGagner + " Points " +
+                "avec le mot : " + MeilleurMotJoueur + "\n\n" +
+                "Le meilleur mot possible était : " + MeilleurPossible + "\n\n" +
+                "Récapitulatif des scores : " + "\n\n" +
+                recapScore + "\n" +
+                "Appuyer sur le bouton pret pour le prochain tour"
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -152,7 +157,7 @@
         <button id="bouton-valider" onclick="EnvoieMot()">Valider</button>
         <input id="nom" placeholder="Tapez votre nom" type="text" required />
         <button id="arrivee" onclick="ConnexionServeur()"">Se connecter</button>
-        <button id="newTour" onclick="ProchainTour()">Prêt pour le prochain</button>
+        <button id=" newTour" onclick="ProchainTour()">Prêt pour le prochain</button>
     </div>
 
     <div class="Tableau systeme">
@@ -169,13 +174,9 @@
         let timerInterval; // Intervalle pour le compte à rebours
         let jeuTermine = false; // Indicateur si le jeu est terminé
 
-        function ProchainTour(){
+        function ProchainTour() {
             socket.emit('nouveauTour')
         }
-
-
-
-
 
         function ConnexionServeur() {
             nomJoueur = nom.value;
@@ -183,11 +184,11 @@
                 socket.emit('AnnonceJoueur', nomJoueur)
         }
 
-        function EnvoieMot(){
+        function EnvoieMot() {
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
-            socket.emit('envoiMot',{"nom" : nomJoueur , "mot" : ligne})
+            socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
         }
 
         /**
