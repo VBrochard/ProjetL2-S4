@@ -26,6 +26,7 @@ print(Fore.GREEN+"*************************************************")
 print(Style.RESET_ALL)
 nomJoueur = input("Entrez votre nom pour rejoindre: ")
 
+
 @sio.event
 def connect():
     sio.emit('AnnonceJoueur',nomJoueur)
@@ -41,6 +42,8 @@ except Exception as e:
 @sio.event
 def Lancement(data):
     print("La partie commence !")
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
     print("Joueurs:")
     for joueur in data:
         print("-"+ joueur[0], "Score :",joueur[1])
@@ -49,14 +52,21 @@ def Lancement(data):
 
 @sio.event
 def résultat(data):
-    print("Donnée reçu :",data)
+    
     print("Le gagnant est :", data.get("nom"))#Nom du vainqueur
     print("Il gagne", data.get("PointGagnée"), "points","avec le mot :", data.get("MotGagnant"))#Afficher le score retourné
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
     print("Le meilleur mot possible était :",data.get("meilleurPossible"))
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
     ListeScore = data.get("ListeScore")
     for joueur in ListeScore:
         print("-"+ joueur[0], "Score :",joueur[1])
-    recommencerPartie()
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
+    pret = input("Appuyer sur entrée pour le prochain tour")
+    sio.emit('nouveauTour')
 
 
 
@@ -77,6 +87,8 @@ def tirageLettres(data):
     affichage = ""
     for lettre in tirage:
         affichage+=lettre+" "
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
     print(Fore.GREEN+"Lettres disponibles:",Fore.RED+affichage)
     print(Style.RESET_ALL)
     propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
@@ -88,6 +100,14 @@ def tirageLettres(data):
             propositionMot = input("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
             propositionMot = propositionMot.upper()
         sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
+
+@sio.event
+def victoire(data):
+    if len(data.get("nomsVainqueurs"))>1:
+        print("Les vainqueurs sont",data.get("nomsVainqueurs"))
+    else:
+        print("Le vainqueur est",data.get("nomsVainqueurs"))
+    recommencerPartie()
 
 
 sio.wait()

@@ -8,12 +8,16 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 TokenReponse = int(0)
 ListeJoueurs = []
-NbrJoueurs = 2
+NbrJoueurs = 4
 taille_deck = 7
 deck = []
-MeilleurMotJoueur = ""
-NomMeilleurJoueur = ""
+MeilleurMotsJoueur = []
+NomMeilleursJoueurs = []
+listePropositions = []
 MeilleurPossible = ""
+limiteScore = 10
+jetonPret = 0
+listeMots = []
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
@@ -52,11 +56,27 @@ def eniemeCarte(n):
 
 
 def genererUnDeck():
+    global deck
     deck = []
     for i in range(taille_deck):
         a = randint(0, sommeDesFreq())
         deck.append(eniemeCarte(a))
     return deck
+
+def motMax(listeMots):
+    result = 0
+    for mot in listeMots:
+        if len(mot)>result:
+            result = len(mot)
+    return result
+
+def retireDoublon(liste):
+    listeRes = []
+    for elt in liste:
+        if elt not in listeRes:
+            listeRes.append(elt)
+    return listeRes
+
 
 @app.route('/')
 def Arrivée():
@@ -77,39 +97,71 @@ def handle_AnnonceJoueur(data):
         socketio.emit('Lancement',ListeJoueurs)
         socketio.emit('tirageLettres',genererUnDeck())
 
+@socketio.on('nouveauTour')
+def handle_nouveauTour():
+    global jetonPret
+    jetonPret+=1
+    if jetonPret == NbrJoueurs:
+        socketio.emit('tirageLettres',genererUnDeck())
+        jetonPret = 0
+
 @socketio.on('envoiMot')
 def handle_envoieMot(data):
+    global deck
     global TokenReponse
-    global MeilleurMotJoueur
-    global NomMeilleurJoueur
+    global MeilleurMotsJoueur
+    global NomMeilleursJoueurs
     global ListeJoueurs
     global MeilleurPossible
-    if ((motExiste(data.get("mot"))) and (len(data.get("mot")) > len(MeilleurMotJoueur))):
-        MeilleurMotJoueur = data.get("mot")
-        NomMeilleurJoueur = data.get("nom")
+    global listePropositions
+    global listeMots
+
+    
+    listePropositions.append([data.get("nom"),data.get("mot")])
+    
+    listeMots.append(data.get("mot"))
+    
+
+ 
     TokenReponse += 1
+    print(TokenReponse)
+    MeilleurPossible = motLePlusLong(deck)
+    nomsVainqueurs = []
+    scoresVainqueurs = []
+    print(MeilleurMotsJoueur)
     if TokenReponse == NbrJoueurs:
-        MeilleurPossible = motLePlusLong(deck)
-        for sous_liste in ListeJoueurs:
-            if sous_liste[0] == NomMeilleurJoueur: 
-                sous_liste[1] + len(MeilleurMotJoueur) 
-                break
-        print(MeilleurMotJoueur)
-        print(NomMeilleurJoueur)
-        print(ListeJoueurs)
-        print(MeilleurPossible)
-        socketio.emit('résultat', {
-            "nom" : NomMeilleurJoueur,
-            "ListeScore" : ListeJoueurs,
-            "PointGagnée" : len(MeilleurMotJoueur),
-            "meilleurPossible" : MeilleurPossible,
-            "MotGagnant" : MeilleurMotJoueur
-            })
+
+        tailleMotPlusGrand = motMax(listeMots)
+        for reponse in listePropositions:
+            if len(reponse[1]) == tailleMotPlusGrand and motExiste(reponse[1]):
+                MeilleurMotsJoueur.append(reponse[1])
+                NomMeilleursJoueurs.append(reponse[0])
+
+        for joueur in ListeJoueurs:
+            if joueur[0] in NomMeilleursJoueurs: 
+                joueur[1] += tailleMotPlusGrand
+                
+
+        for joueur in ListeJoueurs:
+            if joueur[1]>=limiteScore:
+                nomsVainqueurs.append(joueur[0])
+                scoresVainqueurs.append(joueur[1])
+
+        if len(nomsVainqueurs)>0:
+            socketio.emit('victoire',{"nomsVainqueurs":nomsVainqueurs,"tableauScores":ListeJoueurs})
+        else:
+            socketio.emit('résultat', {
+                "nom" : retireDoublon(NomMeilleursJoueurs),
+                "ListeScore" : ListeJoueurs,
+                "PointGagnée" : tailleMotPlusGrand,
+                "meilleurPossible" : MeilleurPossible,
+                "MotGagnant" : retireDoublon(MeilleurMotsJoueur)
+                })
         TokenReponse = 0
+        MeilleurMotsJoueur = []
+        listePropositions = []
+        listeMots = []
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
-
-
-#Fonction meilleur mot possible ne fonctionne pas dans le serv mais oui dans testFonction
 
