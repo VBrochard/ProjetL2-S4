@@ -13,7 +13,9 @@
 
 
         socket.on('victoire', (data) => {
-            var msg = "Félicitation à " + data.nomsVainqueurs + " qui remporte la partie"
+            var msg =
+            "Félicitation à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n"+
+            "Récapitulatif final des scores : \n" + data.tableauScores
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
