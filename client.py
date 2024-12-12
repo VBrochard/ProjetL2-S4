@@ -57,12 +57,9 @@ def résultat(data):
     ListeScore = data.get("ListeScore")
     for joueur in ListeScore:
         print("-"+ joueur[0], "Score :",joueur[1])
-    tempsAttente = 10
-    while tempsAttente > 0:
-        time.sleep(1)
-        tempsAttente-=1
-        print("La prochain tour commence dans",tempsAttente, end="\r")
-    sio.emit('nouveauTour')
+    pret = input("Appuyer sur Entrée pour le prochain tour")
+    if pret == "":
+        sio.emit('nouveauTour')
     
         
 
