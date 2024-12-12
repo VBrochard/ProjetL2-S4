@@ -12,6 +12,14 @@
         let ListeJoueur = []
 
 
+        socket.on('victoire', (data) => {
+            var msg = "Félicitation à " + data.nomsVainqueurs + " qui remporte la partie"
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        })
+
+
         socket.on('Lancement', (data) => {
             ListeJoueur = data
         })
