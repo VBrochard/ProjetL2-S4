@@ -14,9 +14,14 @@
 
 
         socket.on('victoire', (data) => {
+            var ListeJoueur = data.tableauScores
+            var recapScore = ""
+            ListeJoueurs.forEach(item => {
+                recapScore += `${item[0]} :  ${item[1]} points\n`;
+            });
             var msg =
                 "Félicitation à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n" +
-                "Récapitulatif final des scores : \n" + data.tableauScores
+                "Récapitulatif final des scores : \n\n" + recapScore
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
