@@ -59,6 +59,8 @@ def genererUnDeck():
         deck.append(eniemeCarte(a))
     return deck
 
+
+
 @app.route('/')
 def Arrivée():
     socketio.emit('connecté')
@@ -89,6 +91,7 @@ def handle_envoieMot(data):
         MeilleurMotJoueur = data.get("mot")
         NomMeilleurJoueur = data.get("nom")
     TokenReponse += 1
+    print(TokenReponse)
     MeilleurPossible = motLePlusLong(deck)
     if TokenReponse == NbrJoueurs:
         
