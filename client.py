@@ -26,6 +26,7 @@ print(Fore.GREEN+"*************************************************")
 print(Style.RESET_ALL)
 nomJoueur = input("Entrez votre nom pour rejoindre: ")
 
+
 @sio.event
 def connect():
     sio.emit('AnnonceJoueur',nomJoueur)
@@ -49,14 +50,21 @@ def Lancement(data):
 
 @sio.event
 def résultat(data):
-    print("Donnée reçu :",data)
+    
     print("Le gagnant est :", data.get("nom"))#Nom du vainqueur
     print("Il gagne", data.get("PointGagnée"), "points","avec le mot :", data.get("MotGagnant"))#Afficher le score retourné
     print("Le meilleur mot possible était :",data.get("meilleurPossible"))
     ListeScore = data.get("ListeScore")
     for joueur in ListeScore:
         print("-"+ joueur[0], "Score :",joueur[1])
-    recommencerPartie()
+    tempsAttente = 10
+    while tempsAttente > 0:
+        time.sleep(1)
+        tempsAttente-=1
+        print("La prochain tour commence dans",tempsAttente, end="\r")
+    sio.emit('nouveauTour')
+    
+        
 
 
 
@@ -85,7 +93,15 @@ def tirageLettres(data):
         while contientBonnesLettres(propositionMot,tirage) == False:
             propositionMot = input("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
             propositionMot = propositionMot.upper()
-        sio.emit("envoiMot",propositionMot)
+        sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
+
+@sio.event
+def victoire(data):
+    if len(data.get("nomsVainqueurs"))>1:
+        print("Les vainqueurs sont",data.get("nomsVainqueurs"))
+    else:
+        print("Le vainqueur est",data.get("nomsVainqueurs"))
+    recommencerPartie()
 
 
 sio.wait()

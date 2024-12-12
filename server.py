@@ -14,6 +14,8 @@ deck = []
 MeilleurMotJoueur = ""
 NomMeilleurJoueur = ""
 MeilleurPossible = ""
+limiteScore = 10
+jetonPret = 0
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
@@ -79,6 +81,14 @@ def handle_AnnonceJoueur(data):
         socketio.emit('Lancement',ListeJoueurs)
         socketio.emit('tirageLettres',genererUnDeck())
 
+@socketio.on('nouveauTour')
+def handle_nouveauTour():
+    global jetonPret
+    jetonPret+=1
+    if jetonPret == NbrJoueurs:
+        socketio.emit('tirageLettres',genererUnDeck())
+        jetonPret = 0
+
 @socketio.on('envoiMot')
 def handle_envoieMot(data):
     global deck
@@ -87,26 +97,38 @@ def handle_envoieMot(data):
     global NomMeilleurJoueur
     global ListeJoueurs
     global MeilleurPossible
+    
     if ((motExiste(data.get("mot"))) and (len(data.get("mot")) > len(MeilleurMotJoueur))):
         MeilleurMotJoueur = data.get("mot")
         NomMeilleurJoueur = data.get("nom")
     TokenReponse += 1
     print(TokenReponse)
     MeilleurPossible = motLePlusLong(deck)
+    nomsVainqueurs = []
+    scoresVainqueurs = []
     if TokenReponse == NbrJoueurs:
         
         for joueur in ListeJoueurs:
             if joueur[0] == NomMeilleurJoueur: 
                 joueur[1] += len(MeilleurMotJoueur) 
                 break
-        socketio.emit('résultat', {
-            "nom" : NomMeilleurJoueur,
-            "ListeScore" : ListeJoueurs,
-            "PointGagnée" : len(MeilleurMotJoueur),
-            "meilleurPossible" : MeilleurPossible,
-            "MotGagnant" : MeilleurMotJoueur
-            })
+
+        for joueur in ListeJoueurs:
+            if joueur[1]>=limiteScore:
+                nomsVainqueurs.append(joueur[0])
+                scoresVainqueurs.append(joueur[1])
+        if len(nomsVainqueurs)>0:
+            socketio.emit('victoire',{"nomsVainqueurs":nomsVainqueurs,"scoresVainqueurs":scoresVainqueurs})
+        else:
+            socketio.emit('résultat', {
+                "nom" : NomMeilleurJoueur,
+                "ListeScore" : ListeJoueurs,
+                "PointGagnée" : len(MeilleurMotJoueur),
+                "meilleurPossible" : MeilleurPossible,
+                "MotGagnant" : MeilleurMotJoueur
+                })
         TokenReponse = 0
+        MeilleurMotJoueur = ""
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
