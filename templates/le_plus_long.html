@@ -17,11 +17,17 @@
         })
 
         socket.on('tirageLettres', (data) => {
+            deck = []
             deck = data
+            var ligne1 = document.getElementById('ligne-1');
+            var ligne2 = document.getElementById('ligne-2');
+            ligne1.innerHTML=""
+            ligne2.innerHTML=""
             initialiserGrille()
         })
 
         socket.on('résultat', (data) => {
+            console.log(data.ListeScore)
             var NomMeilleurJoueur = data.nom
             var ListeJoueurs = data.ListeScore
             var PointGagner = data.PointGagnée
@@ -32,7 +38,8 @@
             "Il remporte " + PointGagner + " Points " +
             "avec le mot : " + MeilleurMotJoueur + "\n" +
             "Le meilleur mot possible était : " + MeilleurPossible + "\n" +
-            "La liste des scores est : " + ListeJoueur 
+            "La liste des scores est : " + ListeJoueurs +"\n\n"+
+            "Appuyer sur le bouton pret pour le prochain tour"
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -135,6 +142,7 @@
         <button id="bouton-valider" onclick="EnvoieMot()">Valider</button>
         <input id="nom" placeholder="Tapez votre nom" type="text" required />
         <button id="arrivee" onclick="ConnexionServeur()"">Se connecter</button>
+        <button id="newTour" onclick="ProchainTour()">Prêt pour le prochain</button>
     </div>
 
     <div class="Tableau systeme">
@@ -150,6 +158,13 @@
         let tempsRestant = 30; // Temps de départ en secondes
         let timerInterval; // Intervalle pour le compte à rebours
         let jeuTermine = false; // Indicateur si le jeu est terminé
+
+        function ProchainTour(){
+            socket.emit('nouveauTour')
+        }
+
+
+
 
 
         function ConnexionServeur() {

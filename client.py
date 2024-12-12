@@ -57,11 +57,17 @@ def résultat(data):
     ListeScore = data.get("ListeScore")
     for joueur in ListeScore:
         print("-"+ joueur[0], "Score :",joueur[1])
+<<<<<<< HEAD
     pret = input("Appuyer sur Entrée pour le prochain tour")
     if pret == "":
         sio.emit('nouveauTour')
     
         
+=======
+    pret = input("Appuyer sur entrée pour le prochain tour")
+    if pret == "":
+        sio.emit('nouveauTour')
+>>>>>>> 6d27523d2920894b78b1d1ffd2d00c5a10b89bf1
 
 
 
