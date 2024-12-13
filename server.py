@@ -12,8 +12,8 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 TokenReponse = int(0)
 ListeJoueurs = []
-NbrJoueurs = 2
-taille_deck = 7
+
+
 deck = []
 MeilleurMotsJoueur = []
 NomMeilleursJoueurs = []
@@ -117,7 +117,7 @@ def handle_AnnonceJoueur(data):
     global ListeJoueurs
     ListeJoueurs.append([str(data),0])
     print(data, "Rejoint la partie")
-    if len(ListeJoueurs) == NbrJoueurs:
+    if len(ListeJoueurs) == nbrJoueur:
         socketio.emit('Lancement',ListeJoueurs)
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
@@ -134,7 +134,7 @@ def handle_voyelle():
     global jetonTourTirage
     deck += tirageCarteVoyelle()
     jetonTourTirage += 1
-    if jetonTourTirage == NbrJoueurs:
+    if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
     if len(deck) == taille_deck:
         socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
@@ -149,7 +149,7 @@ def handle_voyelle():
     global jetonTourTirage
     deck += tirageCarteConsonne()
     jetonTourTirage += 1
-    if jetonTourTirage == NbrJoueurs:
+    if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
     if len(deck) == taille_deck:
         socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
@@ -165,7 +165,7 @@ def handle_nouveauTour():
     deck = []
     
     jetonPret+=1
-    if jetonPret == NbrJoueurs:
+    if jetonPret == nbrJoueur:
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
         jetonPret = 0
 
@@ -187,7 +187,7 @@ def handle_envoieMot(data):
     MeilleurPossible = motLePlusLong(deck)
     nomsVainqueurs = []
     scoresVainqueurs = []
-    if TokenReponse == NbrJoueurs:
+    if TokenReponse == nbrJoueur:
 
         tailleMotPlusGrand = motMax(listeMots)
         for reponse in listePropositions:
