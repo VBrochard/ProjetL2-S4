@@ -2,6 +2,7 @@ from flask import *
 from flask_socketio import *
 from random import *
 from itertools import permutations
+import sys
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -19,6 +20,17 @@ limiteScore = 10
 jetonPret = 0
 listeMots = []
 jetonTourTirage = 0
+
+if len(sys.argv) != 2:
+    print("Veuillez spécifier en argument le nombre de joueurs")
+    sys.exit(1)
+
+try:
+    nbrJoueur = int(sys.argv[1])
+    print("Le serveur est configuré pour",nbrJoueur,"joueurs")
+except ValueError:
+    print("Veuillez entrer un nombre valide pour le nombre de joueurs.")
+    sys.exit(1)
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
@@ -86,7 +98,7 @@ def handle_AnnonceJoueur(data):
         socketio.emit('Lancement',ListeJoueurs)
         socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage])
 
-@socketio('voyelle')
+@socketio.on('voyelle')
 def handle_voyelle():
     global deck
     global ListeJoueurs
@@ -96,7 +108,7 @@ def handle_voyelle():
         jetonTourTirage = 0
     socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
 
-@socketio('consonne')
+@socketio.on('consonne')
 def handle_voyelle():
     global deck
     global ListeJoueurs
