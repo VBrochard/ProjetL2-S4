@@ -119,7 +119,7 @@ def handle_AnnonceJoueur(data):
     print(data, "Rejoint la partie")
     if len(ListeJoueurs) == NbrJoueurs:
         socketio.emit('Lancement',ListeJoueurs)
-        socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage][0])
+        socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 
 @socketio.on('voyelle')
@@ -131,9 +131,11 @@ def handle_voyelle():
     jetonTourTirage += 1
     if jetonTourTirage == NbrJoueurs:
         jetonTourTirage = 0
-    socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
-    time.sleep(1)
-    socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage][0])
+    if len(deck) == taille_deck:
+        socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
+    else:
+
+        socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 @socketio.on('consonne')
 def handle_voyelle():
@@ -144,18 +146,22 @@ def handle_voyelle():
     jetonTourTirage += 1
     if jetonTourTirage == NbrJoueurs:
         jetonTourTirage = 0
-    socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
-    socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage][0])
+    if len(deck) == taille_deck:
+        socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
+    else:
 
+        socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 
 @socketio.on('nouveauTour')
 def handle_nouveauTour():
     global jetonPret
+    global deck
+    deck = []
     
     jetonPret+=1
     if jetonPret == NbrJoueurs:
-        socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage][0])
+        socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
         jetonPret = 0
 
 @socketio.on('envoiMot')

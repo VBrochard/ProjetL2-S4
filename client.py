@@ -67,6 +67,7 @@ def résultat(data):
     print(Style.RESET_ALL)
     pret = input("Appuyer sur entrée pour le prochain tour")
     sio.emit('nouveauTour')
+    
 
 
 
@@ -79,8 +80,18 @@ def recommencerPartie():
     
 @sio.event
 def choixLettre(data):
-    
-    if data == nomJoueur:
+   
+    tirage = data.get("deck")
+    affichage = ""
+    for lettre in tirage:
+        affichage+=lettre+" "
+    if len(tirage)>0:
+        print(Fore.GREEN+"--------------------------------------------------------------------------")
+        print(Style.RESET_ALL)
+        print(Fore.GREEN+"Lettres disponibles:",Fore.CYAN+affichage,end="\r")
+        print(Style.RESET_ALL)
+
+    if data.get("joueur") == nomJoueur:
         choixLettre = input("Voyelles ou consonnes ?[v/c]")
         if choixLettre == "v":
             sio.emit('voyelle')
@@ -93,6 +104,7 @@ def choixLettre(data):
                     sio.emit('voyelle')
                 elif choixLettre == "c":
                     sio.emit('consonne')
+        choixLettre = ""
         
 
 
@@ -104,22 +116,22 @@ def tirageLettres(data):
     for lettre in tirage:
         affichage+=lettre+" "
 
-    if data.get("TokenComplet") == 0:
-        print(Fore.GREEN+"--------------------------------------------------------------------------")
-        print(Style.RESET_ALL)
-        print(Fore.GREEN+"Lettres disponibles:",Fore.CYAN+affichage,end="\r")
-        print(Style.RESET_ALL)
-        
-    if data.get("TokenComplet") == 1:
-        propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
-        propositionMot = propositionMot.upper()
-        if contientBonnesLettres(propositionMot,tirage):
-            sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
-        else:
-            while contientBonnesLettres(propositionMot,tirage) == False:
-                propositionMot = input("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
-                propositionMot = propositionMot.upper()
-            sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
+   
+    print(Fore.GREEN+"--------------------------------------------------------------------------")
+    print(Style.RESET_ALL)
+    print(Fore.GREEN+"Lettres finales:",Fore.CYAN+affichage)
+    print(Style.RESET_ALL)
+
+    
+    propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
+    propositionMot = propositionMot.upper()
+    if contientBonnesLettres(propositionMot,tirage):
+        sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
+    else:
+        while contientBonnesLettres(propositionMot,tirage) == False:
+            propositionMot = input("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
+            propositionMot = propositionMot.upper()
+        sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
 
 @sio.event
 def victoire(data):
