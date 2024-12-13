@@ -1,11 +1,12 @@
 from random import *
 from itertools import permutations
+import time
 
 def ouvrirDico():
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
         return {ligne.strip().upper() for ligne in fichier}
 
-dico = ouvrirDico()
+
 
 def motExiste(mot):
     return mot.upper() in dico
@@ -20,8 +21,7 @@ def motLePlusLong(s):
     
     return f"Le mot le plus long avec ces lettres est '{max_mot}'"
 
-print(motLePlusLong("srttele"))
-print(motExiste("sterlet"))
+
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
@@ -63,3 +63,23 @@ def retireDoublon(liste):
         if elt not in listeRes:
             listeRes.append(elt)
     return listeRes
+
+def barreChargement(secondes):
+    affichage = ""
+    for i in range(secondes):
+        mil = i*"-"
+        espace = (secondes-i)*" "
+        print("|"+mil+espace+"|",end="\r")
+        time.sleep(1)
+    print("\nTemps écoulé")
+
+import sys, select
+
+print ("You have ten seconds to answer!")
+
+i, o, e = select.select( [sys.stdin], [], [], 10 )
+
+if (i):
+  print ("You said", sys.stdin.readline().strip())
+else:
+  print ("You said nothing!")

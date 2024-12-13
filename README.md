@@ -34,3 +34,9 @@ Pour lancer le serveur, écrire dans un terminal:
 
 
 
+A faire:
+    -créer une pioche pour le mot le plus long et les autres fonctions(Samy)
+    -timer côté client texte
+    -démarrer à l'initiative (à partir de 2 joueurs jusqu'à un maximum passé en paramètre), passer en paramètre la taille du deck
+    -modifier côté serveur les fonctions piocher en mettant en paramètre la liste à utiliser
+    -
