@@ -2,11 +2,10 @@ from flask import *
 from flask_socketio import *
 from random import *
 from itertools import permutations
-<<<<<<< HEAD
-import time
-=======
 import sys
->>>>>>> cff9d381ac29cc09a7b6bfc8856dbda6cc6894da
+import time
+
+
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -121,6 +120,7 @@ def handle_AnnonceJoueur(data):
     if len(ListeJoueurs) == NbrJoueurs:
         socketio.emit('Lancement',ListeJoueurs)
         socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage][0])
+
 
 @socketio.on('voyelle')
 def handle_voyelle():
