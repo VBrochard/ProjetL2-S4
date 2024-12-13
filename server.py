@@ -18,6 +18,7 @@ MeilleurPossible = ""
 limiteScore = 10
 jetonPret = 0
 listeMots = []
+jetonTourTirage = 0
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
@@ -83,7 +84,29 @@ def handle_AnnonceJoueur(data):
     print(data, "Rejoint la partie")
     if len(ListeJoueurs) == NbrJoueurs:
         socketio.emit('Lancement',ListeJoueurs)
-        socketio.emit('tirageLettres',genererUnDeck())
+        socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage])
+
+@socketio('voyelle')
+def handle_voyelle():
+    global deck
+    global ListeJoueurs
+    deck += tirageCarteVoyelle()
+    jetonTourTirage += 1
+    if jetonTourTirage == NbrJoueurs:
+        jetonTourTirage = 0
+    socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
+
+@socketio('consonne')
+def handle_voyelle():
+    global deck
+    global ListeJoueurs
+    deck += tirageCarteConsonne()
+    jetonTourTirage += 1
+    if jetonTourTirage == NbrJoueurs:
+        jetonTourTirage = 0
+    socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
+
+
 
 @socketio.on('nouveauTour')
 def handle_nouveauTour():
