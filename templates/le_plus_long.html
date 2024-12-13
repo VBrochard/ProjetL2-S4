@@ -70,33 +70,34 @@
 </head>
 
 <body>
+    <header>
+        <div class="nav">
+            <button onclick="window.location.href='index.html'">Retour au menu</button>
+        </div>
+    </header>
     <h1>Le Plus Long Mot</h1>
     <div id="timer">30</div>
+    <div id="tempsEcoule">Temps écoulé!</div>
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
-
-    <!-- Conteneur des boutons -->
     <div class="button-container">
-        <!-- Bouton Retour -->
-        <button onclick="window.location.href='index.html'">Retour</button>
-        <!-- Bouton Valider -->
-        <button id="bouton-valider" onclick="EnvoieMot()">Valider</button>
-        <input id="nom" placeholder="Tapez votre nom" type="text" required />
-        <button id="arrivee" onclick="ConnexionServeur()"">Se connecter</button>
+        <button id="bouton-valider" onclick="EnvoieMot(); desacBouton('valider'); demarrerCompteur()">Valider</button>
         <button id=" newTour" onclick="ProchainTour()">Prêt pour le prochain</button>
     </div>
-
-    <div class="Tableau systeme">
+    <div class="voycons">
+        <button id="voyelle" onclick="tirageVoyelle()">Voyelle</button>
+        <button id ="consonne" onclick="tirageConsonne">Consonne</button>
+    </div>
+    <div class="systeme">
+        <input id="nom" placeholder="Tapez votre nom" type="text" required />
+        <button id="arrivee" onclick="ConnexionServeur(); desacBouton('arrivee')">Se connecter</button>
         <textarea id="Systeme" rows="10" readonly></textarea>
     </div>
 
-    <!-- Message de temps écoulé -->
-    <div id=" message-temps-ecoule">Temps écoulé!
-    </div>
 
     <script>
         let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
-        let tempsRestant = 30; // Temps de départ en secondes
+        let tempsRestant = 3; // Temps de départ en secondes
         let timerInterval; // Intervalle pour le compte à rebours
         let jeuTermine = false; // Indicateur si le jeu est terminé
 
@@ -255,13 +256,29 @@
                 if (tempsRestant <= 0) {
                     clearInterval(timerInterval);
                     jeuTermine = true;
-                    document.getElementById('message-temps-ecoule').style.display = 'block'; // Affiche le message
+                    document.getElementById('messageEcoule').style.display = 'block'; 
                     // Désactive les interactions avec les cases
                     const cases = document.querySelectorAll('.case');
                     cases.forEach(caseElem => caseElem.setAttribute('draggable', false));
                 }
             }, 1000); // Mise à jour toutes les secondes
         }
+
+        function desacBouton(idBouton){
+            let newtour = document.getElementById('newTour');
+            let barrivee = document.getElementById('arrivee');
+            let valider = document.getElementById('bouton-valider')
+            let msgTempsEcoule = document.getElementById('tempsEcoule')
+            if(idBouton == 'arrivee'){
+                barrivee.disabled = true
+            }
+                /*
+            if(idBouton == 'valider'){
+                newtour.disabled = false
+            }
+            */
+        }
+        initialiserGrille();
     </script>
 </body>
 
