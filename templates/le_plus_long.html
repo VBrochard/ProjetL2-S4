@@ -22,11 +22,14 @@
             deck = data.deck
             initialiserGrille()
             if (data.joueur == nomJoueur) {
-                var voy = document.getElementById('voyelle')
-                var cons = document.getElementById('consonne')
-                cons.disabled = false;
-                voy.disabled = false;
+                activBouton('voyelle')
+                activBouton('consonne')
                 var msg = "Choisissez de tirer une voyelle ou une consonne"
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } else {
+                var msg = "C'est à un autre joueur de tirer une lettre"
                 messagesDiv = document.getElementById('Systeme');
                 messagesDiv.value = msg + '\n';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -53,6 +56,8 @@
         })
 
         socket.on('tirageLettres', (data) => {
+            activBouton('valider')
+            desacBouton('prochain')
             deck = data.deck
             initialiserGrille()
             var msg = "A vous de jouez"
@@ -102,8 +107,8 @@
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
     <div class="button-container">
-        <button id="bouton-valider" onclick="EnvoieMot(); desacBouton('valider')">Valider</button>
-        <button id=" newTour" onclick="ProchainTour()">Prêt pour le prochain</button>
+        <button id="bouton-valider" onclick="EnvoieMot()" disabled=true>Valider</button>
+        <button id="newTour" onclick="ProchainTour()" disabled=true>Prêt pour le prochain</button>
     </div>
     <div class="voycons">
         <button id="voyelle" onclick="tirage('voyelle')" disabled=true>Voyelle</button>
@@ -124,6 +129,7 @@
         let jeuTermine = false;
 
         function ProchainTour() {
+            desacBouton('prochain')
             socket.emit('nouveauTour')
         }
 
@@ -136,6 +142,8 @@
         }
 
         function EnvoieMot() {
+            desacBouton('valider')
+            activBouton('prochain')
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
@@ -149,14 +157,8 @@
             if (e == 'consonne') {
                 socket.emit('consonne')
             }
-            var voy = document.getElementById('voyelle')
-            var cons = document.getElementById('consonne')
-            cons.disabled = true;
-            voy.disabled = true;
-            var msg = ""
-            messagesDiv = document.getElementById('Systeme');
-            messagesDiv.value = msg + '\n';
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            desacBouton('voyelle')
+            desacBouton('consonne')
         }
 
         /**
@@ -311,14 +313,57 @@
             let barrivee = document.getElementById('arrivee');
             let valider = document.getElementById('bouton-valider')
             let msgTempsEcoule = document.getElementById('tempsEcoule')
+            var voy = document.getElementById('voyelle')
+            var cons = document.getElementById('consonne')
             if (idBouton == 'arrivee') {
                 barrivee.disabled = true
+                return 0
             }
-            /*
-        if(idBouton == 'valider'){
-            newtour.disabled = false
+            if (idBouton == 'valider') {
+                valider.disabled = true
+                return 0
+            }
+            if (idBouton == 'prochain') {
+                newtour.disabled = true
+                return 0
+            }
+            if (idBouton == 'voyelle') {
+                voy.disabled = true
+                return 0
+            }
+            if (idBouton == 'consonne') {
+                cons.disabled = true
+                return 0
+            }
         }
-        */
+
+        function activBouton(idBouton) {
+            let newtour = document.getElementById('newTour');
+            let barrivee = document.getElementById('arrivee');
+            let valider = document.getElementById('bouton-valider')
+            let msgTempsEcoule = document.getElementById('tempsEcoule')
+            var voy = document.getElementById('voyelle')
+            var cons = document.getElementById('consonne')
+            if (idBouton == 'arrivee') {
+                barrivee.disabled = false
+                return 0
+            }
+            if (idBouton == 'valider') {
+                valider.disabled = false
+                return 0
+            }
+            if (idBouton == 'prochain') {
+                newtour.disabled = false
+                return 0
+            }
+            if (idBouton == 'voyelle') {
+                voy.disabled = false
+                return 0
+            }
+            if (idBouton == 'consonne') {
+                cons.disabled = false
+                return 0
+            }
         }
     </script>
 </body>
