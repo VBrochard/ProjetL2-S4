@@ -16,7 +16,7 @@
         socket.on('victoire', (data) => {
             var ListeJoueur = data.tableauScores
             var recapScore = ""
-            ListeJoueurs.forEach(item => {
+            ListeJoueur.forEach(item => {
                 recapScore += `${item[0]} :  ${item[1]} points\n`;
             });
             var msg =
