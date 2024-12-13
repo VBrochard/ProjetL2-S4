@@ -11,7 +11,11 @@
         const socket = io('localhost:5000') /* Remplacer localhost par l'adresse du serv si besoin */
         let deck = []
         let ListeJoueur = []
+        let tailleDeck = 7;
 
+        socket.on('EnvoieTailleDeck', (data) => {
+            tailleDeck = data
+        })
 
         socket.on('victoire', (data) => {
             var ListeJoueur = data.tableauScores
@@ -86,7 +90,7 @@
     </div>
     <div class="voycons">
         <button id="voyelle" onclick="tirageVoyelle()">Voyelle</button>
-        <button id ="consonne" onclick="tirageConsonne">Consonne</button>
+        <button id="consonne" onclick="tirageConsonne">Consonne</button>
     </div>
     <div class="systeme">
         <input id="nom" placeholder="Tapez votre nom" type="text" required />
@@ -107,8 +111,10 @@
 
         function ConnexionServeur() {
             nomJoueur = nom.value;
-            if (String(nomJoueur))
+            if (String(nomJoueur)) {
                 socket.emit('AnnonceJoueur', nomJoueur)
+                socket.emit('DemandeTailleDeck')
+            }
         }
 
         function EnvoieMot() {
@@ -133,7 +139,7 @@
             });
 
             // Remplit la deuxième ligne avec des cases vides
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < tailleDeck; i++) {
                 const caseVide = creerCaseVide();
                 ligne2.appendChild(caseVide);
             }
@@ -256,7 +262,7 @@
                 if (tempsRestant <= 0) {
                     clearInterval(timerInterval);
                     jeuTermine = true;
-                    document.getElementById('messageEcoule').style.display = 'block'; 
+                    document.getElementById('messageEcoule').style.display = 'block';
                     // Désactive les interactions avec les cases
                     const cases = document.querySelectorAll('.case');
                     cases.forEach(caseElem => caseElem.setAttribute('draggable', false));
@@ -264,19 +270,19 @@
             }, 1000); // Mise à jour toutes les secondes
         }
 
-        function desacBouton(idBouton){
+        function desacBouton(idBouton) {
             let newtour = document.getElementById('newTour');
             let barrivee = document.getElementById('arrivee');
             let valider = document.getElementById('bouton-valider')
             let msgTempsEcoule = document.getElementById('tempsEcoule')
-            if(idBouton == 'arrivee'){
+            if (idBouton == 'arrivee') {
                 barrivee.disabled = true
             }
-                /*
-            if(idBouton == 'valider'){
-                newtour.disabled = false
-            }
-            */
+            /*
+        if(idBouton == 'valider'){
+            newtour.disabled = false
+        }
+        */
         }
         initialiserGrille();
     </script>
