@@ -2,6 +2,7 @@ from flask import *
 from flask_socketio import *
 from random import *
 from itertools import permutations
+import time
 
 app = Flask(__name__)
 socketio = SocketIO(app, cors_allowed_origins="*")
@@ -26,6 +27,12 @@ lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I
 cartes_freq = [carte for carte, freq in lettres_freq.items() for i in range(freq)]
 
 taille_deck = 7
+
+def ouvrirDico():
+    with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
+        return {ligne.strip().upper() for ligne in fichier}
+
+dico = ouvrirDico()
 
 def sommeDesFreq():
     b = 0
@@ -64,6 +71,20 @@ def retireDoublon(liste):
             listeRes.append(elt)
     return listeRes
 
+def motLePlusLong(s):
+    max_mot = ""
+    for i in range(len(s), 0, -1): 
+        for combi in permutations(s, i):
+            mot = ''.join(combi)
+            if motExiste(mot) and len(mot) > len(max_mot):
+                max_mot = mot
+    
+    return max_mot
+
+def motExiste(mot):
+    return mot.upper() in dico
+
+
 @app.route('/Ressources/<path:filename>')
 def ressources(filename):
     return send_from_directory('Ressources', filename)
@@ -84,36 +105,42 @@ def handle_AnnonceJoueur(data):
     print(data, "Rejoint la partie")
     if len(ListeJoueurs) == NbrJoueurs:
         socketio.emit('Lancement',ListeJoueurs)
-        socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage])
+        socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage][0])
 
-@socketio('voyelle')
+@socketio.on('voyelle')
 def handle_voyelle():
     global deck
     global ListeJoueurs
+    global jetonTourTirage
     deck += tirageCarteVoyelle()
     jetonTourTirage += 1
     if jetonTourTirage == NbrJoueurs:
         jetonTourTirage = 0
     socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
+    time.sleep(1)
+    socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage][0])
 
-@socketio('consonne')
+@socketio.on('consonne')
 def handle_voyelle():
     global deck
     global ListeJoueurs
+    global jetonTourTirage
     deck += tirageCarteConsonne()
     jetonTourTirage += 1
     if jetonTourTirage == NbrJoueurs:
         jetonTourTirage = 0
     socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
+    socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage][0])
 
 
 
 @socketio.on('nouveauTour')
 def handle_nouveauTour():
     global jetonPret
+    
     jetonPret+=1
     if jetonPret == NbrJoueurs:
-        socketio.emit('tirageLettres',genererUnDeck())
+        socketio.emit('choixLettre',ListeJoueurs[jetonTourTirage][0])
         jetonPret = 0
 
 @socketio.on('envoiMot')
