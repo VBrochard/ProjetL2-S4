@@ -18,42 +18,46 @@ def motLePlusLong(s):
             mot = ''.join(combi)
             if motExiste(mot) and len(mot) > len(max_mot):
                 max_mot = mot
-    
-    return f"Le mot le plus long avec ces lettres est '{max_mot}'"
+    return max_mot
 
-
-
-lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
+lettres_freq_lplm = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
 
-cartes_freq = [carte for carte, freq in lettres_freq.items() for i in range(freq)]
+lettres_freq_opti = {"A": 5, "B": 1, "C": 2, "D":2, "E":9, "F":2, "G": 1, "H": 1, "I":5,"J":1, "K":1, "L":3, "M":3, "N":3, "O":3, "P":2, "Q":1, "R":3, "S":4, "T":3, "U":3,
+"V": 2, "W": 1, "X": 1, "Z": 1}
 
-taille_deck = 7
+cartes_freq_lplm = [carte for carte, freq in lettres_freq_lplm.items() for i in range(freq)]
+cartes_freq_opti = [carte for carte, freq in lettres_freq_opti.items() for i in range(freq)]
 
-def sommeDesFreq():
-    b = 0
-    for lettre, freq in lettres_freq.items():
-        b+= freq
-    return b
+taille_deck_lplm = 7
+taille_deck_opti = 10
+
+def sommeDesFreq(cartes):
+    return len(cartes)
 
 def eniemeCarte(n, tabCartes):
     return tabCartes[n - 1]
 
-def genererUnDeck():
+def genererUnDeck(cartes, taille):
     deck = []
-    for i in range(taille_deck):
-        a = randint(0, sommeDesFreq())
-        deck.append(eniemeCarte(a, cartes_freq))
+    for i in range(taille):
+        a = randint(0, sommeDesFreq(cartes))
+        deck.append(eniemeCarte(a, cartes))
     return deck
 
-voyelles = [carte for carte, freq in lettres_freq.items() if carte in "AEIOUY" for i in range(freq)]
-consonnes = [carte for carte, freq in lettres_freq.items() if carte not in "AEIOUY" for i in range(freq)]
+print(genererUnDeck(cartes_freq_lplm, taille_deck_lplm))
+print(genererUnDeck(cartes_freq_opti, taille_deck_opti))
 
-def tirageCarteVoyelle():
+voyelles_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte in "AEIOUY" for i in range(freq)]
+consonnes_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte not in "AEIOUY" for i in range(freq)]
+voyelles_opti = [carte for carte, freq in lettres_freq_opti.items() if carte in "AEIOUY" for i in range(freq)]
+consonnes_opti = [carte for carte, freq in lettres_freq_opti.items() if carte not in "AEIOUY" for i in range(freq)]
+
+def tirageCarteVoyelle(cartes):
     a = randint(0, len(voyelles))
     return eniemeCarte(a, voyelles)
 
-def tirageCarteConsonne():
+def tirageCarteConsonne(cartes):
     a = randint(0, len(consonnes))
     return eniemeCarte(a, consonnes)
 
