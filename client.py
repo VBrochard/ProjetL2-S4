@@ -20,6 +20,20 @@ def contientBonnesLettres(mot, tirage):
             return False
     return True
 
+def affichageListe(liste):
+    result = ""
+    if len(liste) == 1:
+        return liste[0]
+    else:
+        for i in range(len(liste)):
+            if i == len(liste)-2:
+                result += str(liste[i]) +" et "
+            elif i<len(liste)-1:
+                result += str(liste[i])+", "
+            else:
+                result += str(liste[i])
+    return result
+
 print(Fore.GREEN+"*************************************************\n")
 print("** Bienvenue dans le jeu du mot le plus long **\n")
 print(Fore.GREEN+"*************************************************")
@@ -52,11 +66,13 @@ def Lancement(data):
 
 @sio.event
 def résultat(data):
-    
-    print("Le gagnant est :", data.get("nom"))#Nom du vainqueur
-    print("Il gagne", data.get("PointGagnée"), "points","avec le mot :", data.get("MotGagnant"))#Afficher le score retourné
-    print(Fore.GREEN+"--------------------------------------------------------------------------")
-    print(Style.RESET_ALL)
+    if len(data.get("nom")) == 0:
+        print("Personne n'a marqué de points ce tour")
+    else:
+        print("Le(s) gagnant(s) de ce tour sont :", affichageListe(data.get("nom")))#Nom du vainqueur
+        print("Il(s) gagne(nt)", data.get("PointGagnée"), "points","avec le(s) mot :", affichageListe(data.get("MotGagnant")))#Afficher le score retourné
+        print(Fore.GREEN+"--------------------------------------------------------------------------")
+        print(Style.RESET_ALL)
     print("Le meilleur mot possible était :",data.get("meilleurPossible"))
     print(Fore.GREEN+"--------------------------------------------------------------------------")
     print(Style.RESET_ALL)
@@ -135,10 +151,11 @@ def tirageLettres(data):
 
 @sio.event
 def victoire(data):
+    vainqueurs = affichageListe(data.get("nomsVainqueurs"))
     if len(data.get("nomsVainqueurs"))>1:
-        print("Les vainqueurs sont",data.get("nomsVainqueurs"))
+        print("Les vainqueurs sont",vainqueurs)
     else:
-        print("Le vainqueur est",data.get("nomsVainqueurs"))
+        print("Le vainqueur est",vainqueurs)
     recommencerPartie()
 
 
