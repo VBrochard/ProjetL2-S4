@@ -116,13 +116,11 @@ def tirageLettres(data):
     for lettre in tirage:
         affichage+=lettre+" "
 
-   
     print(Fore.GREEN+"--------------------------------------------------------------------------")
     print(Style.RESET_ALL)
     print(Fore.GREEN+"Lettres finales:",Fore.CYAN+affichage)
     print(Style.RESET_ALL)
 
-    
     propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
     propositionMot = propositionMot.upper()
     if contientBonnesLettres(propositionMot,tirage):
@@ -143,7 +141,4 @@ def victoire(data):
 
 
 sio.wait()
-
-
-#METTRE UN WAIT A LAFFICHAGE DES JOUEURS
 

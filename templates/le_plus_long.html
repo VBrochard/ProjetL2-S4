@@ -12,9 +12,25 @@
         let deck = []
         let ListeJoueur = []
         let tailleDeck = 7;
+        let nomJoueur;
 
         socket.on('EnvoieTailleDeck', (data) => {
             tailleDeck = data
+        })
+
+        socket.on('choixLettre', (data) => {
+            deck = data.deck
+            initialiserGrille()
+            if (data.joueur == nomJoueur) {
+                var voy = document.getElementById('voyelle')
+                var cons = document.getElementById('consonne')
+                cons.disabled = false;
+                voy.disabled = false;
+                var msg = "Choisissez de tirer une voyelle ou une consonne"
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
         })
 
         socket.on('victoire', (data) => {
@@ -37,13 +53,14 @@
         })
 
         socket.on('tirageLettres', (data) => {
-            deck = []
-            deck = data
-            var ligne1 = document.getElementById('ligne-1');
-            var ligne2 = document.getElementById('ligne-2');
-            ligne1.innerHTML = ""
-            ligne2.innerHTML = ""
+            deck = data.deck
             initialiserGrille()
+            var msg = "A vous de jouez"
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            deck = []
+            deck = data.deck
         })
 
         socket.on('résultat', (data) => {
@@ -85,12 +102,12 @@
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
     <div class="button-container">
-        <button id="bouton-valider" onclick="EnvoieMot(); desacBouton('valider'); demarrerCompteur()">Valider</button>
+        <button id="bouton-valider" onclick="EnvoieMot(); desacBouton('valider')">Valider</button>
         <button id=" newTour" onclick="ProchainTour()">Prêt pour le prochain</button>
     </div>
     <div class="voycons">
-        <button id="voyelle" onclick="tirageVoyelle()">Voyelle</button>
-        <button id="consonne" onclick="tirageConsonne">Consonne</button>
+        <button id="voyelle" onclick="tirage('voyelle')" disabled=true>Voyelle</button>
+        <button id="consonne" onclick="tirage('consonne')" disabled=true>Consonne</button>
     </div>
     <div class="systeme">
         <input id="nom" placeholder="Tapez votre nom" type="text" required />
@@ -103,7 +120,8 @@
         let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
         let tempsRestant = 3; // Temps de départ en secondes
         let timerInterval; // Intervalle pour le compte à rebours
-        let jeuTermine = false; // Indicateur si le jeu est terminé
+        let Tour = false;
+        let jeuTermine = false;
 
         function ProchainTour() {
             socket.emit('nouveauTour')
@@ -124,6 +142,23 @@
             socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
         }
 
+        function tirage(e) {
+            if (e == 'voyelle') {
+                socket.emit('voyelle')
+            }
+            if (e == 'consonne') {
+                socket.emit('consonne')
+            }
+            var voy = document.getElementById('voyelle')
+            var cons = document.getElementById('consonne')
+            cons.disabled = true;
+            voy.disabled = true;
+            var msg = ""
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
         /**
          * Initialise les grilles avec les lettres et les cases vides
          */
@@ -132,13 +167,14 @@
             const ligne2 = document.getElementById('ligne-2');
 
 
-            // Remplit la première ligne avec des lettres aléatoires
+            ligne1.innerHTML = ""
             deck.forEach(deck => {
                 const caseLettre = creerCaseDeplacable(deck);
                 ligne1.appendChild(caseLettre);
             });
 
             // Remplit la deuxième ligne avec des cases vides
+            ligne2.innerHTML = ""
             for (let i = 0; i < tailleDeck; i++) {
                 const caseVide = creerCaseVide();
                 ligne2.appendChild(caseVide);
@@ -284,7 +320,6 @@
         }
         */
         }
-        initialiserGrille();
     </script>
 </body>
 
