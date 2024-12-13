@@ -25,12 +25,11 @@ Intégrateur , résolveur de bug
 
 Pour lancer le serveur, écrire dans un terminal:
     
-    - lancer le fichier python server.py :
+    - lancer le fichier python server.py suivi du nombre de joueurs et de la taille du deck voulue :
         
         - aller à l'adresse http://127.0.0.1:5000/ pour l'interface graphique
         - Lancer client.py dans un cmd pour l'interface texte
-        
-        Le jeu est réglée pour 2 joueurs actuellement pour les test
+
 
 
 

@@ -11,7 +11,27 @@
         const socket = io('localhost:5000') /* Remplacer localhost par l'adresse du serv si besoin */
         let deck = []
         let ListeJoueur = []
+        let tailleDeck = 7;
+        let nomJoueur;
 
+        socket.on('EnvoieTailleDeck', (data) => {
+            tailleDeck = data
+        })
+
+        socket.on('choixLettre', (data) => {
+            deck = data.deck
+            initialiserGrille()
+            if (data.joueur == nomJoueur) {
+                var voy = document.getElementById('voyelle')
+                var cons = document.getElementById('consonne')
+                cons.disabled = false;
+                voy.disabled = false;
+                var msg = "Choisissez de tirer une voyelle ou une consonne"
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        })
 
         socket.on('victoire', (data) => {
             var ListeJoueur = data.tableauScores
@@ -33,13 +53,14 @@
         })
 
         socket.on('tirageLettres', (data) => {
-            deck = []
-            deck = data
-            var ligne1 = document.getElementById('ligne-1');
-            var ligne2 = document.getElementById('ligne-2');
-            ligne1.innerHTML = ""
-            ligne2.innerHTML = ""
+            deck = data.deck
             initialiserGrille()
+            var msg = "A vous de jouez"
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            deck = []
+            deck = data.deck
         })
 
         socket.on('résultat', (data) => {
@@ -81,12 +102,12 @@
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
     <div class="button-container">
-        <button id="bouton-valider" onclick="EnvoieMot(); desacBouton('valider'); demarrerCompteur()">Valider</button>
+        <button id="bouton-valider" onclick="EnvoieMot(); desacBouton('valider')">Valider</button>
         <button id=" newTour" onclick="ProchainTour()">Prêt pour le prochain</button>
     </div>
     <div class="voycons">
-        <button id="voyelle" onclick="tirageVoyelle()">Voyelle</button>
-        <button id ="consonne" onclick="tirageConsonne">Consonne</button>
+        <button id="voyelle" onclick="tirage('voyelle')" disabled=true>Voyelle</button>
+        <button id="consonne" onclick="tirage('consonne')" disabled=true>Consonne</button>
     </div>
     <div class="systeme">
         <input id="nom" placeholder="Tapez votre nom" type="text" required />
@@ -99,7 +120,8 @@
         let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
         let tempsRestant = 3; // Temps de départ en secondes
         let timerInterval; // Intervalle pour le compte à rebours
-        let jeuTermine = false; // Indicateur si le jeu est terminé
+        let Tour = false;
+        let jeuTermine = false;
 
         function ProchainTour() {
             socket.emit('nouveauTour')
@@ -107,8 +129,10 @@
 
         function ConnexionServeur() {
             nomJoueur = nom.value;
-            if (String(nomJoueur))
+            if (String(nomJoueur)) {
                 socket.emit('AnnonceJoueur', nomJoueur)
+                socket.emit('DemandeTailleDeck')
+            }
         }
 
         function EnvoieMot() {
@@ -116,6 +140,23 @@
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
             socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
+        }
+
+        function tirage(e) {
+            if (e == 'voyelle') {
+                socket.emit('voyelle')
+            }
+            if (e == 'consonne') {
+                socket.emit('consonne')
+            }
+            var voy = document.getElementById('voyelle')
+            var cons = document.getElementById('consonne')
+            cons.disabled = true;
+            voy.disabled = true;
+            var msg = ""
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         }
 
         /**
@@ -126,14 +167,15 @@
             const ligne2 = document.getElementById('ligne-2');
 
 
-            // Remplit la première ligne avec des lettres aléatoires
+            ligne1.innerHTML = ""
             deck.forEach(deck => {
                 const caseLettre = creerCaseDeplacable(deck);
                 ligne1.appendChild(caseLettre);
             });
 
             // Remplit la deuxième ligne avec des cases vides
-            for (let i = 0; i < 7; i++) {
+            ligne2.innerHTML = ""
+            for (let i = 0; i < tailleDeck; i++) {
                 const caseVide = creerCaseVide();
                 ligne2.appendChild(caseVide);
             }
@@ -256,7 +298,7 @@
                 if (tempsRestant <= 0) {
                     clearInterval(timerInterval);
                     jeuTermine = true;
-                    document.getElementById('messageEcoule').style.display = 'block'; 
+                    document.getElementById('messageEcoule').style.display = 'block';
                     // Désactive les interactions avec les cases
                     const cases = document.querySelectorAll('.case');
                     cases.forEach(caseElem => caseElem.setAttribute('draggable', false));
@@ -264,21 +306,20 @@
             }, 1000); // Mise à jour toutes les secondes
         }
 
-        function desacBouton(idBouton){
+        function desacBouton(idBouton) {
             let newtour = document.getElementById('newTour');
             let barrivee = document.getElementById('arrivee');
             let valider = document.getElementById('bouton-valider')
             let msgTempsEcoule = document.getElementById('tempsEcoule')
-            if(idBouton == 'arrivee'){
+            if (idBouton == 'arrivee') {
                 barrivee.disabled = true
             }
-                /*
-            if(idBouton == 'valider'){
-                newtour.disabled = false
-            }
-            */
+            /*
+        if(idBouton == 'valider'){
+            newtour.disabled = false
         }
-        initialiserGrille();
+        */
+        }
     </script>
 </body>
 
