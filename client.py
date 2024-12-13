@@ -121,6 +121,8 @@ def choixLettre(data):
                 elif choixLettre == "c":
                     sio.emit('consonne')
         choixLettre = ""
+    else:
+        print("En attente du choix de",data.get("joueur"))
         
 
 

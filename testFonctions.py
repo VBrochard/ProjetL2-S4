@@ -77,13 +77,26 @@ def barreChargement(secondes):
         time.sleep(1)
     print("\nTemps écoulé")
 
+
+def affichageListe(liste):
+    result = ""
+    if len(liste) == 1:
+        return liste[0]
+    else:
+        for i in range(len(liste)):
+            if i == len(liste)-2:
+                result += str(liste[i]) +" et "
+            elif i<len(liste)-1:
+                result += str(liste[i])+", "
+            else:
+                result += str(liste[i])
+    return result
+
 import sys, select
-
 print ("You have ten seconds to answer!")
-
 i, o, e = select.select( [sys.stdin], [], [], 10 )
-
 if (i):
   print ("You said", sys.stdin.readline().strip())
 else:
   print ("You said nothing!")
+
