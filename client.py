@@ -67,6 +67,7 @@ def résultat(data):
     print(Style.RESET_ALL)
     pret = input("Appuyer sur entrée pour le prochain tour")
     sio.emit('nouveauTour')
+    
 
 
 
@@ -77,20 +78,51 @@ def recommencerPartie():
         print("Au revoir")
         sio.disconnect()
     
+@sio.event
+def choixLettre(data):
+   
+    tirage = data.get("deck")
+    affichage = ""
+    for lettre in tirage:
+        affichage+=lettre+" "
+    if len(tirage)>0:
+        print(Fore.GREEN+"--------------------------------------------------------------------------")
+        print(Style.RESET_ALL)
+        print(Fore.GREEN+"Lettres disponibles:",Fore.CYAN+affichage,end="\r")
+        print(Style.RESET_ALL)
 
+    if data.get("joueur") == nomJoueur:
+        choixLettre = input("Voyelles ou consonnes ?[v/c]")
+        if choixLettre == "v":
+            sio.emit('voyelle')
+        elif choixLettre == "c":
+            sio.emit('consonne')
+        else:
+            while choixLettre != "v" and choixLettre != "c":
+                choixLettre = input("Ecrivez v pour une voyelle ou c pour une consonne")
+                if choixLettre == "v":
+                    sio.emit('voyelle')
+                elif choixLettre == "c":
+                    sio.emit('consonne')
+        choixLettre = ""
+        
 
 
 
 @sio.event
 def tirageLettres(data):
-    tirage = data
+    tirage = data.get("deck")
     affichage = ""
     for lettre in tirage:
         affichage+=lettre+" "
+
+   
     print(Fore.GREEN+"--------------------------------------------------------------------------")
     print(Style.RESET_ALL)
-    print(Fore.GREEN+"Lettres disponibles:",Fore.RED+affichage)
+    print(Fore.GREEN+"Lettres finales:",Fore.CYAN+affichage)
     print(Style.RESET_ALL)
+
+    
     propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
     propositionMot = propositionMot.upper()
     if contientBonnesLettres(propositionMot,tirage):
