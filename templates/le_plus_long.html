@@ -69,7 +69,7 @@
         })
 
         socket.on('résultat', (data) => {
-            console.log(data.ListeScore)
+            activBouton('prochain')
             var NomMeilleurJoueur = data.nom
             var ListeJoueurs = data.ListeScore
             var PointGagner = data.PointGagnée
@@ -116,7 +116,7 @@
     </div>
     <div class="systeme">
         <input id="nom" placeholder="Tapez votre nom" type="text" required />
-        <button id="arrivee" onclick="ConnexionServeur(); desacBouton('arrivee')">Se connecter</button>
+        <button id="arrivee" onclick="ConnexionServeur()">Se connecter</button>
         <textarea id="Systeme" rows="10" readonly></textarea>
     </div>
 
@@ -136,6 +136,11 @@
         function ConnexionServeur() {
             nomJoueur = nom.value;
             if (String(nomJoueur)) {
+                desacBouton('arrivee')
+                var msg = "Bienvenue " + nomJoueur + " ! \n\n" + "En attente d'autre joueurs..."
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 socket.emit('AnnonceJoueur', nomJoueur)
                 socket.emit('DemandeTailleDeck')
             }
@@ -143,10 +148,13 @@
 
         function EnvoieMot() {
             desacBouton('valider')
-            activBouton('prochain')
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
+            var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
             socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
         }
 
