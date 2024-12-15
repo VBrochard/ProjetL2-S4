@@ -197,20 +197,16 @@
             desacBouton('consonne')
         }
 
-        /**
-         * Initialise les grilles avec les lettres et les cases vides
-         */
+        //Initialise les grilles avec les lettres et les cases vides
         function initialiserGrille() {
             const ligne1 = document.getElementById('ligne-1');
             const ligne2 = document.getElementById('ligne-2');
-
 
             ligne1.innerHTML = ""
             deck.forEach(deck => {
                 const caseLettre = creerCaseDeplacable(deck);
                 ligne1.appendChild(caseLettre);
             });
-
             // Remplit la deuxième ligne avec des cases vides
             ligne2.innerHTML = ""
             for (let i = 0; i < tailleDeck; i++) {
@@ -329,10 +325,6 @@
                     EnvoieMot();
                     clearInterval(timerInterval);
                     document.getElementById('timer').hidden = true;
-                    /*document.getElementById('messageEcoule').style.display = 'block';
-                    // Désactive les interactions avec les cases
-                    const cases = document.querySelectorAll('.case');
-                    cases.forEach(caseElem => caseElem.setAttribute('draggable', false));*/
                 }
             }, 1000); // Mise à jour toutes les secondes
         }
