@@ -40,7 +40,7 @@
             var ListeJoueur = data.tableauScores
             var recapScore = ""
             ListeJoueur.forEach(item => {
-                recapScore += item[0] + ":" + item[1] + "points\n";
+                recapScore += item[0] + " : " + item[1] + " points\n";
             });
             var msg =
                 "Félicitation à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n" +
@@ -84,7 +84,7 @@
             desacBouton('prochain')
             deck = data.deck
             initialiserGrille()
-            var msg = "A vous de jouez"
+            var msg = "A vous de jouez \n\n" + "Vous avez 30 secondes pour envoyer votre réponse sinon elle sera envoyé automatiquement"
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -101,7 +101,7 @@
             var MeilleurMotJoueur = data.MotGagnant
             var recapScore = ""
             ListeJoueurs.forEach(item => {
-                recapScore += item[0] + ":" + item[1] + "points\n";
+                recapScore += item[0] + " : " + item[1] + " points\n";
             });
             var msg =
                 "Le gagnant du tour est : " + NomMeilleurJoueur + '\n' +
