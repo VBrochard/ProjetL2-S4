@@ -119,6 +119,17 @@ def handle_AnnonceJoueur(data):
     print(data, "Rejoint la partie")
     if len(ListeJoueurs) == nbrJoueur:
         socketio.emit('Lancement',ListeJoueurs)
+        time.sleep(0.5)
+        socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
+    else:
+        socketio.emit('ListePresence',ListeJoueurs)
+
+
+
+@socketio.on('Declancheur')
+def handle_declancheur():
+        socketio.emit('Lancement',ListeJoueurs)
+        time.sleep(0.5)
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 

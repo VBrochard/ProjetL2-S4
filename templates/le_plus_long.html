@@ -40,7 +40,7 @@
             var ListeJoueur = data.tableauScores
             var recapScore = ""
             ListeJoueur.forEach(item => {
-                recapScore += `${item[0]} :  ${item[1]} points\n`;
+                recapScore += item[0] + ":" + item[1] + "points\n";
             });
             var msg =
                 "Félicitation à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n" +
@@ -50,9 +50,30 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
 
+        socket.on('ListePresence', (data) => {
+            ListeJoueur = data
+            console.log(ListeJoueur)
+            if (ListeJoueur.length >= 2) {
+                var RecapJoueurs = ""
+                var cacheboutton = document.getElementById('Lancement')
+                cacheboutton.hidden = false;
+                ListeJoueur.forEach(item => {
+                    RecapJoueurs += item[0] + " ";
+                });
+                var msg =
+                    "Joueurs présent dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n" +
+                    "Vous êtes au moins 2 joueurs, à l'initiative de l'entre d'entre vous, la partie peut commencer..."
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        })
+
 
         socket.on('Lancement', (data) => {
             ListeJoueur = data
+            var cacheboutton = document.getElementById('Lancement')
+            cacheboutton.hidden = true;
         })
 
         socket.on('tirageLettres', (data) => {
@@ -77,7 +98,7 @@
             var MeilleurMotJoueur = data.MotGagnant
             var recapScore = ""
             ListeJoueurs.forEach(item => {
-                recapScore += `${item[0]} :  ${item[1]} points\n`;
+                recapScore += item[0] + ":" + item[1] + "points\n";
             });
             var msg =
                 "Le gagnant du tour est : " + NomMeilleurJoueur + '\n' +
@@ -119,6 +140,9 @@
         <button id="arrivee" onclick="ConnexionServeur()">Se connecter</button>
         <textarea id="Systeme" rows="10" readonly></textarea>
     </div>
+    <div>
+        <button id="Lancement" hidden="true" onclick="socket.emit('Declancheur')">Lancer la Partie</button>
+    </div>
 
 
     <script>
@@ -144,6 +168,10 @@
                 socket.emit('AnnonceJoueur', nomJoueur)
                 socket.emit('DemandeTailleDeck')
             }
+        }
+
+        function declencheur() {
+
         }
 
         function EnvoieMot() {
