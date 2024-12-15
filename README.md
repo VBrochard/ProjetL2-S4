@@ -38,4 +38,12 @@ A faire:
     -timer côté client texte
     -démarrer à l'initiative (à partir de 2 joueurs jusqu'à un maximum passé en paramètre), passer en paramètre la taille du deck
     -modifier côté serveur les fonctions piocher en mettant en paramètre la liste à utiliser
-    -
+
+
+Valeur des lettres dans le scrabble français :
+    A,E,I,L,N,O,R,S,T,U : 1 point
+    D,G,M : 2 points
+    B,C,P : 3 points
+    F,H,V : 4 points
+    J,Q : 8 points
+    K,W,X,Y,Z : 10 points
