@@ -77,6 +77,9 @@
         })
 
         socket.on('tirageLettres', (data) => {
+            demarrerCompteur();
+            var timer = document.getElementById('timer')
+            timer.hidden = false;
             activBouton('valider')
             desacBouton('prochain')
             deck = data.deck
@@ -123,7 +126,7 @@
         </div>
     </header>
     <h1>Le Plus Long Mot</h1>
-    <div id="timer">30</div>
+    <div id="timer" hidden="true">10</div>
     <div id="tempsEcoule">Temps écoulé!</div>
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
@@ -147,7 +150,7 @@
 
     <script>
         let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
-        let tempsRestant = 3; // Temps de départ en secondes
+        let tempsRestant = 10; // Temps de départ en secondes
         let timerInterval; // Intervalle pour le compte à rebours
         let Tour = false;
         let jeuTermine = false;
@@ -170,9 +173,6 @@
             }
         }
 
-        function declencheur() {
-
-        }
 
         function EnvoieMot() {
             desacBouton('valider')
@@ -317,29 +317,22 @@
                 }
             }
         }
-
-        /**
-         * Fonction pour valider la grille (exemple d'action pour le bouton "Valider")
-         */
-        /*document.getElementById('bouton-valider').addEventListener('click', function () {
-            alert("Grille validée !");
-        });*/
-
         /**
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
+            tempsRestant = 10
             timerInterval = setInterval(function () {
                 tempsRestant--;
                 document.getElementById('timer').textContent = tempsRestant;
-
                 if (tempsRestant <= 0) {
+                    EnvoieMot();
                     clearInterval(timerInterval);
-                    jeuTermine = true;
-                    document.getElementById('messageEcoule').style.display = 'block';
+                    document.getElementById('timer').hidden = true;
+                    /*document.getElementById('messageEcoule').style.display = 'block';
                     // Désactive les interactions avec les cases
                     const cases = document.querySelectorAll('.case');
-                    cases.forEach(caseElem => caseElem.setAttribute('draggable', false));
+                    cases.forEach(caseElem => caseElem.setAttribute('draggable', false));*/
                 }
             }, 1000); // Mise à jour toutes les secondes
         }

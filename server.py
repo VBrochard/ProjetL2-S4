@@ -23,6 +23,7 @@ limiteScore = 10
 jetonPret = 0
 listeMots = []
 jetonTourTirage = 0
+nbrJoueur = 0
 
 if len(sys.argv) != 3:
     print("Veuillez spécifier en argument le nombre de joueurs et la taille du deck")
@@ -128,6 +129,8 @@ def handle_AnnonceJoueur(data):
 
 @socketio.on('Declancheur')
 def handle_declancheur():
+        global nbrJoueur
+        nbrJoueur = len(ListeJoueurs)
         socketio.emit('Lancement',ListeJoueurs)
         time.sleep(0.5)
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
@@ -143,6 +146,7 @@ def handle_voyelle():
     global deck
     global ListeJoueurs
     global jetonTourTirage
+    global nbrJoueur
     deck += tirageCarteVoyelle()
     jetonTourTirage += 1
     if jetonTourTirage == nbrJoueur:
@@ -150,7 +154,6 @@ def handle_voyelle():
     if len(deck) == taille_deck:
         socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
     else:
-
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 @socketio.on('consonne')
@@ -165,7 +168,6 @@ def handle_voyelle():
     if len(deck) == taille_deck:
         socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
     else:
-
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 
