@@ -18,6 +18,9 @@ Toute les communications du serveur sont prêtes
 Bastien :
 
 Interface texte en python qui communique avec le serveur et affiche les bons résultats
+A faire côté client:
+    -Débugger le début de partie à l'initiative d'un joueur: les premiers print ne s'affiche pas directement
+    -Faire le timer en utilisant le module select et la fonction readline pour éviter un input bloquant
 
 Vincent :
 

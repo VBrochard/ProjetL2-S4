@@ -45,7 +45,18 @@ nomJoueur = input("Entrez votre nom pour rejoindre: ")
 def connect():
     sio.emit('AnnonceJoueur',nomJoueur)
     print("Bienvenue",nomJoueur, "\n")
-
+    
+@sio.event
+def ListePresence(data):
+    listeJoueurs = data
+    if len(listeJoueurs) == 2:
+        pret = input("Il y au moins deux joueurs, appuyez sur Entrée pour démarrer la partie")
+        if pret == "":
+            sio.emit("Declancheur")
+    elif len(listeJoueurs) > 2 and (nomJoueur == listeJoueurs[len(listeJoueurs)-1][0]):
+        pret = input("Il y au moins deux joueurs, appuyez sur Entrée pour démarrer la partie")
+        if pret == "":
+            sio.emit("Declancheur")
 
 
 try:
@@ -61,6 +72,7 @@ def Lancement(data):
     print("Joueurs:")
     for joueur in data:
         print("-"+ joueur[0], "Score :",joueur[1])
+    time.sleep(2)
 
 
 @sio.event
@@ -95,7 +107,6 @@ def recommencerPartie():
     
 @sio.event
 def choixLettre(data):
-   
     tirage = data.get("deck")
     affichage = ""
     for lettre in tirage:
@@ -151,6 +162,7 @@ def tirageLettres(data):
 @sio.event
 def victoire(data):
     vainqueurs = affichageListe(data.get("nomsVainqueurs"))
+
     if len(data.get("nomsVainqueurs"))>1:
         print("Les vainqueurs sont",vainqueurs)
     else:
