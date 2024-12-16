@@ -13,7 +13,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 TokenReponse = int(0)
 ListeJoueurs = []
 
-
+#Variables mot le plus long
 deck = []
 MeilleurMotsJoueur = []
 NomMeilleursJoueurs = []
@@ -24,6 +24,8 @@ jetonPret = 0
 listeMots = []
 jetonTourTirage = 0
 nbrJoueur = 0
+
+
 
 if len(sys.argv) != 3:
     print("Veuillez spécifier en argument le nombre de joueurs et la taille du deck")
@@ -240,11 +242,23 @@ def handle_envoieMot(data):
         listePropositions = []
         listeMots = []
 
+
+##########################################################################
+#Variables Opti'Mot
+listeJoueursOM = []
+
+@socketio.on('connexionOM')
+def handle_connexionOM(data):
+    print(data)
+    nomJoueur = data
+    listeJoueursOM.append(nomJoueur)
+    
+@socketio.on("demarrerPartieOM")
+def handle_demarrerPartieOM(data):
+    if len(data) == nbrJoueur:
+        socketio.emit("lancementOM")
+
 '''
-@socketio.on('connexion')
-def handle_connexion(data):
-
-
 @socketio.on('valider')
 def handle_valider(data):
 

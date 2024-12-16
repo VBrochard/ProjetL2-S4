@@ -44,7 +44,7 @@
             <div>Nom Joueur:</div>
             <input type="text" id="nomJoueurInput" placeholder="Entrez votre nom">
             <button class="connecter-button" id="connecterButton">Se connecter</button>
-            <button class="entrer-button" id="entrerButton">Entrer</button> <!-- Nouveau bouton "Entrer" ajouté -->
+            
         </div>
     </div>
 
@@ -168,22 +168,14 @@
             alert("Le jeu a été validé !");
         });
 
-        // Action pour le bouton "Entrer" (met à jour le nom de joueur)
-        entrerButton.addEventListener('click', () => {
-            const nomJoueur = nomJoueurInput.value.trim();
-            if (nomJoueur) {
-                nomJoueurElement.textContent = nomJoueur;
-                nomJoueurInput.value = ''; // Réinitialise le champ de saisie après l'entrée du nom
-            } else {
-                alert('Veuillez entrer un nom valide.');
-            }
-        });
+        
 
         // Action pour le bouton "Se connecter"
         connecterButton.addEventListener('click', () => {
             const nomJoueur = nomJoueurInput.value.trim();
             if (nomJoueur) {
                 nomJoueurElement.textContent = nomJoueur;
+                socket.emit('connexionOM',nomJoueur);
                 nomJoueurInput.value = ''; // Réinitialise le champ de saisie après la connexion
             } else {
                 alert('Veuillez entrer un nom de joueur');
