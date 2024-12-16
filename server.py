@@ -75,7 +75,8 @@ def retireUneConsonne_lplm(lettre):
     consonnes_lplm.remove(lettre)
 
 def motMax(listeMots):
-    return len(max(listeMots, key=len))
+    mots_valides = [mot for mot in listeMots if motExiste(mot)]
+    return len(max(mots_valides, key=len))
 
 def retireDoublon(liste):
     listeRes = []
@@ -91,7 +92,6 @@ def motLePlusLong(s):
             mot = ''.join(combi)
             if motExiste(mot) and len(mot) > len(max_mot):
                 max_mot = mot
-    
     return max_mot
 
 def motExiste(mot):

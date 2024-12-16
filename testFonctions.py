@@ -6,6 +6,9 @@ def ouvrirDico():
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
         return {ligne.strip().upper() for ligne in fichier}
 
+dico = ouvrirDico()
+
+
 def motExiste(mot):
     return mot.upper() in dico
 
@@ -35,6 +38,14 @@ def sommeDesFreq(cartes):
 
 def eniemeCarte(n, tabCartes):
     return tabCartes[n - 1]
+
+def motMax(listeMots):
+    mots_valides = [mot for mot in listeMots if motExiste(mot)]
+    return len(max(mots_valides, key=len))
+
+l = ["Parasol", "Sol","daizjdbfgerj", "Ordinateur",  "ecran"]
+
+print(motMax(l))
 
 def genererUnDeck(cartes, taille):
     deck = []
