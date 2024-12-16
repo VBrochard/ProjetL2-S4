@@ -37,6 +37,12 @@ def affichageListe(liste):
                 result += str(liste[i])
     return result
 
+def inputNonBloquant():
+    res, o, e = select.select([sys.stdin],[],[],0.1)
+    if res:
+        return sys.stdin.readline().strip()
+    return None
+
 
 print(Fore.GREEN+"*************************************************\n")
 print("** Bienvenue dans le jeu du mot le plus long **\n")
@@ -54,10 +60,13 @@ def connect():
 @sio.event
 def ListePresence(data):
     listeJoueurs = data
-    if len(listeJoueurs) >= 2:
-        a = input("Entrez yes pour démarrer sinon ne faites rien")
-        if a == "yes":
-            sio.emit("Declancheur")
+    if len(listeJoueurs)==2 and listeJoueurs[0][0] == nomJoueur:
+        demarrer = input("Vous êtes maitre du jeu, appuyez sur Entrée pour démarrer la partie")
+        sio.emit('Declancheur')
+    elif listeJoueurs[0][0] != nomJoueur:
+        print(listeJoueurs[0][0],"est le maître du jeu, il peur démarrer la partie à tout moment",end="\r")
+   
+
 
 
 try:
@@ -155,17 +164,18 @@ def tirageLettres(data):
     print(Style.RESET_ALL)
     print(Fore.GREEN+"Lettres finales:",Fore.CYAN+affichage)
     print(Style.RESET_ALL)
-
+    time.sleep(0.1)
     propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
     propositionMot = propositionMot.upper()
     if contientBonnesLettres(propositionMot,tirage):
         sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
+        print("Mot envoyé !")
     else:
         while contientBonnesLettres(propositionMot,tirage) == False:
             propositionMot = input("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
             propositionMot = propositionMot.upper()
         sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
-
+        print("Mot envoyé !")
 @sio.event
 def victoire(data):
     

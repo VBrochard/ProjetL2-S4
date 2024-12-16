@@ -130,3 +130,23 @@ def affichageListe(liste):
             else:
                 result += str(liste[i])
     return result
+
+#NE PAS TOUCHER 
+'''
+if len(listeJoueurs) == 2:
+        print("Entrez y pour démarrer la partie")
+        while True:
+            demarrer = inputNonBloquant()
+            if demarrer == "y":
+                sys.stdin = sys.__stdin__
+                sio.emit('Declancheur')
+                break
+    elif len(listeJoueurs) > 2 and nomJoueur == listeJoueurs[len(listeJoueurs)-1]:
+        print("Entrez y pour démarrer la partie")
+        while True:
+            demarrer = inputNonBloquant()
+            if demarrer == "y":
+                sys.stdin = sys.__stdin__
+                sio.emit('Declancheur')
+                break
+'''
