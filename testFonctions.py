@@ -29,7 +29,6 @@ lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I
 cartes_freq = [carte for carte, freq in lettres_freq.items() for i in range(freq)]
 
 taille_deck = 7
-
 def sommeDesFreq():
     b = 0
     for lettre, freq in lettres_freq.items():
