@@ -45,8 +45,8 @@ def genererUnDeck(cartes, taille):
         deck.append(eniemeCarte(a, cartes))
     return deck
 
-print(genererUnDeck(cartes_freq_lplm, taille_deck_lplm))
-print(genererUnDeck(cartes_freq_opti, taille_deck_opti))
+#print(genererUnDeck(cartes_freq_lplm, taille_deck_lplm))
+#print(genererUnDeck(cartes_freq_opti, taille_deck_opti))
 
 voyelles_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte in "AEIOUY" for i in range(freq)]
 consonnes_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte not in "AEIOUY" for i in range(freq)]
