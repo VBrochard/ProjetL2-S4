@@ -38,9 +38,10 @@ except ValueError:
     print("Veuillez entrer un nombre valide pour le nombre de joueurs et la taille du deck")
     sys.exit(1)
 
-lettres_freq_lplm = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
+lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
 
+cartes_freq = [carte for carte, freq in lettres_freq.items() for i in range(freq)]
 
 def ouvrirDico():
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
@@ -57,26 +58,26 @@ def sommeDesFreq():
 def eniemeCarte(n, tabCartes):
     return tabCartes[n - 1]
 
-voyelles_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte in "AEIOUY" for i in range(freq)]
-consonnes_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte not in "AEIOUY" for i in range(freq)]
+def genererUnDeck():
+    deck = []
+    for i in range(taille_deck):
+        a = randint(0, sommeDesFreq())
+        deck.append(eniemeCarte(a, cartes_freq))
+    return deck
 
-def tirageCarteVoyelle(voyelles):
+voyelles = [carte for carte, freq in lettres_freq.items() if carte in "AEIOUY" for i in range(freq)]
+consonnes = [carte for carte, freq in lettres_freq.items() if carte not in "AEIOUY" for i in range(freq)]
+
+def tirageCarteVoyelle():
     a = randint(0, len(voyelles))
     return eniemeCarte(a, voyelles)
 
-def tirageCarteConsonne(consonnes):
+def tirageCarteConsonne():
     a = randint(0, len(consonnes))
     return eniemeCarte(a, consonnes)
 
-def retireUneVoyelle_lplm(lettre):
-    voyelles_lplm.remove(lettre)
-
-def retireUneConsonne_lplm(lettre):
-    consonnes_lplm.remove(lettre)
-
 def motMax(listeMots):
-    mots_valides = [mot for mot in listeMots if motExiste(mot)]
-    return len(max(mots_valides, key=len))
+    return len(max(listeMots, key=len))
 
 def retireDoublon(liste):
     listeRes = []
@@ -92,6 +93,7 @@ def motLePlusLong(s):
             mot = ''.join(combi)
             if motExiste(mot) and len(mot) > len(max_mot):
                 max_mot = mot
+    
     return max_mot
 
 def motExiste(mot):
@@ -110,6 +112,10 @@ def Arrivée():
 @app.route('/le_plus_long.html')
 def LeMotlepluslong():
     return render_template('le_plus_long.html')
+
+@app.route('/OptiMot.html')
+def Optimot():
+    return render_template('OptiMot.html')
 
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
@@ -131,6 +137,8 @@ def handle_declancheur():
         nbrJoueur = len(ListeJoueurs)
         socketio.emit('Lancement',ListeJoueurs)
         time.sleep(0.5)
+        socketio.emit('afficheLettres',deck)
+        time.sleep(0.5)
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 
@@ -145,9 +153,7 @@ def handle_voyelle():
     global ListeJoueurs
     global jetonTourTirage
     global nbrJoueur
-    a = tirageCarteVoyelle(voyelles_lplm)
-    deck += a
-    retireUneVoyelle_lplm(a)
+    deck += tirageCarteVoyelle()
     jetonTourTirage += 1
     if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
@@ -161,9 +167,7 @@ def handle_voyelle():
     global deck
     global ListeJoueurs
     global jetonTourTirage
-    b = tirageCarteConsonne(consonnes_lplm)
-    deck += b
-    retireUneConsonne_lplm(b)
+    deck += tirageCarteConsonne()
     jetonTourTirage += 1
     if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
