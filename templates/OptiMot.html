@@ -21,7 +21,8 @@
         </div>
 
         <div class="info-box">
-            <div class="nom-joueur">Nom du Joueur: <span id="nomJoueur">Au tour de : </span></div>
+            <div id="AuTourDe">Au tour de :</div>
+            <div class="nomJoueur">Joueur:</div>
             <div class="case-modifiable" id="case-modifiable">
                 <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
                 <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
@@ -29,7 +30,7 @@
             </div>
             <div class="piocher-button-wrapper">
                 <button class="piocher-button" id="piocherButton">Piocher</button>
-                <button class="valider-button" id="validerButton">Valider</button>
+                <button class="valider-button" id="validerButton">Valider son tour</button>
                 <!-- Nouveau bouton "Valider" ajouté ici -->
             </div>
         </div>
@@ -195,6 +196,11 @@
         zoomOutButton.addEventListener('click', () => {
             carte.style.transform = 'scale(0.8)';
         });
+
+        socket.on('lancementOM', () => {
+            
+        })
+
     </script>
 </body>
 
