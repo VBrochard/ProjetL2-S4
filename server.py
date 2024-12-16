@@ -260,9 +260,13 @@ def handle_connexionOM(data):
     listeJoueursOM.append(nomJoueur)    
     if len(listeJoueursOM) == nbrJoueur:
         deckDepart = []
+        mainDepart = []
         for i in range(5):
             deckDepart.append(tirageCarteOpti())
-        socketio.emit("lancementOM",{"liste" :listeJoueursOM,"depart" : deckDepart})
+        for i in range(10):
+            mainDepart.append(tirageCarteOpti())
+        socketio.emit("lancementOM",{"liste" :listeJoueursOM,"depart" : deckDepart, 'mainDepart' : mainDepart})
+        print(mainDepart)
 
 @socketio.on('victoireOM')
 def handle_victoireOM(data):
@@ -287,27 +291,36 @@ def verifier_mots(mots):
     emit('resultatValidationMots', tous_valides)
 
 
+@socketio.on('DemandePioche')
+def handle_DemandePioche(data):
+    carte = tirageCarteOpti()
+    socketio.emit('RetourPioche',{"joueur" : data, 'pioche' : carte})
+
+
+
 '''
-@socketio.on('valider')
-def handle_valider(data):
-
-
-@socketio.on('piocher')
-def handle_piocher(data):
-
 
 @socketio.on('remiseEnPioche')
 def handle_RemiseEnPioche(data):
-
-@socketio.on('tourSuivant')
-def handle_tourSuivant(data):
 '''
-
-
-
-
-
 
 if __name__ == '__main__':
     socketio.run(app, host= '0.0.0.0', port=5000, debug=True)
 
+
+
+'''
+        function genererLettresInitiales(mainDepart) {
+            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
+            for (var i = 0; i < 10; i++) {
+                elementLettre.textContent = mainDepart[i];
+                elementLettre.setAttribute('draggable', 'true');
+                elementLettre.addEventListener('dragstart', gererDragStart);
+            };
+        }
+
+                socket.on('lancementOM', data => {
+            AuTourDeElement.textContent = "Au tour de : " + data.liste[0]
+            genererLettresInitiales(data.mainDepart)
+            genererLettresCentre(data.depart)
+        })'''

@@ -27,6 +27,13 @@
                 <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
                 <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
                 <div class="case" id="case3" draggable="true"><span class="lettre" id="lettre3"></span></div>
+                <div class="case" id="case4" draggable="true"><span class="lettre" id="lettre4"></span></div>
+                <div class="case" id="case5" draggable="true"><span class="lettre" id="lettre5"></span></div>
+                <div class="case" id="case6" draggable="true"><span class="lettre" id="lettre6"></span></div>
+                <div class="case" id="case7" draggable="true"><span class="lettre" id="lettre7"></span></div>
+                <div class="case" id="case8" draggable="true"><span class="lettre" id="lettre8"></span></div>
+                <div class="case" id="case9" draggable="true"><span class="lettre" id="lettre9"></span></div>
+                <div class="case" id="case10" draggable="true"><span class="lettre" id="lettre10"></span></div>
             </div>
             <div class="piocher-button-wrapper">
                 <button class="piocher-button" id="piocherButton">Piocher</button>
@@ -65,12 +72,6 @@
         let positionsLettresPosees = [];
         var nomJoueur;
 
-        function genererLettreAleatoire() {
-            const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            const indexAleatoire = Math.floor(Math.random() * lettres.length);
-            return lettres[indexAleatoire];
-        }
-
         function genererGrille() {
             for (let i = 0; i < 32 * 32; i++) {
                 const cellule = document.createElement('div');
@@ -82,14 +83,19 @@
             }
         }
 
-        function genererLettresInitiales() {
+        function genererLettresInitiales(maindepart) {
             const elementsLettre = caseModifiable.querySelectorAll('.lettre');
+            var i = 0
             elementsLettre.forEach(elementLettre => {
-                elementLettre.textContent = genererLettreAleatoire();
+                elementLettre.textContent = maindepart[i];
                 elementLettre.setAttribute('draggable', 'true');
                 elementLettre.addEventListener('dragstart', gererDragStart);
+                i++
             });
         }
+
+
+
 
         function extraireMotsGrille() {
             const tailleGrille = 32; // Taille de la grille (32x32)
@@ -243,18 +249,8 @@
 
 
         piocherButton.addEventListener('click', () => {
-            const nouvelleCase = document.createElement('div');
-            nouvelleCase.classList.add('case');
-            nouvelleCase.style.backgroundColor = '#f0f0f0';
-            const nouvelleLettre = document.createElement('span');
-            nouvelleLettre.classList.add('lettre');
-            nouvelleLettre.textContent = genererLettreAleatoire();
-            nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
-            nouvelleCase.appendChild(nouvelleLettre);
-            caseModifiable.appendChild(nouvelleCase);
+            socket.emit('DemandePioche', nomJoueur)
 
-            nouvelleLettre.setAttribute('draggable', 'true');
-            nouvelleLettre.addEventListener('dragstart', gererDragStart);
         });
 
         // Action pour le bouton "Valider"
@@ -291,6 +287,25 @@
         });
 
 
+        socket.on('RetourPioche', (data) => {
+            carteTire = data.pioche
+            joueur = data.joueur
+            if (nomJoueur == joueur) {
+                const nouvelleCase = document.createElement('div');
+                nouvelleCase.classList.add('case');
+                nouvelleCase.style.backgroundColor = '#f0f0f0';
+                const nouvelleLettre = document.createElement('span');
+                nouvelleLettre.classList.add('lettre');
+                nouvelleLettre.textContent = carteTire;
+                nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                nouvelleCase.appendChild(nouvelleLettre);
+                caseModifiable.appendChild(nouvelleCase);
+                nouvelleLettre.setAttribute('draggable', 'true');
+                nouvelleLettre.addEventListener('dragstart', gererDragStart);
+            }
+        })
+
+
 
         socket.on('resultatValidationMots', (tousValides) => {
             if (tousValides) {
@@ -315,6 +330,7 @@
         socket.on('lancementOM', data => {
             AuTourDeElement.textContent = "Au tour de : " + data.liste[0]
             genererLettresCentre(data.depart)
+            genererLettresInitiales(data.mainDepart)
         })
 
         socket.on('tourSuivantOM', data => {
@@ -328,8 +344,6 @@
 
         // Initialiser la grille et les lettres au démarrage
         genererGrille();
-        genererLettresInitiales();
-        //genererLettresCentrealéatoire();
 
 
     </script>
