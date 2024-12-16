@@ -179,6 +179,7 @@ def handle_voyelle():
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 
+
 @socketio.on('nouveauTour')
 def handle_nouveauTour():
     global jetonPret
@@ -267,6 +268,17 @@ def handle_tourSuivantOM():
     if jetonTourOM == len(listeJoueursOM):
         jetonTourOM = 0
     socketio.emit('tourSuivantOM',listeJoueursOM[jetonTourOM])
+
+@socketio.on('verifierMots')
+def verifier_mots(mots):
+    print(f"Mots reçus pour validation : {mots}")
+
+    # Valider tous les mots
+    tous_valides = all(motExiste(mot) for mot in mots)
+
+    # Retourner le résultat au client
+    emit('resultatValidationMots', tous_valides)
+
 
 '''
 @socketio.on('valider')
