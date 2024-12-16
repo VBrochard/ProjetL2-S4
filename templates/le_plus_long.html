@@ -13,6 +13,7 @@
         let ListeJoueur = []
         let tailleDeck = 7;
         let nomJoueur;
+        let TokenValide = false
 
         socket.on('EnvoieTailleDeck', (data) => {
             tailleDeck = data
@@ -80,6 +81,7 @@
             demarrerCompteur();
             var timer = document.getElementById('timer')
             timer.hidden = false;
+            TokenValide = false;
             activBouton('valider')
             desacBouton('prochain')
             deck = data.deck
@@ -93,6 +95,8 @@
         })
 
         socket.on('résultat', (data) => {
+            var timer = document.getElementById('timer')
+            timer.hidden = true;
             activBouton('prochain')
             var NomMeilleurJoueur = data.nom
             var ListeJoueurs = data.ListeScore
@@ -150,7 +154,7 @@
 
     <script>
         let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
-        let tempsRestant = 10; // Temps de départ en secondes
+        let tempsRestant = 20; // Temps de départ en secondes
         let timerInterval; // Intervalle pour le compte à rebours
         let Tour = false;
         let jeuTermine = false;
@@ -175,6 +179,7 @@
 
 
         function EnvoieMot() {
+            TokenValide = true
             desacBouton('valider')
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
@@ -317,11 +322,16 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
-            tempsRestant = 10
+            tempsRestant = 20
             timerInterval = setInterval(function () {
                 tempsRestant--;
                 document.getElementById('timer').textContent = tempsRestant;
-                if (tempsRestant <= 0) {
+                if (tempsRestant == 0) {
+                    if (TokenValide == true){
+                        clearInterval(timerInterval);
+                        document.getElementById('timer').hidden = true;
+                        return 0
+                    }
                     EnvoieMot();
                     clearInterval(timerInterval);
                     document.getElementById('timer').hidden = true;
