@@ -62,6 +62,7 @@
         const connecterButton = document.getElementById('connecterButton');
         const entrerButton = document.getElementById('entrerButton'); // Nouveau bouton "Entrer"
         const AuTourDeElement = document.getElementById("AuTourDe");
+        let positionsLettresPosees = [];
         var nomJoueur;
 
         function genererLettreAleatoire() {
@@ -120,7 +121,6 @@
             console.log("Mots trouvés dans la grille :", motsTrouves);
             return motsTrouves;
         }
-        let positionsLettresPosees = [];
 
         // Fonction pour sauvegarder la position de chaque lettre
         function sauvegarderPositionLettre(lettreElement) {
@@ -135,55 +135,54 @@
         }
 
 
-        function resetLettresPosees() {
+        function resetLettresPosees(valeur) {
             // Parcourir toutes les positions sauvegardées
-            positionsLettresPosees.forEach(position => {
-                const { index, lettre, cellule } = position;
+            if (valeur == 0) {
+                positionsLettresPosees = [];
+                return 0
+            } else {
+                positionsLettresPosees.forEach(position => {
+                    const { index, lettre, cellule } = position;
 
-                // Supprimer la lettre de la grille
-                const lettreElement = cellule.querySelector('.lettre');
-                if (lettreElement) {
-                    cellule.removeChild(lettreElement);
-                }
-                // Revenir la lettre dans la main du joueur (zone modifiable)
-                const caseVide = caseModifiable.querySelector('.case'); // Trouver une case vide pour remettre la lettre
-                if (caseVide) {
-                    const nouvelleCase = document.createElement('div');
-                    nouvelleCase.classList.add('case');
-                    nouvelleCase.style.backgroundColor = '#f0f0f0';
-                    const nouvelleLettre = document.createElement('span');
-                    nouvelleLettre.classList.add('lettre');
-                    nouvelleLettre.textContent = lettre;
-                    nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
-                    nouvelleCase.appendChild(nouvelleLettre);
-                    caseModifiable.appendChild(nouvelleCase);
+                    // Supprimer la lettre de la grille
+                    const lettreElement = cellule.querySelector('.lettre');
+                    if (lettreElement) {
+                        cellule.removeChild(lettreElement);
+                    }
+                    // Revenir la lettre dans la main du joueur (zone modifiable)
+                    const caseVide = caseModifiable.querySelector('.case'); // Trouver une case vide pour remettre la lettre
+                    if (caseVide) {
+                        const nouvelleCase = document.createElement('div');
+                        nouvelleCase.classList.add('case');
+                        nouvelleCase.style.backgroundColor = '#f0f0f0';
+                        const nouvelleLettre = document.createElement('span');
+                        nouvelleLettre.classList.add('lettre');
+                        nouvelleLettre.textContent = lettre;
+                        nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                        nouvelleCase.appendChild(nouvelleLettre);
+                        caseModifiable.appendChild(nouvelleCase);
 
-                    nouvelleLettre.setAttribute('draggable', 'true');
-                    nouvelleLettre.addEventListener('dragstart', gererDragStart);
-                }
-            });
-            // Réinitialiser le tableau de positions après avoir remis toutes les lettres
-            positionsLettresPosees = [];
-            console.log("Les lettres posées ont été réinitialisées.");
+                        nouvelleLettre.setAttribute('draggable', 'true');
+                        nouvelleLettre.addEventListener('dragstart', gererDragStart);
+                    }
+                });
+                // Réinitialiser le tableau de positions après avoir remis toutes les lettres
+                positionsLettresPosees = [];
+                console.log("Les lettres posées ont été réinitialisées.");
+            }
         }
 
-
-
-
-
-
-        function genererLettresCentre() {
+        function genererLettresCentre(lettresListe) {
             const ligneCentre = 15;
             const colonneCentre = 15;
             for (let i = 0; i < 5; i++) {
-                const lettre = genererLettreAleatoire();
+                const lettre = lettresListe[i];
                 const indexCellule = (ligneCentre + i) * 32 + colonneCentre;
                 const cellule = carte.children[indexCellule];
-
                 const elementLettre = document.createElement('span');
                 elementLettre.classList.add('lettre');
                 elementLettre.textContent = lettre;
-                cellule.appendChild(elementLettre);
+                cellule.appendChild(elementLettre);;
             }
         }
 
@@ -266,7 +265,6 @@
             }
             else {
                 const motsTrouves = extraireMotsGrille();
-
                 // Vérifier qu'il y a des mots à valider
                 if (motsTrouves.length === 0) {
                     console.log("Aucun mot formé !");
@@ -292,20 +290,17 @@
             }
         });
 
-        // Initialiser la grille et les lettres au démarrage
-        genererGrille();
-        genererLettresCentre();
-        genererLettresInitiales();
 
 
         socket.on('resultatValidationMots', (tousValides) => {
             if (tousValides) {
                 console.log("Tous les mots sont valides. Tour suivant.");
-                socket.emit('finTourOM'); // Passer au tour suivant
+                resetLettresPosees(0)
+                socket.emit('finTourOM');
             } else {
                 console.log("Certains mots sont invalides. Réinitialisation des lettres.");
-                resetLettresPosees(); // Réinitialiser les lettres ajoutées
-                socket.emit('finTourOM'); // Passer au tour suivant malgré l'échec
+                resetLettresPosees(1);
+                socket.emit('finTourOM');
             }
         });
         // Fonction de zoom
@@ -318,7 +313,8 @@
         });
 
         socket.on('lancementOM', data => {
-            AuTourDeElement.textContent = "Au tour de : " + data[0]
+            AuTourDeElement.textContent = "Au tour de : " + data.liste[0]
+            genererLettresCentre(data.depart)
         })
 
         socket.on('tourSuivantOM', data => {
@@ -328,6 +324,13 @@
         socket.on('afficheVictoireOM', data => {
             AuTourDeElement.textContent = "Le vainqueur est " + data
         })
+
+
+        // Initialiser la grille et les lettres au démarrage
+        genererGrille();
+        genererLettresInitiales();
+        //genererLettresCentrealéatoire();
+
 
     </script>
 </body>

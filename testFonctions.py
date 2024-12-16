@@ -34,6 +34,8 @@ cartes_freq_opti = [carte for carte, freq in lettres_freq_opti.items() for i in 
 taille_deck_lplm = 7
 taille_deck_opti = 10
 
+print(cartes_freq_opti)
+
 def sommeDesFreq(cartes):
     return len(cartes)
 

@@ -60,13 +60,6 @@ def sommeDesFreq():
 def eniemeCarte(n, tabCartes):
     return tabCartes[n - 1]
 
-def genererUnDeck():
-    deck = []
-    for i in range(taille_deck):
-        a = randint(0, sommeDesFreq())
-        deck.append(eniemeCarte(a, cartes_freq))
-    return deck
-
 voyelles = [carte for carte, freq in lettres_freq.items() if carte in "AEIOUY" for i in range(freq)]
 consonnes = [carte for carte, freq in lettres_freq.items() if carte not in "AEIOUY" for i in range(freq)]
 
@@ -249,13 +242,28 @@ def handle_envoieMot(data):
 listeJoueursOM = []
 jetonTourOM = 0
 
+lettres_freq_opti = {"A": 5, "B": 1, "C": 2, "D":2, "E":9, "F":2, "G": 1, "H": 1, "I":5,"J":1, "K":1, "L":3, "M":3, "N":3, "O":3, "P":2, "Q":1, "R":3, "S":4, "T":3, "U":3,
+"V": 2, "W": 1, "X": 1, "Z": 1}
+
+cartes_freq_opti = [carte for carte, freq in lettres_freq_opti.items() for i in range(freq)]
+
+def ajouterLettreDansPioche_opti(lettre):
+    cartes_freq_opti.append(lettre)
+
+def tirageCarteOpti():
+    a = randint(0, len(cartes_freq_opti))
+    return eniemeCarte(a, cartes_freq_opti)
+
 @socketio.on('connexionOM')
 def handle_connexionOM(data):
     nomJoueur = data
     listeJoueursOM.append(nomJoueur)    
     if len(listeJoueursOM) == nbrJoueur:
-        socketio.emit("lancementOM",listeJoueursOM)
-        
+        deckDepart = []
+        for i in range(5):
+            deckDepart.append(tirageCarteOpti())
+        socketio.emit("lancementOM",{"liste" :listeJoueursOM,"depart" : deckDepart})
+
 @socketio.on('victoireOM')
 def handle_victoireOM(data):
     print(data)
@@ -271,7 +279,6 @@ def handle_tourSuivantOM():
 
 @socketio.on('verifierMots')
 def verifier_mots(mots):
-    print(f"Mots reçus pour validation : {mots}")
 
     # Valider tous les mots
     tous_valides = all(motExiste(mot) for mot in mots)
