@@ -129,7 +129,6 @@ def choixLettre(data):
         print(Style.RESET_ALL)
         print(Fore.GREEN+"Lettres disponibles:",Fore.CYAN+affichage,end="\r")
         print(Style.RESET_ALL)
-   
     if data.get("joueur") == nomJoueur:
         choixLettre = ""
         
