@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/Ressources/style_lepluslong.css">
     <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
     <script>
-        const socket = io() 
+        const socket = io() /* Remplacer localhost par l'adresse du serv si besoin */
         let deck = []
         let ListeJoueur = []
         let tailleDeck = 7;
@@ -154,7 +154,7 @@
 
     <script>
         let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
-        let tempsRestant = 25; // Temps de départ en secondes
+        let tempsRestant = 20; // Temps de départ en secondes
         let timerInterval; // Intervalle pour le compte à rebours
         let Tour = false;
         let jeuTermine = false;
@@ -322,7 +322,7 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
-            tempsRestant = 25
+            tempsRestant = 20
             timerInterval = setInterval(function () {
                 tempsRestant--;
                 document.getElementById('timer').textContent = tempsRestant;
