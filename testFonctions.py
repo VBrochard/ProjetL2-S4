@@ -27,6 +27,7 @@ lettres_freq_lplm = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 
 lettres_freq_opti = {"A": 5, "B": 1, "C": 2, "D":2, "E":9, "F":2, "G": 1, "H": 1, "I":5,"J":1, "K":1, "L":3, "M":3, "N":3, "O":3, "P":2, "Q":1, "R":3, "S":4, "T":3, "U":3,
 "V": 2, "W": 1, "X": 1, "Z": 1}
 
+
 cartes_freq_lplm = [carte for carte, freq in lettres_freq_lplm.items() for i in range(freq)]
 cartes_freq_opti = [carte for carte, freq in lettres_freq_opti.items() for i in range(freq)]
 
@@ -43,9 +44,30 @@ def motMax(listeMots):
     mots_valides = [mot for mot in listeMots if motExiste(mot)]
     return len(max(mots_valides, key=len))
 
-l = ["Parasol", "Sol","daizjdbfgerj", "Ordinateur",  "ecran"]
+lettres_points_1 = ["A","E","I","L","N","O","R","S","T","U"]
+lettres_points_2 = ["D","G","M"]
+lettres_points_3 = ["B","C","P"]
+lettres_points_4 = ["F","H","V"]
+lettres_points_8 = ["J","Q"]
+lettres_points_10 = ["K","W","X","Y","Z"]
 
-print(motMax(l))
+def calculScore(mot):
+    score =0
+    motUp = mot.upper()
+    for lettre in motUp:
+        if lettre in lettres_points_1:
+            score +=1
+        if lettre in lettres_points_2:
+            score +=2
+        if lettre in lettres_points_3:
+            score +=3
+        if lettre in lettres_points_4:
+            score +=4
+        if lettre in lettres_points_8:
+            score +=8
+        if lettre in lettres_points_10:
+            score +=10
+    return score
 
 def genererUnDeck(cartes, taille):
     deck = []
