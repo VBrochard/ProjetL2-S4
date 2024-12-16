@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,8 +8,9 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/Ressources/style_optimot.css">
 </head>
-<body class="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-700 text-white">
-    
+
+<body
+    class="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-700 text-white">
     <div class="absolute inset-0 flex items-center justify-center">
         <div class="background-text">OPTI'MOT</div>
     </div>
@@ -16,12 +18,12 @@
     <div class="carte" id="carte"></div>
 
     <div class="connexion">
-        <input id="nom" placeholder="Tapez votre nom ici" type="text" required/>
+        <input id="nom" placeholder="Tapez votre nom ici" type="text" required />
         <button id="arrivee" onclick="ConnexionServeur()">Se connecter</button>
     </div>
 
     <div class="info-box">
-        <div class="nom-joueur">Nom du Joueur: <span id="nomJoueur">Joueur 1</span></div>
+        <div class="nom-joueur"><span id="nomJoueur"></span></div>
         <div class="case-modifiable" id="case-modifiable">
             <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
             <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
@@ -43,6 +45,16 @@
         const zoomOutButton = document.getElementById('zoomOut');
         const piocherButton = document.getElementById('piocherButton');
         const caseModifiable = document.getElementById('case-modifiable');
+
+
+        function ConnexionServeur(){
+            nomJoueur = nom.value;
+            if (String(nomJoueur)) {
+                document.getElementById('nomJoueur').textContent = nomJoueur
+            }
+        }
+
+
 
         function genererLettreAleatoire() {
             const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -211,21 +223,5 @@
         });
     </script>
 </body>
+
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
