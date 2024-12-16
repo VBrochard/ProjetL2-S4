@@ -6,6 +6,7 @@ def ouvrirDico():
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
         return {ligne.strip().upper() for ligne in fichier}
 
+dico = ouvrirDico()
 
 
 def motExiste(mot):
@@ -38,6 +39,14 @@ def sommeDesFreq(cartes):
 def eniemeCarte(n, tabCartes):
     return tabCartes[n - 1]
 
+def motMax(listeMots):
+    mots_valides = [mot for mot in listeMots if motExiste(mot)]
+    return len(max(mots_valides, key=len))
+
+l = ["Parasol", "Sol","daizjdbfgerj", "Ordinateur",  "ecran"]
+
+print(motMax(l))
+
 def genererUnDeck(cartes, taille):
     deck = []
     for i in range(taille):
@@ -45,21 +54,30 @@ def genererUnDeck(cartes, taille):
         deck.append(eniemeCarte(a, cartes))
     return deck
 
-#print(genererUnDeck(cartes_freq_lplm, taille_deck_lplm))
-#print(genererUnDeck(cartes_freq_opti, taille_deck_opti))
-
 voyelles_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte in "AEIOUY" for i in range(freq)]
 consonnes_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte not in "AEIOUY" for i in range(freq)]
 voyelles_opti = [carte for carte, freq in lettres_freq_opti.items() if carte in "AEIOUY" for i in range(freq)]
 consonnes_opti = [carte for carte, freq in lettres_freq_opti.items() if carte not in "AEIOUY" for i in range(freq)]
 
-def tirageCarteVoyelle(cartes):
+def tirageCarteVoyelle(voyelles):
     a = randint(0, len(voyelles))
     return eniemeCarte(a, voyelles)
 
-def tirageCarteConsonne(cartes):
+def tirageCarteConsonne(consonnes):
     a = randint(0, len(consonnes))
     return eniemeCarte(a, consonnes)
+
+def retireUneVoyelle_lplm(lettre):
+    voyelles_lplm.remove(lettre)
+
+def retireUneConsonne_lplm(lettre):
+    consonnes_lplm.remove(lettre)
+
+def retireUneVoyelle_opti(lettre):
+    voyelles_opti.remove(lettre)
+
+def retireUneConsonne_opti(lettre):
+    consonnes_opti.remove(lettre)
 
 def retireDoublon(liste):
     listeRes = []
@@ -77,7 +95,6 @@ def barreChargement(secondes):
         time.sleep(1)
     print("\nTemps écoulé")
 
-
 def affichageListe(liste):
     result = ""
     if len(liste) == 1:
@@ -91,12 +108,3 @@ def affichageListe(liste):
             else:
                 result += str(liste[i])
     return result
-
-import sys, select
-print ("You have ten seconds to answer!")
-i, o, e = select.select( [sys.stdin], [], [], 10 )
-if (i):
-  print ("You said", sys.stdin.readline().strip())
-else:
-  print ("You said nothing!")
-
