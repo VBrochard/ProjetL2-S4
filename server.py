@@ -246,17 +246,27 @@ def handle_envoieMot(data):
 ##########################################################################
 #Variables Opti'Mot
 listeJoueursOM = []
+jetonTourOM = 0
 
 @socketio.on('connexionOM')
 def handle_connexionOM(data):
-    print(data)
     nomJoueur = data
-    listeJoueursOM.append(nomJoueur)
+    listeJoueursOM.append(nomJoueur)    
+    if len(listeJoueursOM) == nbrJoueur:
+        socketio.emit("lancementOM",listeJoueursOM)
+        
+@socketio.on('victoireOM')
+def handle_victoireOM(data):
+    print(data)
+    socketio.emit('afficheVictoireOM',data)
     
-@socketio.on("demarrerPartieOM")
-def handle_demarrerPartieOM(data):
-    if len(data) == nbrJoueur:
-        socketio.emit("lancementOM")
+@socketio.on('finTourOM')
+def handle_tourSuivantOM():
+    global jetonTourOM
+    jetonTourOM+=1
+    if jetonTourOM == len(listeJoueursOM):
+        jetonTourOM = 0
+    socketio.emit('tourSuivantOM',listeJoueursOM[jetonTourOM])
 
 '''
 @socketio.on('valider')

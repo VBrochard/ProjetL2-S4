@@ -61,6 +61,8 @@
         const nomJoueurInput = document.getElementById('nomJoueurInput');
         const connecterButton = document.getElementById('connecterButton');
         const entrerButton = document.getElementById('entrerButton'); // Nouveau bouton "Entrer"
+        const AuTourDeElement = document.getElementById("AuTourDe");
+        var nomJoueur;
 
         function genererLettreAleatoire() {
             const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -166,15 +168,22 @@
 
         // Action pour le bouton "Valider"
         validerButton.addEventListener('click', () => {
-            alert("Le jeu a été validé !");
+            if (document.querySelectorAll("#case-modifiable .lettre").length == 0){
+                socket.emit('victoireOM',nomJoueur)
+                console.log(nomJoueur)
+            }
+            else{
+                socket.emit('finTourOM')
+            }
         });
 
 
         // Action pour le bouton "Se connecter"
         connecterButton.addEventListener('click', () => {
-            const nomJoueur = nomJoueurInput.value.trim();
+            nomJoueur = nomJoueurInput.value.trim();
             if (nomJoueur) {
                 nomJoueurElement.textContent = "Joueur : " + nomJoueur;
+                socket.emit("connexionOM",nomJoueur)
                 nomJoueurInput.value = ''; // Réinitialise le champ de saisie après la connexion
             } else {
                 alert('Veuillez entrer un nom de joueur');
@@ -195,8 +204,16 @@
             carte.style.transform = 'scale(0.8)';
         });
 
-        socket.on('lancementOM', () => {
-            
+        socket.on('lancementOM', data => {
+            AuTourDeElement.textContent = "Au tour de : "+data[0]
+        })
+        
+        socket.on('tourSuivantOM',data =>{
+            AuTourDeElement.textContent = "Au tour de : "+data
+        })
+
+        socket.on('afficheVictoireOM',data =>{
+            AuTourDeElement.textContent = "Le vainqueur est "+data
         })
 
     </script>
