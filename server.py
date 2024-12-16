@@ -111,6 +111,10 @@ def Arrivée():
 def LeMotlepluslong():
     return render_template('le_plus_long.html')
 
+@app.route('/OptiMot.html')
+def Optimot():
+    return render_template('OptiMot.html')
+
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
     global ListeJoueurs

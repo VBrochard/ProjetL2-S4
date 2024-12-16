@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grille avec informations et case modifiable</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/Ressources/style_optimot.css">
+</head>
+<body class="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-700 text-white">
+    <div class="absolute inset-0 flex items-center justify-center">
+        <div class="background-text">OPTI'MOT</div>
+    </div>
+
+    <div class="carte" id="carte"></div>
+
+    <div class="info-box">
+        <div class="nom-joueur">Nom du Joueur: <span id="nomJoueur">Joueur 1</span></div>
+        <div class="case-modifiable" id="case-modifiable">
+            <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
+            <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
+            <div class="case" id="case3" draggable="true"><span class="lettre" id="lettre3"></span></div>
+        </div>
+        <div class="piocher-button-wrapper">
+            <button class="piocher-button" id="piocherButton">Piocher</button>
+        </div>
+    </div>
+
+    <div class="boutons-zoom">
+        <button id="zoomIn">+</button>
+        <button id="zoomOut">-</button>
+    </div>
+
+    <script>
+        const carte = document.querySelector('#carte');
+        const zoomInButton = document.getElementById('zoomIn');
+        const zoomOutButton = document.getElementById('zoomOut');
+        const piocherButton = document.getElementById('piocherButton');
+        const caseModifiable = document.getElementById('case-modifiable');
+
+        function genererLettreAleatoire() {
+            const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const indexAleatoire = Math.floor(Math.random() * lettres.length);
+            return lettres[indexAleatoire];
+        }
+
+        function genererGrille() {
+            for (let i = 0; i < 32 * 32; i++) {
+                const cellule = document.createElement('div');
+                cellule.classList.add('case');
+                cellule.setAttribute('draggable', 'false');
+                cellule.addEventListener('dragover', gererDragOver);
+                cellule.addEventListener('drop', gererDrop);
+                carte.appendChild(cellule);
+            }
+        }
+
+        function genererLettresInitiales() {
+            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
+            elementsLettre.forEach(elementLettre => {
+                elementLettre.textContent = genererLettreAleatoire();
+                elementLettre.setAttribute('draggable', 'true');
+                elementLettre.addEventListener('dragstart', gererDragStart);
+            });
+        }
+
+        function genererLettresCentre() {
+            const ligneCentre = 15;
+            const colonneCentre = 15;
+            for (let i = 0; i < 5; i++) {
+                const lettre = genererLettreAleatoire();
+                const indexCellule = (ligneCentre + i) * 32 + colonneCentre;
+                const cellule = carte.children[indexCellule];
+
+                const elementLettre = document.createElement('span');
+                elementLettre.classList.add('lettre');
+                elementLettre.textContent = lettre;
+                cellule.appendChild(elementLettre);
+            }
+        }
+
+        function gererDragStart(event) {
+            event.dataTransfer.setData('text', event.target.id);
+        }
+
+        function gererDragOver(event) {
+            event.preventDefault();
+        }
+
+        function gererDrop(event) {
+            event.preventDefault();
+            const lettreId = event.dataTransfer.getData('text');
+            const elementLettre = document.getElementById(lettreId);
+            const celluleCible = event.target;
+
+            if (celluleCible.classList.contains('case') && !celluleCible.hasChildNodes()) {
+                const nouvelleLettreElement = document.createElement('span');
+                nouvelleLettreElement.classList.add('lettre');
+                nouvelleLettreElement.textContent = elementLettre.textContent;
+                celluleCible.appendChild(nouvelleLettreElement);
+
+                const lettreParent = elementLettre.parentElement;
+                if (lettreParent) {
+                    lettreParent.removeChild(elementLettre);
+                }
+
+                supprimerCaseVide();
+            }
+        }
+
+        function supprimerCaseVide() {
+            const casesSousNom = caseModifiable.querySelectorAll('.case');
+            casesSousNom.forEach(caseElement => {
+                if (!caseElement.hasChildNodes()) {
+                    caseElement.remove();
+                }
+            });
+        }
+
+        function activerDragPourLettres() {
+            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
+            elementsLettre.forEach(lettre => {
+                lettre.setAttribute('draggable', 'true');
+                lettre.addEventListener('dragstart', gererDragStart);
+            });
+        }
+
+        piocherButton.addEventListener('click', () => {
+            const nouvelleCase = document.createElement('div');
+            nouvelleCase.classList.add('case');
+            nouvelleCase.style.backgroundColor = '#f0f0f0';
+            const nouvelleLettre = document.createElement('span');
+            nouvelleLettre.classList.add('lettre');
+            nouvelleLettre.textContent = genererLettreAleatoire();
+            nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+            nouvelleCase.appendChild(nouvelleLettre);
+            caseModifiable.appendChild(nouvelleCase);
+
+            nouvelleLettre.setAttribute('draggable', 'true');
+            nouvelleLettre.addEventListener('dragstart', gererDragStart);
+        });
+
+        genererGrille();
+        genererLettresInitiales();
+        genererLettresCentre();
+        activerDragPourLettres();
+
+        let echelle = 1;
+        let position = { x: 0, y: 0 };
+        let dernierePositionSouris = { x: 0, y: 0 };
+        let estEnTrainDeGlisser = false;
+
+        function mettreAJourTransform() {
+            carte.style.transform = `translate(${position.x}px, ${position.y}px) scale(${echelle})`;
+        }
+
+        zoomInButton.addEventListener('click', () => {
+            echelle = Math.min(echelle + 0.1, 3);
+            mettreAJourTransform();
+        });
+
+        zoomOutButton.addEventListener('click', () => {
+            echelle = Math.max(echelle - 0.1, 0.5);
+            mettreAJourTransform();
+        });
+
+        carte.addEventListener('wheel', (event) => {
+            event.preventDefault();
+            const vitesseZoom = 0.1;
+            const deltaEchelle = event.deltaY > 0 ? -vitesseZoom : vitesseZoom;
+            echelle = Math.min(Math.max(echelle + deltaEchelle, 0.5), 3);
+            mettreAJourTransform();
+        });
+
+        carte.addEventListener('dblclick', () => {
+            estEnTrainDeGlisser = !estEnTrainDeGlisser;
+            carte.style.cursor = estEnTrainDeGlisser ? 'grabbing' : 'grab';
+        });
+
+        carte.addEventListener('mousedown', (event) => {
+            if (estEnTrainDeGlisser) {
+                dernierePositionSouris = { x: event.clientX, y: event.clientY };
+                carte.style.cursor = 'grabbing';
+            }
+        });
+
+        carte.addEventListener('mousemove', (event) => {
+            if (!estEnTrainDeGlisser) return;
+
+            const dx = event.clientX - dernierePositionSouris.x;
+            const dy = event.clientY - dernierePositionSouris.y;
+
+            position.x += dx / echelle;
+            position.y += dy / echelle;
+
+            dernierePositionSouris = { x: event.clientX, y: event.clientY };
+
+            mettreAJourTransform();
+        });
+
+        carte.addEventListener('mouseup', () => {
+            if (estEnTrainDeGlisser) {
+                carte.style.cursor = 'grab';
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
