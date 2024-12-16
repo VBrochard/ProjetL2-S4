@@ -1,61 +1,193 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opti'Mot</title>
+    <title>OptiMot</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="/Ressources/style_optimot.css">
+    <style>
+        .background-text {
+            content: "OPTI'MOT";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 10rem;
+            font-weight: bold;
+            color: rgba(0, 0, 0, 0.1);
+            pointer-events: none;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .case {
+            background-color: transparent;
+            border: 1px solid #c4c4c4;
+            box-sizing: border-box;
+            aspect-ratio: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lettre {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .carte {
+            display: grid;
+            grid-template-columns: repeat(32, 1fr);
+            grid-template-rows: repeat(32, 1fr);
+            gap: 0;
+            transition: transform 0.1s ease-out;
+            max-width: 100%;
+            max-height: 100%;
+        }
+
+        .info-box {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nom-joueur {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .case-modifiable {
+            display: flex;
+            gap: 5px;
+        }
+
+        .case-modifiable .case {
+            width: 30px;
+            height: 30px;
+            background-color: #f0f0f0;
+            border: 1px solid #aaa;
+        }
+
+        .boutons-zoom {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .boutons-zoom button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 15px;
+            font-size: 20px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .boutons-zoom button:hover {
+            background-color: #0056b3;
+        }
+
+        .piocher-button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 150px;
+        }
+
+        .piocher-button:hover {
+            background-color: #218838;
+        }
+
+        .piocher-button-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        /* Flexbox centré pour l'ensemble de la page */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            height: 100vh;
+            background: linear-gradient(135deg, #4caf50, #3f51b5);
+            overflow: hidden;
+        }
+
+        .container {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Empêche les barres de défilement */
+        }
+
+        .carte-wrapper {
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+    </style>
 </head>
-
-<body
-    class="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-700 text-white">
-    <div class="absolute inset-0 flex items-center justify-center">
-        <div class="background-text">OPTI'MOT</div>
-    </div>
-
-    <div class="carte" id="carte"></div>
-
-    <div class="connexion">
-        <input id="nom" placeholder="Tapez votre nom ici" type="text" required />
-        <button id="arrivee" onclick="ConnexionServeur()">Se connecter</button>
-    </div>
-
-    <div class="info-box">
-        <div class="nom-joueur"><span id="nomJoueur"></span></div>
-        <div class="case-modifiable" id="case-modifiable">
-            <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
-            <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
-            <div class="case" id="case3" draggable="true"><span class="lettre" id="lettre3"></span></div>
+<body>
+    <div class="container">
+        <div class="absolute inset-0 flex items-center justify-center">
+            <div class="background-text">OPTI'MOT</div>
         </div>
-        <div class="piocher-button-wrapper">
-            <button class="piocher-button" id="piocherButton">Piocher</button>
-        </div>
-    </div>
 
-    <div class="boutons-zoom">
-        <button id="zoomIn">+</button>
-        <button id="zoomOut">-</button>
+        <div class="carte-wrapper">
+            <div class="carte" id="carte"></div>
+        </div>
+
+        <div class="info-box">
+            <div class="nom-joueur">Nom du Joueur: <span id="nomJoueur">Joueur 1</span></div>
+            <div class="case-modifiable" id="case-modifiable">
+                <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
+                <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
+                <div class="case" id="case3" draggable="true"><span class="lettre" id="lettre3"></span></div>
+            </div>
+            <div class="piocher-button-wrapper">
+                <button class="piocher-button" id="piocherButton">Piocher</button>
+            </div>
+        </div>
+
+        <div class="boutons-zoom">
+            <button id="zoomIn">+</button>
+            <button id="zoomOut">-</button>
+        </div>
     </div>
 
     <script>
-        //const carte = document.querySelector('#carte');
-        const carte = document.getElementById('carte');
+        const carte = document.querySelector('#carte');
         const zoomInButton = document.getElementById('zoomIn');
         const zoomOutButton = document.getElementById('zoomOut');
         const piocherButton = document.getElementById('piocherButton');
         const caseModifiable = document.getElementById('case-modifiable');
-
-
-        function ConnexionServeur() {
-            nomJoueur = nom.value;
-            if (String(nomJoueur)) {
-                document.getElementById('nomJoueur').textContent = nomJoueur
-            }
-        }
-
-
 
         function genererLettreAleatoire() {
             const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -163,80 +295,39 @@
         genererLettresInitiales();
         genererLettresCentre();
         activerDragPourLettres();
-        centrerEtDezoomer();
-
-        function centrerEtDezoomer() {
-            const rect = carte.getBoundingClientRect();
-            const carteWidth = rect.width;
-            const carteHeight = rect.height;
-
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight;
-
-            // Calculer le facteur d'échelle pour que la grille tienne dans la fenêtre
-            const scaleX = windowWidth / carteWidth;
-            const scaleY = windowHeight / carteHeight;
-            scale = Math.min(scaleX, scaleY); // Prendre le plus petit facteur
-
-            // Calculer le décalage pour centrer la grille
-            offsetX = (windowWidth - carteWidth * scale) / 2;
-            offsetY = (windowHeight - carteHeight * scale) / 2;
-
-            // Appliquer les transformations
-            mettreAJourCarte();
-        }
 
         let echelle = 1;
-        let position = { x: 0, y: 0 };
-        let dernierePositionSouris = { x: 0, y: 0 };
-        let estEnTrainDeGlisser = false;
-        let scale = 1; // Niveau de zoom initial
-        let offsetX = 0; // Décalage c
-        let offsetY = 0; // Décalage vertical
 
-
-        function mettreAJourCarte() {
-            carte.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+        function mettreAJourTransform() {
+            carte.style.transform = `scale(${echelle})`;
         }
 
-        function mettreAJourCarte() {
-            carte.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-            carte.style.transformOrigin = "0 0"; // Origine du zoom : coin supérieur gauche
-        }
-
-
-        carte.addEventListener('dblclick', () => {
-            estEnTrainDeGlisser = !estEnTrainDeGlisser;
-            carte.style.cursor = estEnTrainDeGlisser ? 'grabbing' : 'grab';
-        });
-
-        carte.addEventListener('mousedown', (event) => {
-            if (estEnTrainDeGlisser) {
-                dernierePositionSouris = { x: event.clientX, y: event.clientY };
-                carte.style.cursor = 'grabbing';
-            }
-        });
-
-        carte.addEventListener('mousemove', (event) => {
-            if (!estEnTrainDeGlisser) return;
-
-            const dx = event.clientX - dernierePositionSouris.x;
-            const dy = event.clientY - dernierePositionSouris.y;
-
-            position.x += dx / echelle;
-            position.y += dy / echelle;
-
-            dernierePositionSouris = { x: event.clientX, y: event.clientY };
-
+        zoomInButton.addEventListener('click', () => {
+            echelle = Math.min(echelle + 0.05, 3); // Zoom plus précis avec une petite augmentation
             mettreAJourTransform();
         });
 
-        carte.addEventListener('mouseup', () => {
-            if (estEnTrainDeGlisser) {
-                carte.style.cursor = 'grab';
-            }
+        zoomOutButton.addEventListener('click', () => {
+            echelle = Math.max(echelle - 0.05, 0.5); // Réduction plus douce
+            mettreAJourTransform();
+        });
+
+        carte.addEventListener('wheel', (event) => {
+            event.preventDefault();
+
+            // Prendre les coordonnées de la souris
+            const rect = carte.getBoundingClientRect();
+            const sourisX = event.clientX - rect.left;
+            const sourisY = event.clientY - rect.top;
+
+            const vitesseZoom = 0.05; // Ajustement de la vitesse du zoom
+            const deltaEchelle = event.deltaY > 0 ? -vitesseZoom : vitesseZoom;
+            echelle = Math.min(Math.max(echelle + deltaEchelle, 0.5), 3);
+
+            // Ajuster l'origine du zoom pour être centrée sur la souris
+            carte.style.transformOrigin = `${(sourisX / rect.width) * 100}% ${(sourisY / rect.height) * 100}%`;
+            mettreAJourTransform();
         });
     </script>
 </body>
-
 </html>
