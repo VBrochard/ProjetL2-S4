@@ -134,7 +134,6 @@ def choixLettre(data):
         choixLettre = input("Voyelles ou consonnes ?[v/c]")
         
         if choixLettre == "v":
-            print("Socket voyelle")
             sio.emit('voyelle')
             
         elif choixLettre == "c":
