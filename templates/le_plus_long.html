@@ -25,7 +25,7 @@
             if (data.joueur == nomJoueur) {
                 activBouton('voyelle')
                 activBouton('consonne')
-                var msg = "Choisissez de tirer une voyelle ou une consonne"
+                var msg = "Tirez une voyelle ou une consonne"
                 messagesDiv = document.getElementById('Systeme');
                 messagesDiv.value = msg + '\n';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -44,7 +44,7 @@
                 recapScore += item[0] + " : " + item[1] + " points\n";
             });
             var msg =
-                "Félicitation à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n" +
+                "Félicitations à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n" +
                 "Récapitulatif final des scores : \n\n" + recapScore
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
@@ -62,8 +62,8 @@
                     RecapJoueurs += item[0] + " ";
                 });
                 var msg =
-                    "Joueurs présent dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n" +
-                    "Vous êtes au moins 2 joueurs, à l'initiative de l'entre d'entre vous, la partie peut commencer..."
+                    "Joueurs présents dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n" +
+                    "Vous êtes au moins 2 joueurs, à l'initiative de l'un d'entre d'entre vous, la partie peut commencer..."
                 messagesDiv = document.getElementById('Systeme');
                 messagesDiv.value = msg + '\n';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -86,7 +86,7 @@
             desacBouton('prochain')
             deck = data.deck
             initialiserGrille()
-            var msg = "A vous de jouez \n\n" + "Vous avez 30 secondes pour envoyer votre réponse sinon elle sera envoyé automatiquement"
+            var msg = "A vous de jouer \n\n" + "Vous avez 30 secondes pour envoyer votre réponse sinon elle sera envoyée automatiquement"
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -114,7 +114,7 @@
                 "Le meilleur mot possible était : " + MeilleurPossible + "\n\n" +
                 "Récapitulatif des scores : " + "\n\n" +
                 recapScore + "\n" +
-                "Appuyer sur le bouton pret pour le prochain tour"
+                "Appuyer sur le bouton prêt pour passer au prochain tour"
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
