@@ -47,21 +47,19 @@ nomJoueur = input("Entrez votre nom pour rejoindre: ")
 
 @sio.event
 def connect():
-    sio.sleep(0.5)
+    
     sio.emit('AnnonceJoueur',nomJoueur)
     print("Bienvenue",nomJoueur, "\n")
     
 @sio.event
 def ListePresence(data):
-    sio.sleep(0.5)
+   
     listeJoueurs = data
     if len(listeJoueurs) >= 2:
         print("Entrez yes pour démarrer sinon ne faites rien")
         i, o, e = select.select([sys.stdin], [], [])
-        sys.stdin = open('/dev/tty')
         if sys.stdin.readline().strip() == "yes":
             
-            sio.sleep(0.5)
             sio.emit("Declancheur")
         
         
@@ -127,13 +125,13 @@ def choixLettre(data):
     if len(tirage)>0:
         print(Fore.GREEN+"--------------------------------------------------------------------------")
         print(Style.RESET_ALL)
-        print(Fore.GREEN+"Lettres disponibles:",Fore.CYAN+affichage,end="\r")
+        print(Fore.GREEN+"Lettres disponibles:",Fore.CYAN+affichage)
         print(Style.RESET_ALL)
     if data.get("joueur") == nomJoueur:
         choixLettre = ""
         
         choixLettre = input("Voyelles ou consonnes ?[v/c]")
-        time.sleep(0.5)
+        
         if choixLettre == "v":
             print("Socket voyelle")
             sio.emit('voyelle')
