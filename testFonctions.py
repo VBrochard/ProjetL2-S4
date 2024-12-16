@@ -131,6 +131,8 @@ def affichageListe(liste):
                 result += str(liste[i])
     return result
 
+
+
 #NE PAS TOUCHER 
 '''
 if len(listeJoueurs) == 2:

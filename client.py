@@ -43,6 +43,16 @@ def inputNonBloquant():
         return sys.stdin.readline().strip()
     return None
 
+def barreChargement(secondes):
+    affichage = ""
+    for i in range(secondes):
+        mil = i*"-"
+        espace = (secondes-i)*" "
+        print("|"+mil+espace+"|",end="\r")
+        time.sleep(1)
+   
+
+
 
 print(Fore.GREEN+"*************************************************\n")
 print("** Bienvenue dans le jeu du mot le plus long **\n")
@@ -61,8 +71,12 @@ def connect():
 def ListePresence(data):
     listeJoueurs = data
     if len(listeJoueurs)==2 and listeJoueurs[0][0] == nomJoueur:
-        demarrer = input("Vous êtes maitre du jeu, appuyez sur Entrée pour démarrer la partie")
-        sio.emit('Declancheur')
+        print("Vous êtes le maître du jeu, appuyez sur Entrée pour commencer la partie.")
+        i,o,e = select.select([sys.stdin],[],[])
+        if i:
+            sys.stdin = sys.__stdin__
+            sio.emit('Declancheur')
+
     elif listeJoueurs[0][0] != nomJoueur:
         print(listeJoueurs[0][0],"est le maître du jeu, il peur démarrer la partie à tout moment",end="\r")
    
@@ -82,6 +96,7 @@ def Lancement(data):
     print("Joueurs:")
     for joueur in data:
         print("-"+ joueur[0], "Score :",joueur[1])
+    time.sleep(0.5)
     
 
 
@@ -118,7 +133,7 @@ def recommencerPartie():
     
 @sio.event
 def choixLettre(data):
-    
+    time.sleep(0.5)
     tirage = data.get("deck")
     affichage = ""
     
@@ -131,7 +146,7 @@ def choixLettre(data):
         print(Style.RESET_ALL)
     if data.get("joueur") == nomJoueur:
         choixLettre = ""
-        
+        print(choixLettre)
         choixLettre = input("Voyelles ou consonnes ?[v/c]")
         
         if choixLettre == "v":
@@ -164,16 +179,32 @@ def tirageLettres(data):
     print(Style.RESET_ALL)
     print(Fore.GREEN+"Lettres finales:",Fore.CYAN+affichage)
     print(Style.RESET_ALL)
-    time.sleep(0.1)
-    propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
-    propositionMot = propositionMot.upper()
+    time.sleep(0.1) 
+    print("Vous avez 20s pour écrire votre mot: ")
+    i, o, e = select.select([sys.stdin],[],[],20)
+    if i:
+        
+        propositionMot = sys.stdin.readline().strip()
+        propositionMot = propositionMot.upper()
+    else:
+        print("Vous n'avez pas répondu à temps.")
+        propositionMot = ""
+
     if contientBonnesLettres(propositionMot,tirage):
         sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
         print("Mot envoyé !")
+        
     else:
         while contientBonnesLettres(propositionMot,tirage) == False:
-            propositionMot = input("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
-            propositionMot = propositionMot.upper()
+            print("Veuillez utiliser seulement les lettres du tirage et au plus une fois chacune: ")
+            if i:
+        
+                propositionMot = sys.stdin.readline().strip()
+                propositionMot = propositionMot.upper()
+            else:
+                print("Vous n'avez pas répondu à temps.")
+                propositionMot = ""
+            
         sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
         print("Mot envoyé !")
 @sio.event
