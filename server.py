@@ -240,6 +240,31 @@ def handle_envoieMot(data):
         listePropositions = []
         listeMots = []
 
+'''
+@socketio.on('connexion')
+def handle_connexion(data):
+
+
+@socketio.on('valider')
+def handle_valider(data):
+
+
+@socketio.on('piocher')
+def handle_piocher(data):
+
+
+@socketio.on('remiseEnPioche')
+def handle_RemiseEnPioche(data):
+
+@socketio.on('tourSuivant')
+def handle_tourSuivant(data):
+'''
+
+
+
+
+
+
 if __name__ == '__main__':
     socketio.run(app, host= '0.0.0.0', port=5000, debug=True)
 

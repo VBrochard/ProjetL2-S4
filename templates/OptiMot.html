@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OptiMot</title>
+    <title>Grille avec informations et case modifiable</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
         .background-text {
@@ -123,6 +123,22 @@
             gap: 10px;
         }
 
+        .valider-button {
+            background-color: #ff9800;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 150px;
+        }
+
+        .valider-button:hover {
+            background-color: #f57c00;
+        }
+
         /* Flexbox centré pour l'ensemble de la page */
         body {
             display: flex;
@@ -152,6 +168,58 @@
             align-items: center;
             overflow: hidden;
         }
+
+        .nom-joueur-container {
+            position: fixed;
+            top: 20px;
+            left: 20px; /* Placé en haut à gauche */
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .nom-joueur-container input {
+            font-size: 1.2rem;
+            padding: 5px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: none;
+            width: 150px;
+            color: black; /* Ajouté : définit la couleur du texte du champ de saisie en noir */
+        }
+
+        .connecter-button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .connecter-button:hover {
+            background-color: #218838;
+        }
+
+        .entrer-button {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            font-size: 18px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .entrer-button:hover {
+            background-color: #0056b3;
+        }
+
     </style>
 </head>
 <body>
@@ -173,12 +241,21 @@
             </div>
             <div class="piocher-button-wrapper">
                 <button class="piocher-button" id="piocherButton">Piocher</button>
+                <button class="valider-button" id="validerButton">Valider</button> <!-- Nouveau bouton "Valider" ajouté ici -->
             </div>
         </div>
 
         <div class="boutons-zoom">
             <button id="zoomIn">+</button>
             <button id="zoomOut">-</button>
+        </div>
+        
+        <!-- Nouveau champ Nom Joueur et bouton Se connecter en haut à gauche -->
+        <div class="nom-joueur-container">
+            <div>Nom Joueur:</div>
+            <input type="text" id="nomJoueurInput" placeholder="Entrez votre nom">
+            <button class="connecter-button" id="connecterButton">Se connecter</button>
+            <button class="entrer-button" id="entrerButton">Entrer</button> <!-- Nouveau bouton "Entrer" ajouté -->
         </div>
     </div>
 
@@ -187,7 +264,12 @@
         const zoomInButton = document.getElementById('zoomIn');
         const zoomOutButton = document.getElementById('zoomOut');
         const piocherButton = document.getElementById('piocherButton');
+        const validerButton = document.getElementById('validerButton'); // Nouveau bouton "Valider"
         const caseModifiable = document.getElementById('case-modifiable');
+        const nomJoueurElement = document.getElementById('nomJoueur');
+        const nomJoueurInput = document.getElementById('nomJoueurInput');
+        const connecterButton = document.getElementById('connecterButton');
+        const entrerButton = document.getElementById('entrerButton'); // Nouveau bouton "Entrer"
 
         function genererLettreAleatoire() {
             const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -291,42 +373,45 @@
             nouvelleLettre.addEventListener('dragstart', gererDragStart);
         });
 
+        // Action pour le bouton "Valider"
+        validerButton.addEventListener('click', () => {
+            alert("Le jeu a été validé !");
+        });
+
+        // Action pour le bouton "Entrer" (met à jour le nom de joueur)
+        entrerButton.addEventListener('click', () => {
+            const nomJoueur = nomJoueurInput.value.trim();
+            if (nomJoueur) {
+                nomJoueurElement.textContent = nomJoueur;
+                nomJoueurInput.value = ''; // Réinitialise le champ de saisie après l'entrée du nom
+            } else {
+                alert('Veuillez entrer un nom valide.');
+            }
+        });
+
+        // Action pour le bouton "Se connecter"
+        connecterButton.addEventListener('click', () => {
+            const nomJoueur = nomJoueurInput.value.trim();
+            if (nomJoueur) {
+                nomJoueurElement.textContent = nomJoueur;
+                nomJoueurInput.value = ''; // Réinitialise le champ de saisie après la connexion
+            } else {
+                alert('Veuillez entrer un nom de joueur');
+            }
+        });
+
+        // Initialiser la grille et les lettres au démarrage
         genererGrille();
-        genererLettresInitiales();
         genererLettresCentre();
-        activerDragPourLettres();
+        genererLettresInitiales();
 
-        let echelle = 1;
-
-        function mettreAJourTransform() {
-            carte.style.transform = `scale(${echelle})`;
-        }
-
+        // Fonction de zoom
         zoomInButton.addEventListener('click', () => {
-            echelle = Math.min(echelle + 0.05, 3); // Zoom plus précis avec une petite augmentation
-            mettreAJourTransform();
+            carte.style.transform = 'scale(1.2)';
         });
 
         zoomOutButton.addEventListener('click', () => {
-            echelle = Math.max(echelle - 0.05, 0.5); // Réduction plus douce
-            mettreAJourTransform();
-        });
-
-        carte.addEventListener('wheel', (event) => {
-            event.preventDefault();
-
-            // Prendre les coordonnées de la souris
-            const rect = carte.getBoundingClientRect();
-            const sourisX = event.clientX - rect.left;
-            const sourisY = event.clientY - rect.top;
-
-            const vitesseZoom = 0.05; // Ajustement de la vitesse du zoom
-            const deltaEchelle = event.deltaY > 0 ? -vitesseZoom : vitesseZoom;
-            echelle = Math.min(Math.max(echelle + deltaEchelle, 0.5), 3);
-
-            // Ajuster l'origine du zoom pour être centrée sur la souris
-            carte.style.transformOrigin = `${(sourisX / rect.width) * 100}% ${(sourisY / rect.height) * 100}%`;
-            mettreAJourTransform();
+            carte.style.transform = 'scale(0.8)';
         });
     </script>
 </body>
