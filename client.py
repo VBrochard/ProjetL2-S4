@@ -20,6 +20,20 @@ def contientBonnesLettres(mot, tirage):
             return False
     return True
 
+def affichageListe(liste):
+    result = ""
+    if len(liste) == 1:
+        return liste[0]
+    else:
+        for i in range(len(liste)):
+            if i == len(liste)-2:
+                result += str(liste[i]) +" et "
+            elif i<len(liste)-1:
+                result += str(liste[i])+", "
+            else:
+                result += str(liste[i])
+    return result
+
 print(Fore.GREEN+"*************************************************\n")
 print("** Bienvenue dans le jeu du mot le plus long **\n")
 print(Fore.GREEN+"*************************************************")
@@ -31,7 +45,18 @@ nomJoueur = input("Entrez votre nom pour rejoindre: ")
 def connect():
     sio.emit('AnnonceJoueur',nomJoueur)
     print("Bienvenue",nomJoueur, "\n")
-
+    
+@sio.event
+def ListePresence(data):
+    listeJoueurs = data
+    if len(listeJoueurs) == 2:
+        pret = input("Il y au moins deux joueurs, appuyez sur Entrée pour démarrer la partie")
+        if pret == "":
+            sio.emit("Declancheur")
+    elif len(listeJoueurs) > 2 and (nomJoueur == listeJoueurs[len(listeJoueurs)-1][0]):
+        pret = input("Il y au moins deux joueurs, appuyez sur Entrée pour démarrer la partie")
+        if pret == "":
+            sio.emit("Declancheur")
 
 
 try:
@@ -52,11 +77,13 @@ def Lancement(data):
 
 @sio.event
 def résultat(data):
-    
-    print("Le gagnant est :", data.get("nom"))#Nom du vainqueur
-    print("Il gagne", data.get("PointGagnée"), "points","avec le mot :", data.get("MotGagnant"))#Afficher le score retourné
-    print(Fore.GREEN+"--------------------------------------------------------------------------")
-    print(Style.RESET_ALL)
+    if len(data.get("nom")) == 0:
+        print("Personne n'a marqué de points ce tour")
+    else:
+        print("Le(s) gagnant(s) de ce tour sont :", affichageListe(data.get("nom")))#Nom du vainqueur
+        print("Il(s) gagne(nt)", data.get("PointGagnée"), "points","avec le(s) mot :", affichageListe(data.get("MotGagnant")))#Afficher le score retourné
+        print(Fore.GREEN+"--------------------------------------------------------------------------")
+        print(Style.RESET_ALL)
     print("Le meilleur mot possible était :",data.get("meilleurPossible"))
     print(Fore.GREEN+"--------------------------------------------------------------------------")
     print(Style.RESET_ALL)
@@ -80,7 +107,6 @@ def recommencerPartie():
     
 @sio.event
 def choixLettre(data):
-   
     tirage = data.get("deck")
     affichage = ""
     for lettre in tirage:
@@ -105,6 +131,8 @@ def choixLettre(data):
                 elif choixLettre == "c":
                     sio.emit('consonne')
         choixLettre = ""
+    else:
+        print("En attente du choix de",data.get("joueur"))
         
 
 
@@ -116,13 +144,11 @@ def tirageLettres(data):
     for lettre in tirage:
         affichage+=lettre+" "
 
-   
     print(Fore.GREEN+"--------------------------------------------------------------------------")
     print(Style.RESET_ALL)
     print(Fore.GREEN+"Lettres finales:",Fore.CYAN+affichage)
     print(Style.RESET_ALL)
 
-    
     propositionMot = input("Ecrivez votre mot grâce aux lettres du tirage: ")
     propositionMot = propositionMot.upper()
     if contientBonnesLettres(propositionMot,tirage):
@@ -135,15 +161,14 @@ def tirageLettres(data):
 
 @sio.event
 def victoire(data):
+    vainqueurs = affichageListe(data.get("nomsVainqueurs"))
+
     if len(data.get("nomsVainqueurs"))>1:
-        print("Les vainqueurs sont",data.get("nomsVainqueurs"))
+        print("Les vainqueurs sont",vainqueurs)
     else:
-        print("Le vainqueur est",data.get("nomsVainqueurs"))
+        print("Le vainqueur est",vainqueurs)
     recommencerPartie()
 
 
 sio.wait()
-
-
-#METTRE UN WAIT A LAFFICHAGE DES JOUEURS
 

@@ -12,8 +12,8 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 
 TokenReponse = int(0)
 ListeJoueurs = []
-NbrJoueurs = 2
-taille_deck = 7
+
+
 deck = []
 MeilleurMotsJoueur = []
 NomMeilleursJoueurs = []
@@ -23,24 +23,25 @@ limiteScore = 10
 jetonPret = 0
 listeMots = []
 jetonTourTirage = 0
+nbrJoueur = 0
 
-if len(sys.argv) != 2:
-    print("Veuillez spécifier en argument le nombre de joueurs")
+if len(sys.argv) != 3:
+    print("Veuillez spécifier en argument le nombre de joueurs et la taille du deck")
     sys.exit(1)
 
 try:
     nbrJoueur = int(sys.argv[1])
     print("Le serveur est configuré pour",nbrJoueur,"joueurs")
+    taille_deck = int(sys.argv[2])
+    print("Le serveur est configuré pour un deck de",taille_deck,"cartes")
 except ValueError:
-    print("Veuillez entrer un nombre valide pour le nombre de joueurs.")
+    print("Veuillez entrer un nombre valide pour le nombre de joueurs et la taille du deck")
     sys.exit(1)
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Z": 2}
 
 cartes_freq = [carte for carte, freq in lettres_freq.items() for i in range(freq)]
-
-taille_deck = 7
 
 def ouvrirDico():
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
@@ -117,9 +118,27 @@ def handle_AnnonceJoueur(data):
     global ListeJoueurs
     ListeJoueurs.append([str(data),0])
     print(data, "Rejoint la partie")
-    if len(ListeJoueurs) == NbrJoueurs:
+    if len(ListeJoueurs) == nbrJoueur:
         socketio.emit('Lancement',ListeJoueurs)
+        time.sleep(0.5)
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
+    else:
+        socketio.emit('ListePresence',ListeJoueurs)
+
+
+
+@socketio.on('Declancheur')
+def handle_declancheur():
+        global nbrJoueur
+        nbrJoueur = len(ListeJoueurs)
+        socketio.emit('Lancement',ListeJoueurs)
+        time.sleep(0.5)
+        socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
+
+
+@socketio.on('DemandeTailleDeck')
+def handle_DemandeTailleDeck():
+    socketio.emit('EnvoieTailleDeck',taille_deck)
 
 
 @socketio.on('voyelle')
@@ -127,14 +146,14 @@ def handle_voyelle():
     global deck
     global ListeJoueurs
     global jetonTourTirage
+    global nbrJoueur
     deck += tirageCarteVoyelle()
     jetonTourTirage += 1
-    if jetonTourTirage == NbrJoueurs:
+    if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
     if len(deck) == taille_deck:
         socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
     else:
-
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 @socketio.on('consonne')
@@ -144,12 +163,11 @@ def handle_voyelle():
     global jetonTourTirage
     deck += tirageCarteConsonne()
     jetonTourTirage += 1
-    if jetonTourTirage == NbrJoueurs:
+    if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
     if len(deck) == taille_deck:
         socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
     else:
-
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 
@@ -160,7 +178,7 @@ def handle_nouveauTour():
     deck = []
     
     jetonPret+=1
-    if jetonPret == NbrJoueurs:
+    if jetonPret == nbrJoueur:
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
         jetonPret = 0
 
@@ -182,7 +200,7 @@ def handle_envoieMot(data):
     MeilleurPossible = motLePlusLong(deck)
     nomsVainqueurs = []
     scoresVainqueurs = []
-    if TokenReponse == NbrJoueurs:
+    if TokenReponse == nbrJoueur:
 
         tailleMotPlusGrand = motMax(listeMots)
         for reponse in listePropositions:
