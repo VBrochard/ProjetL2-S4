@@ -306,21 +306,3 @@ def handle_RemiseEnPioche(data):
 
 if __name__ == '__main__':
     socketio.run(app, host= '0.0.0.0', port=5000, debug=True)
-
-
-
-'''
-        function genererLettresInitiales(mainDepart) {
-            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
-            for (var i = 0; i < 10; i++) {
-                elementLettre.textContent = mainDepart[i];
-                elementLettre.setAttribute('draggable', 'true');
-                elementLettre.addEventListener('dragstart', gererDragStart);
-            };
-        }
-
-                socket.on('lancementOM', data => {
-            AuTourDeElement.textContent = "Au tour de : " + data.liste[0]
-            genererLettresInitiales(data.mainDepart)
-            genererLettresCentre(data.depart)
-        })'''
