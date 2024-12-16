@@ -53,17 +53,11 @@ def connect():
     
 @sio.event
 def ListePresence(data):
-   
     listeJoueurs = data
     if len(listeJoueurs) >= 2:
-        print("Entrez yes pour démarrer sinon ne faites rien")
-        i, o, e = select.select([sys.stdin], [], [])
-        if sys.stdin.readline().strip() == "yes":
-            
+        a = input("Entrez yes pour démarrer sinon ne faites rien")
+        if a == "yes":
             sio.emit("Declancheur")
-        
-        
-        
 
 
 try:
@@ -73,7 +67,6 @@ except Exception as e:
 
 @sio.event
 def Lancement(data):
-   
     print("La partie commence !")
     print(Fore.GREEN+"--------------------------------------------------------------------------")
     print(Style.RESET_ALL)
