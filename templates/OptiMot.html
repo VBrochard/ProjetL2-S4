@@ -40,14 +40,15 @@
     </div>
 
     <script>
-        const carte = document.querySelector('#carte');
+        //const carte = document.querySelector('#carte');
+        const carte = document.getElementById('carte');
         const zoomInButton = document.getElementById('zoomIn');
         const zoomOutButton = document.getElementById('zoomOut');
         const piocherButton = document.getElementById('piocherButton');
         const caseModifiable = document.getElementById('case-modifiable');
 
 
-        function ConnexionServeur(){
+        function ConnexionServeur() {
             nomJoueur = nom.value;
             if (String(nomJoueur)) {
                 document.getElementById('nomJoueur').textContent = nomJoueur
@@ -162,33 +163,47 @@
         genererLettresInitiales();
         genererLettresCentre();
         activerDragPourLettres();
+        centrerEtDezoomer();
+
+        function centrerEtDezoomer() {
+            const rect = carte.getBoundingClientRect();
+            const carteWidth = rect.width;
+            const carteHeight = rect.height;
+
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+
+            // Calculer le facteur d'échelle pour que la grille tienne dans la fenêtre
+            const scaleX = windowWidth / carteWidth;
+            const scaleY = windowHeight / carteHeight;
+            scale = Math.min(scaleX, scaleY); // Prendre le plus petit facteur
+
+            // Calculer le décalage pour centrer la grille
+            offsetX = (windowWidth - carteWidth * scale) / 2;
+            offsetY = (windowHeight - carteHeight * scale) / 2;
+
+            // Appliquer les transformations
+            mettreAJourCarte();
+        }
 
         let echelle = 1;
         let position = { x: 0, y: 0 };
         let dernierePositionSouris = { x: 0, y: 0 };
         let estEnTrainDeGlisser = false;
+        let scale = 1; // Niveau de zoom initial
+        let offsetX = 0; // Décalage c
+        let offsetY = 0; // Décalage vertical
 
-        function mettreAJourTransform() {
-            carte.style.transform = `translate(${position.x}px, ${position.y}px) scale(${echelle})`;
+
+        function mettreAJourCarte() {
+            carte.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
         }
 
-        zoomInButton.addEventListener('click', () => {
-            echelle = Math.min(echelle + 0.1, 3);
-            mettreAJourTransform();
-        });
+        function mettreAJourCarte() {
+            carte.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+            carte.style.transformOrigin = "0 0"; // Origine du zoom : coin supérieur gauche
+        }
 
-        zoomOutButton.addEventListener('click', () => {
-            echelle = Math.max(echelle - 0.1, 0.5);
-            mettreAJourTransform();
-        });
-
-        carte.addEventListener('wheel', (event) => {
-            event.preventDefault();
-            const vitesseZoom = 0.1;
-            const deltaEchelle = event.deltaY > 0 ? -vitesseZoom : vitesseZoom;
-            echelle = Math.min(Math.max(echelle + deltaEchelle, 0.5), 3);
-            mettreAJourTransform();
-        });
 
         carte.addEventListener('dblclick', () => {
             estEnTrainDeGlisser = !estEnTrainDeGlisser;
