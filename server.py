@@ -42,7 +42,7 @@ except ValueError:
     sys.exit(1)
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
-"V": 2, "W": 1, "X": 1, "Z": 2}
+"V": 2, "W": 1, "X": 1, "Y" : 1, "Z": 2}
 
 cartes_freq = [carte for carte, freq in lettres_freq.items() for i in range(freq)]
 
@@ -245,7 +245,7 @@ listeJoueursOM = []
 jetonTourOM = 0
 
 lettres_freq_opti = {"A": 5, "B": 1, "C": 2, "D":2, "E":9, "F":2, "G": 1, "H": 1, "I":5,"J":1, "K":1, "L":3, "M":3, "N":3, "O":3, "P":2, "Q":1, "R":3, "S":4, "T":3, "U":3,
-"V": 2, "W": 1, "X": 1, "Z": 1}
+"V": 2, "W": 1, "X": 1, "Y" : 1, "Z": 1}
 
 cartes_freq_opti = [carte for carte, freq in lettres_freq_opti.items() for i in range(freq)]
 
@@ -256,19 +256,28 @@ def tirageCarteOpti():
     a = randint(0, len(cartes_freq_opti))
     return eniemeCarte(a, cartes_freq_opti)
 
+def retireUneCarte_opti(lettre):
+    cartes_freq_opti.remove(lettre)
+
 @socketio.on('connexionOM')
 def handle_connexionOM(data):
     nomJoueur = data
-    listeJoueursOM.append(nomJoueur)    
+    mainDepart = []
+    listeJoueursOM.append(nomJoueur)  
+    for i in range(10):
+        j = tirageCarteOpti()
+        mainDepart.append(j)
+        retireUneCarte_opti(j)
+        socketio.emit('MainDepart',{"nom" : nomJoueur,'mainDepart' : mainDepart})
     if len(listeJoueursOM) == nbrJoueur:
         deckDepart = []
-        mainDepart = []
         for i in range(5):
-            deckDepart.append(tirageCarteOpti())
-        for i in range(10):
-            mainDepart.append(tirageCarteOpti())
-        socketio.emit("lancementOM",{"liste" :listeJoueursOM,"depart" : deckDepart, 'mainDepart' : mainDepart})
+            f = tirageCarteOpti()
+            retireUneCarte_opti(f)
+            deckDepart.append(f)
+        socketio.emit("lancementOM",{"liste" :listeJoueursOM,"depart" : deckDepart})
         print(mainDepart)
+
 
 @socketio.on('victoireOM')
 def handle_victoireOM(data):
