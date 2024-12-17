@@ -257,24 +257,25 @@
         }
 
         function aVoisinAvecLettre(cellule) {
+            //Vérifie si la lettre posée est mise à côté d'une autre lettre du plateau
             const index = Array.from(carte.children).indexOf(cellule);
-            const lignes = 32; // Nombre de lignes dans la grille
-            const colonnes = 32; // Nombre de colonnes dans la grille
+            const lignes = 32; 
+            const colonnes = 32; 
 
-            // Calculer les voisins (haut, bas, gauche, droite)
             const voisins = [
-                index - 1,        // Gauche
-                index + 1         // Droite
+                index - colonnes,
+                index + colonnes,
+                index - 1,        
+                index + 1         
             ];
 
-    // Vérifier si un des voisins contient une lettre
-    return voisins.some((voisinIndex) => {
-        if (voisinIndex >= 0 && voisinIndex < lignes * colonnes) { // Assurer un index valide
-            const voisin = carte.children[voisinIndex];
-            return voisin.hasChildNodes(); // Retourne true si un voisin a une lettre
+            return voisins.some((voisinIndex) => {
+            if (voisinIndex >= 0 && voisinIndex < lignes * colonnes) { 
+                const voisin = carte.children[voisinIndex];
+                return voisin.hasChildNodes(); 
         }
-        return false;
-    });
+            return false;
+        });
 }
 
         piocherButton.addEventListener('click', () => {
@@ -305,6 +306,7 @@
 
         
         connecterButton.addEventListener('click', () => {
+            //Instructions à faire dès que le bouton connecter est cliqué
             nomJoueur = nomJoueurInput.value.trim();
             if (nomJoueur) {
                 nomJoueurElement.textContent = "Joueur : " + nomJoueur;
