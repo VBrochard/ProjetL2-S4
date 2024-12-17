@@ -72,12 +72,6 @@ def tirageCarteConsonne():
     a = randint(0, len(consonnes))
     return eniemeCarte(a, consonnes)
 
-def retireUneVoyelle_lplm(lettre):
-    voyelles.remove(lettre)
-
-def retireUneConsonne_lplm(lettre):
-    consonnes.remove(lettre)
-
 def motMax(listeMots):
     return len(max(listeMots, key=len))
 
@@ -154,8 +148,7 @@ def handle_voyelle():
     global ListeJoueurs
     global jetonTourTirage
     global nbrJoueur
-    b = tirageCarteVoyelle()
-    deck += b
+    deck += tirageCarteVoyelle()
     jetonTourTirage += 1
     if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
@@ -163,17 +156,13 @@ def handle_voyelle():
         socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
     else:
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
-    print(voyelles)
-    print(len(voyelles))
-    
+
 @socketio.on('consonne')
-def handle_consonne():
+def handle_voyelle():
     global deck
     global ListeJoueurs
     global jetonTourTirage
-    a = tirageCarteConsonne()
-    deck += a
-    retireUneConsonne_lplm(a)
+    deck += tirageCarteConsonne()
     jetonTourTirage += 1
     if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
@@ -181,8 +170,7 @@ def handle_consonne():
         socketio.emit('tirageLettres',{"deck" : deck, "TokenComplet" : len(deck)== taille_deck})
     else:
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
-    print(consonnes)
-    print(len(consonnes))
+
 
 
 @socketio.on('nouveauTour')
@@ -268,9 +256,6 @@ def tirageCarteOpti():
     a = randint(0, len(cartes_freq_opti))
     return eniemeCarte(a, cartes_freq_opti)
 
-def retireUneLettre_opti(lettre):
-    cartes_freq_opti.remove(lettre)
-
 @socketio.on('connexionOM')
 def handle_connexionOM(data):
     nomJoueur = data
@@ -311,17 +296,10 @@ def verifier_mots(mots):
 @socketio.on('DemandePiocheOM')
 def handle_DemandePioche(data):
     carte = tirageCarteOpti()
-<<<<<<< HEAD
     socketio.emit('RetourPiocheOM',{"joueur" : data, 'pioche' : carte})
 
 
 @socketio.on('TransmissionCaseRemplieOM')
-=======
-    retireUneLettre_opti(carte)
-    socketio.emit('RetourPioche',{"joueur" : data, 'pioche' : carte})
-
-@socketio.on('TransmissionCaseRemplie')
->>>>>>> 300031076f363b846f712edd9fef7809c3d96c53
 def handle_TransmissionCaseRemplie(data):
     tab = data['position']
     socketio.emit('MettreLettreOM',{"position" : tab, "nomJ" :  data['nomJ']})

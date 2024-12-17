@@ -7,6 +7,7 @@ from colorama import Fore, Back, Style
 sio = socketio.Client()
 tirage = []
 score = 0
+tempsTour = 30
 
 def supprimeUneOcuurence(elt, liste):
     for i in range(len(liste)):
@@ -159,7 +160,7 @@ def tirageLettres(data):
     print(Style.RESET_ALL)
     time.sleep(0.1) 
     print("Vous avez 20s pour écrire votre mot: ")
-    i, o, e = select.select([sys.stdin],[],[],20)
+    i, o, e = select.select([sys.stdin],[],[],tempsTour)
     if i:
         propositionMot = sys.stdin.readline().strip()
         propositionMot = propositionMot.upper()
