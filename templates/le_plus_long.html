@@ -164,7 +164,7 @@
 
     <script>
         let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
-        let tempsRestant = 20; // Temps de départ en secondes
+        let tempsRestant = 30; // Temps de départ en secondes
         let timerInterval; // Intervalle pour le compte à rebours
         let Tour = false;
         let jeuTermine = false;
@@ -332,7 +332,7 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
-            tempsRestant = 20
+            tempsRestant = 30
             timerInterval = setInterval(function () {
                 tempsRestant--;
                 document.getElementById('timer').textContent = tempsRestant;

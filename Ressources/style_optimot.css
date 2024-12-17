@@ -211,3 +211,14 @@ body {
 .entrer-button:hover {
     background-color: #0056b3;
 }
+
+button:disabled:hover {
+    background-color: #cccccc;
+    cursor: not-allowed;
+
+}
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+
+}

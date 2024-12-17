@@ -49,7 +49,7 @@
         <div class="nom-joueur-container">
             <div>Nom Joueur:</div>
             <input type="text" id="nomJoueurInput" placeholder="Entrez votre nom">
-            <button class="connecter-button" id="connecterButton">Se connecter</button>
+            <button class="connecter-button" id="connecterButton" onclick="desacConnexion()">Se connecter</button>
 
         </div>
     </div>
@@ -201,6 +201,10 @@
             event.preventDefault();
         }
 
+        function desacConnexion(){
+            document.getElementsByClassName("nom-joueur-container").hidden = "true"
+        }
+
         function gererDrop(event) {
             event.preventDefault();
 
@@ -251,7 +255,6 @@
             elementLettre.textContent = lettre; 
             cellule.appendChild(elementLettre)
         }
-
 
 
         piocherButton.addEventListener('click', () => {
