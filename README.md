@@ -50,3 +50,11 @@ Valeur des lettres dans le scrabble français :
     F,H,V : 4 points
     J,Q : 8 points
     K,W,X,Y,Z : 10 points
+
+Pour Opti'Mots (Phase 2):
+    -Chaque joueur reçoit 10 cartes au début
+    -5 cartes sont posées sur le plateau
+    -Possibilité de jeter n cartes pour en repiocher n+1
+    -Piocher une carte fait passer son tour
+    -Possibilité de recouvrir des lettres (si la lettre recouverte est différente de la lettre qu'on pose)
+    -

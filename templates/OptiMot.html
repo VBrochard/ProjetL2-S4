@@ -4,63 +4,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Opti'Mot</title>
+    <title>Grille avec informations et case modifiable</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/Ressources/style_optimot.css">
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
 </head>
 
-<body
-    class="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-700 text-white">
-    <div class="absolute inset-0 flex items-center justify-center">
-        <div class="background-text">OPTI'MOT</div>
-    </div>
-
-    <div class="carte" id="carte"></div>
-
-    <div class="connexion">
-        <input id="nom" placeholder="Tapez votre nom ici" type="text" required />
-        <button id="arrivee" onclick="ConnexionServeur()">Se connecter</button>
-    </div>
-
-    <div class="info-box">
-        <div class="nom-joueur"><span id="nomJoueur"></span></div>
-        <div class="case-modifiable" id="case-modifiable">
-            <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
-            <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
-            <div class="case" id="case3" draggable="true"><span class="lettre" id="lettre3"></span></div>
+<body>
+    <div class="container">
+        <div class="absolute inset-0 flex items-center justify-center">
+            <div class="background-text">OPTI'MOT</div>
         </div>
-        <div class="piocher-button-wrapper">
-            <button class="piocher-button" id="piocherButton">Piocher</button>
-        </div>
-    </div>
 
-    <div class="boutons-zoom">
-        <button id="zoomIn">+</button>
-        <button id="zoomOut">-</button>
+        <div class="carte-wrapper">
+            <div class="carte" id="carte"></div>
+        </div>
+
+        <div class="info-box">
+            <div id="AuTourDe">Au tour de :</div>
+            <div id="nomJoueur">Joueur:</div>
+            <div class="case-modifiable" id="case-modifiable">
+                <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
+                <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
+                <div class="case" id="case3" draggable="true"><span class="lettre" id="lettre3"></span></div>
+                <div class="case" id="case4" draggable="true"><span class="lettre" id="lettre4"></span></div>
+                <div class="case" id="case5" draggable="true"><span class="lettre" id="lettre5"></span></div>
+                <div class="case" id="case6" draggable="true"><span class="lettre" id="lettre6"></span></div>
+                <div class="case" id="case7" draggable="true"><span class="lettre" id="lettre7"></span></div>
+                <div class="case" id="case8" draggable="true"><span class="lettre" id="lettre8"></span></div>
+                <div class="case" id="case9" draggable="true"><span class="lettre" id="lettre9"></span></div>
+                <div class="case" id="case10" draggable="true"><span class="lettre" id="lettre10"></span></div>
+            </div>
+            <div class="piocher-button-wrapper">
+                <button class="piocher-button" id="piocherButton" >Piocher</button>
+                <button class="valider-button" id="validerButton" >Valider son tour</button>
+                <!-- Nouveau bouton "Valider" ajouté ici -->
+            </div>
+        </div>
+
+        <div class="boutons-zoom">
+            <button id="zoomIn">+</button>
+            <button id="zoomOut">-</button>
+        </div>
+
+        <!-- Nouveau champ Nom Joueur et bouton Se connecter en haut à gauche -->
+        <div class="nom-joueur-container">
+            <div>Nom Joueur:</div>
+            <input type="text" id="nomJoueurInput" placeholder="Entrez votre nom">
+            <button class="connecter-button" id="connecterButton">Se connecter</button>
+
+        </div>
     </div>
 
     <script>
+        const socket = io()
         const carte = document.querySelector('#carte');
         const zoomInButton = document.getElementById('zoomIn');
         const zoomOutButton = document.getElementById('zoomOut');
         const piocherButton = document.getElementById('piocherButton');
+        const validerButton = document.getElementById('validerButton'); // Nouveau bouton "Valider"
         const caseModifiable = document.getElementById('case-modifiable');
-
-
-        function ConnexionServeur(){
-            nomJoueur = nom.value;
-            if (String(nomJoueur)) {
-                document.getElementById('nomJoueur').textContent = nomJoueur
-            }
-        }
-
-
-
-        function genererLettreAleatoire() {
-            const lettres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            const indexAleatoire = Math.floor(Math.random() * lettres.length);
-            return lettres[indexAleatoire];
-        }
+        const nomJoueurElement = document.getElementById('nomJoueur');
+        const nomJoueurInput = document.getElementById('nomJoueurInput');
+        const connecterButton = document.getElementById('connecterButton');
+        const entrerButton = document.getElementById('entrerButton'); // Nouveau bouton "Entrer"
+        const AuTourDeElement = document.getElementById("AuTourDe");
+        let positionsLettresPosees = [];
+        var nomJoueur;
 
         function genererGrille() {
             for (let i = 0; i < 32 * 32; i++) {
@@ -73,27 +83,111 @@
             }
         }
 
-        function genererLettresInitiales() {
+        function genererLettresInitiales(maindepart) {
             const elementsLettre = caseModifiable.querySelectorAll('.lettre');
+            var i = 0
             elementsLettre.forEach(elementLettre => {
-                elementLettre.textContent = genererLettreAleatoire();
+                elementLettre.textContent = maindepart[i];
                 elementLettre.setAttribute('draggable', 'true');
                 elementLettre.addEventListener('dragstart', gererDragStart);
+                i++
             });
         }
 
-        function genererLettresCentre() {
+
+
+
+        function extraireMotsGrille() {
+            const tailleGrille = 32; // Taille de la grille (32x32)
+            const motsTrouves = []; // Stocke les mots trouvés dans la grille
+
+            for (let row = 0; row < tailleGrille; row++) {
+                let motCourant = ''; // Le mot courant qu'on construit
+                const motsDansLigne = []; // Mots trouvés dans la ligne actuelle
+                for (let col = 0; col < tailleGrille; col++) {
+                    const indexCellule = row * tailleGrille + col;
+                    const cellule = carte.children[indexCellule]; // Sélectionner la cellule dans la grille
+                    const lettreElement = cellule.querySelector('.lettre'); // Récupérer la lettre de la cellule
+                    if (lettreElement && lettreElement.textContent) {
+                        // Si la cellule contient une lettre, l'ajouter au mot en cours
+                        motCourant += lettreElement.textContent;
+                    } else if (motCourant.length > 0) {
+                        if (motCourant.length >= 2) {
+                            motsDansLigne.push(motCourant);
+                        }
+                        motCourant = '';
+                    }
+                }
+
+                if (motCourant.length > 0 && motCourant.length >= 2) {
+                    motsDansLigne.push(motCourant);
+                }
+                motsTrouves.push(...motsDansLigne); // push chaque element de la liste un par un plutot que push une liste dans une liste
+            }
+            console.log("Mots trouvés dans la grille :", motsTrouves);
+            return motsTrouves;
+        }
+
+        // Fonction pour sauvegarder la position de chaque lettre
+        function sauvegarderPositionLettre(lettreElement) {
+            const cellule = lettreElement.parentElement; // Cellule qui contient la lettre
+            const indexCellule = Array.from(carte.children).indexOf(cellule); // Trouver l'index de la cellule dans la grille
+
+            positionsLettresPosees.push({
+                index: indexCellule,
+                lettre: lettreElement.textContent,
+                cellule: cellule // Sauvegarde également la cellule pour un retour rapide
+            });
+        }
+
+
+        function resetLettresPosees(valeur) {
+            // Parcourir toutes les positions sauvegardées
+            if (valeur == 0) {
+                positionsLettresPosees = [];
+                return 0
+            } else {
+                positionsLettresPosees.forEach(position => {
+                    const { index, lettre, cellule } = position;
+
+                    // Supprimer la lettre de la grille
+                    const lettreElement = cellule.querySelector('.lettre');
+                    if (lettreElement) {
+                        cellule.removeChild(lettreElement);
+                    }
+                    // Revenir la lettre dans la main du joueur (zone modifiable)
+                    const caseVide = caseModifiable.querySelector('.case'); // Trouver une case vide pour remettre la lettre
+                    if (caseVide) {
+                        const nouvelleCase = document.createElement('div');
+                        nouvelleCase.classList.add('case');
+                        nouvelleCase.style.backgroundColor = '#f0f0f0';
+                        const nouvelleLettre = document.createElement('span');
+                        nouvelleLettre.classList.add('lettre');
+                        nouvelleLettre.textContent = lettre;
+                        nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                        nouvelleCase.appendChild(nouvelleLettre);
+                        caseModifiable.appendChild(nouvelleCase);
+                        nouvelleLettre.setAttribute('draggable', 'true');
+                        nouvelleLettre.addEventListener('dragstart', gererDragStart);
+                    }
+                });
+                // Réinitialiser le tableau de positions après avoir remis toutes les lettres
+                positionsLettresPosees = [];
+                console.log("Les lettres posées ont été réinitialisées.");
+            }
+        }
+
+        function genererLettresCentre(lettresListe) {
             const ligneCentre = 15;
             const colonneCentre = 15;
             for (let i = 0; i < 5; i++) {
-                const lettre = genererLettreAleatoire();
+                const lettre = lettresListe[i];
                 const indexCellule = (ligneCentre + i) * 32 + colonneCentre;
                 const cellule = carte.children[indexCellule];
-
                 const elementLettre = document.createElement('span');
                 elementLettre.classList.add('lettre');
                 elementLettre.textContent = lettre;
-                cellule.appendChild(elementLettre);
+                cellule.appendChild(elementLettre);;
             }
         }
 
@@ -107,24 +201,33 @@
 
         function gererDrop(event) {
             event.preventDefault();
+
             const lettreId = event.dataTransfer.getData('text');
             const elementLettre = document.getElementById(lettreId);
             const celluleCible = event.target;
 
+            // Vérifier si la cellule cible est valide et n'a pas déjà de lettre
             if (celluleCible.classList.contains('case') && !celluleCible.hasChildNodes()) {
+                // Créer un nouvel élément de lettre et l'ajouter à la cellule
                 const nouvelleLettreElement = document.createElement('span');
                 nouvelleLettreElement.classList.add('lettre');
                 nouvelleLettreElement.textContent = elementLettre.textContent;
                 celluleCible.appendChild(nouvelleLettreElement);
 
+                // Retirer la lettre de la zone modifiable (si elle y était)
                 const lettreParent = elementLettre.parentElement;
                 if (lettreParent) {
                     lettreParent.removeChild(elementLettre);
                 }
 
+                // Sauvegarder la position de la lettre posée dans la grille
+                sauvegarderPositionLettre(nouvelleLettreElement);
+
+                // Supprimer les cases vides de la zone modifiable (si nécessaire)
                 supprimerCaseVide();
             }
         }
+
 
         function supprimerCaseVide() {
             const casesSousNom = caseModifiable.querySelectorAll('.case');
@@ -143,84 +246,149 @@
             });
         }
 
-        piocherButton.addEventListener('click', () => {
-            const nouvelleCase = document.createElement('div');
-            nouvelleCase.classList.add('case');
-            nouvelleCase.style.backgroundColor = '#f0f0f0';
-            const nouvelleLettre = document.createElement('span');
-            nouvelleLettre.classList.add('lettre');
-            nouvelleLettre.textContent = genererLettreAleatoire();
-            nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
-            nouvelleCase.appendChild(nouvelleLettre);
-            caseModifiable.appendChild(nouvelleCase);
+        function ajouterLettreAIndex(index, lettre) {
 
-            nouvelleLettre.setAttribute('draggable', 'true');
-            nouvelleLettre.addEventListener('dragstart', gererDragStart);
-        });
-
-        genererGrille();
-        genererLettresInitiales();
-        genererLettresCentre();
-        activerDragPourLettres();
-
-        let echelle = 1;
-        let position = { x: 0, y: 0 };
-        let dernierePositionSouris = { x: 0, y: 0 };
-        let estEnTrainDeGlisser = false;
-
-        function mettreAJourTransform() {
-            carte.style.transform = `translate(${position.x}px, ${position.y}px) scale(${echelle})`;
+            const cellule = carte.children[index];
+            const elementLettre = document.createElement('span');
+            elementLettre.classList.add('lettre');
+            elementLettre.textContent = lettre; // Ajoute la lettre à la case
+            cellule.appendChild(elementLettre)
         }
 
+
+
+        piocherButton.addEventListener('click', () => {
+            socket.emit('DemandePioche', nomJoueur)
+
+        });
+
+        // Action pour le bouton "Valider"
+        validerButton.addEventListener('click', () => {
+            if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
+                socket.emit('victoireOM', nomJoueur)
+                console.log(nomJoueur)
+            }
+            else {
+                const motsTrouves = extraireMotsGrille();
+                // Vérifier qu'il y a des mots à valider
+                if (motsTrouves.length === 0) {
+                    console.log("Aucun mot formé !");
+                    socket.emit('finTourOM')
+                    return;
+                }
+                // Envoyer les mots au serveur
+                console.log("Envoi des mots au serveur pour validation :", motsTrouves);
+                socket.emit('verifierMots', motsTrouves);
+            }
+        });
+
+
+        // Action pour le bouton "Se connecter"
+        connecterButton.addEventListener('click', () => {
+            nomJoueur = nomJoueurInput.value.trim();
+            if (nomJoueur) {
+                nomJoueurElement.textContent = "Joueur : " + nomJoueur;
+                socket.emit("connexionOM", nomJoueur)
+                nomJoueurInput.value = ''; // Réinitialise le champ de saisie après la connexion
+            } else {
+                alert('Veuillez entrer un nom de joueur');
+            }
+        });
+
+
+        socket.on('RetourPioche', (data) => {
+            carteTire = data.pioche
+            joueur = data.joueur
+            if (nomJoueur == joueur) {
+                const nouvelleCase = document.createElement('div');
+                nouvelleCase.classList.add('case');
+                nouvelleCase.style.backgroundColor = '#f0f0f0';
+                const nouvelleLettre = document.createElement('span');
+                nouvelleLettre.classList.add('lettre');
+                nouvelleLettre.textContent = carteTire;
+                nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                nouvelleCase.appendChild(nouvelleLettre);
+                caseModifiable.appendChild(nouvelleCase);
+                nouvelleLettre.setAttribute('draggable', 'true');
+                nouvelleLettre.addEventListener('dragstart', gererDragStart);
+                socket.emit('finTourOM')
+            }
+        })
+
+
+
+        socket.on('resultatValidationMots', (tousValides) => {
+            if (tousValides) {
+                console.log("Tous les mots sont valides. Tour suivant.");
+                socket.emit('TransmissionCaseRemplie', { "position": positionsLettresPosees, "nomJ": nomJoueur })
+                resetLettresPosees(0)
+                socket.emit('finTourOM');
+            } else {
+                console.log("Certains mots sont invalides. Réinitialisation des lettres.");
+                resetLettresPosees(1);
+                socket.emit('finTourOM');
+            }
+        });
+        // Fonction de zoom
         zoomInButton.addEventListener('click', () => {
-            echelle = Math.min(echelle + 0.1, 3);
-            mettreAJourTransform();
+            carte.style.transform = 'scale(1.2)';
         });
 
         zoomOutButton.addEventListener('click', () => {
-            echelle = Math.max(echelle - 0.1, 0.5);
-            mettreAJourTransform();
+            carte.style.transform = 'scale(0.8)';
         });
 
-        carte.addEventListener('wheel', (event) => {
-            event.preventDefault();
-            const vitesseZoom = 0.1;
-            const deltaEchelle = event.deltaY > 0 ? -vitesseZoom : vitesseZoom;
-            echelle = Math.min(Math.max(echelle + deltaEchelle, 0.5), 3);
-            mettreAJourTransform();
-        });
-
-        carte.addEventListener('dblclick', () => {
-            estEnTrainDeGlisser = !estEnTrainDeGlisser;
-            carte.style.cursor = estEnTrainDeGlisser ? 'grabbing' : 'grab';
-        });
-
-        carte.addEventListener('mousedown', (event) => {
-            if (estEnTrainDeGlisser) {
-                dernierePositionSouris = { x: event.clientX, y: event.clientY };
-                carte.style.cursor = 'grabbing';
+        socket.on('lancementOM', data => {
+            console.log(data.liste[0])
+            if (!(nomJoueur == data.liste[0])){
+                document.getElementById("validerButton").disabled = "true";
+                document.getElementById("piocherButton").disabled = "true";
             }
-        });
-
-        carte.addEventListener('mousemove', (event) => {
-            if (!estEnTrainDeGlisser) return;
-
-            const dx = event.clientX - dernierePositionSouris.x;
-            const dy = event.clientY - dernierePositionSouris.y;
-
-            position.x += dx / echelle;
-            position.y += dy / echelle;
-
-            dernierePositionSouris = { x: event.clientX, y: event.clientY };
-
-            mettreAJourTransform();
-        });
-
-        carte.addEventListener('mouseup', () => {
-            if (estEnTrainDeGlisser) {
-                carte.style.cursor = 'grab';
+            else{
+                document.getElementById("validerButton").disabled = "";
+                document.getElementById("piocherButton").disabled = "";
             }
-        });
+            AuTourDeElement.textContent = "Au tour de : " + data.liste[0]
+            genererLettresCentre(data.depart)
+            genererLettresInitiales(data.mainDepart)
+        })
+
+        socket.on('tourSuivantOM', data => {
+            console.log(data,nomJoueur)
+            if (!(nomJoueur == data)){
+                document.getElementById("validerButton").disabled = "true";
+                document.getElementById("piocherButton").disabled = "true";
+            }
+            else{
+                document.getElementById("validerButton").disabled = "";
+                document.getElementById("piocherButton").disabled = "";
+            }
+            AuTourDeElement.textContent = "Au tour de : " + data
+        })
+
+        socket.on('afficheVictoireOM', data => {
+            AuTourDeElement.textContent = "Le vainqueur est " + data
+        })
+
+
+        socket.on('MettreLettre', (data) => {
+            tabLettre = data['position']
+            if (nomJoueur != data.nomJ) {
+                for (let i = 0; i < tabLettre.length; i++) {
+                    const element = tabLettre[i];
+                    ajouterLettreAIndex(element.index, element.lettre)
+                }
+            }
+        }
+        )
+
+        
+
+
+        // Initialiser la grille et les lettres au démarrage
+        genererGrille();
+
+
     </script>
 </body>
 

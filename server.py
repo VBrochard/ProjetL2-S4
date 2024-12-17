@@ -13,7 +13,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 TokenReponse = int(0)
 ListeJoueurs = []
 
-
+#Variables mot le plus long
 deck = []
 MeilleurMotsJoueur = []
 NomMeilleursJoueurs = []
@@ -24,6 +24,8 @@ jetonPret = 0
 listeMots = []
 jetonTourTirage = 0
 nbrJoueur = 0
+
+
 
 if len(sys.argv) != 3:
     print("Veuillez spécifier en argument le nombre de joueurs et la taille du deck")
@@ -57,13 +59,6 @@ def sommeDesFreq():
 
 def eniemeCarte(n, tabCartes):
     return tabCartes[n - 1]
-
-def genererUnDeck():
-    deck = []
-    for i in range(taille_deck):
-        a = randint(0, sommeDesFreq())
-        deck.append(eniemeCarte(a, cartes_freq))
-    return deck
 
 voyelles = [carte for carte, freq in lettres_freq.items() if carte in "AEIOUY" for i in range(freq)]
 consonnes = [carte for carte, freq in lettres_freq.items() if carte not in "AEIOUY" for i in range(freq)]
@@ -177,6 +172,7 @@ def handle_voyelle():
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 
+
 @socketio.on('nouveauTour')
 def handle_nouveauTour():
     global jetonPret
@@ -240,6 +236,77 @@ def handle_envoieMot(data):
         listePropositions = []
         listeMots = []
 
+
+##########################################################################
+#Variables Opti'Mot
+listeJoueursOM = []
+jetonTourOM = 0
+
+lettres_freq_opti = {"A": 5, "B": 1, "C": 2, "D":2, "E":9, "F":2, "G": 1, "H": 1, "I":5,"J":1, "K":1, "L":3, "M":3, "N":3, "O":3, "P":2, "Q":1, "R":3, "S":4, "T":3, "U":3,
+"V": 2, "W": 1, "X": 1, "Z": 1}
+
+cartes_freq_opti = [carte for carte, freq in lettres_freq_opti.items() for i in range(freq)]
+
+def ajouterLettreDansPioche_opti(lettre):
+    cartes_freq_opti.append(lettre)
+
+def tirageCarteOpti():
+    a = randint(0, len(cartes_freq_opti))
+    return eniemeCarte(a, cartes_freq_opti)
+
+@socketio.on('connexionOM')
+def handle_connexionOM(data):
+    nomJoueur = data
+    listeJoueursOM.append(nomJoueur)    
+    if len(listeJoueursOM) == nbrJoueur:
+        deckDepart = []
+        mainDepart = []
+        for i in range(5):
+            deckDepart.append(tirageCarteOpti())
+        for i in range(10):
+            mainDepart.append(tirageCarteOpti())
+        socketio.emit("lancementOM",{"liste" :listeJoueursOM,"depart" : deckDepart, 'mainDepart' : mainDepart})
+        print(mainDepart)
+
+@socketio.on('victoireOM')
+def handle_victoireOM(data):
+    print(data)
+    socketio.emit('afficheVictoireOM',data)
+    
+@socketio.on('finTourOM')
+def handle_tourSuivantOM():
+    global jetonTourOM
+    jetonTourOM+=1
+    if jetonTourOM == len(listeJoueursOM):
+        jetonTourOM = 0
+    socketio.emit('tourSuivantOM',listeJoueursOM[jetonTourOM])
+
+@socketio.on('verifierMots')
+def verifier_mots(mots):
+
+    # Valider tous les mots
+    tous_valides = all(motExiste(mot) for mot in mots)
+
+    # Retourner le résultat au client
+    emit('resultatValidationMots', tous_valides)
+
+
+@socketio.on('DemandePioche')
+def handle_DemandePioche(data):
+    carte = tirageCarteOpti()
+    socketio.emit('RetourPioche',{"joueur" : data, 'pioche' : carte})
+
+
+@socketio.on('TransmissionCaseRemplie')
+def handle_TransmissionCaseRemplie(data):
+    tab = data['position']
+    socketio.emit('MettreLettre',{"position" : tab, "nomJ" :  data['nomJ']})
+
+'''
+
+@socketio.on('remiseEnPioche')
+def handle_RemiseEnPioche(data):
+'''
+
 if __name__ == '__main__':
     socketio.run(app, host= '0.0.0.0', port=5000, debug=True)
-
