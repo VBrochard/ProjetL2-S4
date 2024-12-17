@@ -14,6 +14,7 @@ def supprimeUneOcuurence(elt, liste):
             liste.pop(i)
             return liste
     
+
 def contientBonnesLettres(mot, tirage):
     for lettre in mot:
         if lettre in tirage:
@@ -22,8 +23,8 @@ def contientBonnesLettres(mot, tirage):
             return False
     return True
 
+
 def affichageListe(liste):
-    
     result = ""
     if len(liste) == 1:
         return liste[0]
@@ -37,21 +38,6 @@ def affichageListe(liste):
                 result += str(liste[i])
     return result
 
-def inputNonBloquant():
-    res, o, e = select.select([sys.stdin],[],[],0.1)
-    if res:
-        return sys.stdin.readline().strip()
-    return None
-
-def barreChargement(secondes):
-    affichage = ""
-    for i in range(secondes):
-        mil = i*"-"
-        espace = (secondes-i)*" "
-        print("|"+mil+espace+"|",end="\r")
-        time.sleep(1)
-   
-
 
 
 print(Fore.GREEN+"*************************************************\n")
@@ -63,10 +49,10 @@ nomJoueur = input("Entrez votre nom pour rejoindre: ")
 
 @sio.event
 def connect():
-    
     sio.emit('AnnonceJoueur',nomJoueur)
     print("Bienvenue",nomJoueur, "\n")
     
+
 @sio.event
 def ListePresence(data):
     listeJoueurs = data
@@ -80,8 +66,6 @@ def ListePresence(data):
     elif listeJoueurs[0][0] != nomJoueur:
         print(listeJoueurs[0][0],"est le maître du jeu, il peur démarrer la partie à tout moment",end="\r")
    
-
-
 
 try:
     sio.connect('http://localhost:5000')
@@ -105,14 +89,17 @@ def résultat(data):
     
     if len(data.get("nom")) == 0:
         print("Personne n'a marqué de points ce tour")
+
     else:
         print("Le(s) gagnant(s) de ce tour sont :", affichageListe(data.get("nom")))#Nom du vainqueur
         print("Il(s) gagne(nt)", data.get("PointGagnée"), "points","avec le(s) mot :", affichageListe(data.get("MotGagnant")))#Afficher le score retourné
         print(Fore.GREEN+"--------------------------------------------------------------------------")
         print(Style.RESET_ALL)
+
     print("Le meilleur mot possible était :",data.get("meilleurPossible"))
     print(Fore.GREEN+"--------------------------------------------------------------------------")
     print(Style.RESET_ALL)
+
     ListeScore = data.get("ListeScore")
     for joueur in ListeScore:
         print("-"+ joueur[0], "Score :",joueur[1])
@@ -121,15 +108,6 @@ def résultat(data):
     pretProchainTour = input("Appuyer sur entrée pour le prochain tour")
     sio.emit('nouveauTour')
     
-
-
-
-#@sio.event
-def recommencerPartie():
-    rejouer = input("Voulez-vous refaire une partie ? [y/n] : ")
-    if rejouer == "n":
-        print("Au revoir")
-        sio.disconnect()
     
 @sio.event
 def choixLettre(data):
@@ -139,21 +117,22 @@ def choixLettre(data):
     
     for lettre in tirage:
         affichage+=lettre+" "
+
     if len(tirage)>0:
         print(Fore.GREEN+"--------------------------------------------------------------------------")
         print(Style.RESET_ALL)
         print(Fore.GREEN+"Lettres disponibles:",Fore.CYAN+affichage)
         print(Style.RESET_ALL)
+
     if data.get("joueur") == nomJoueur:
-        choixLettre = ""
         print(choixLettre)
         choixLettre = input("Voyelles ou consonnes ?[v/c]")
-        
         if choixLettre == "v":
             sio.emit('voyelle')
             
         elif choixLettre == "c":
             sio.emit('consonne')
+
         else:
             while choixLettre != "v" and choixLettre != "c":
                 choixLettre = input("Ecrivez v pour une voyelle ou c pour une consonne")
@@ -169,7 +148,6 @@ def choixLettre(data):
 
 @sio.event
 def tirageLettres(data):
-    
     tirage = data.get("deck")
     affichage = ""
     for lettre in tirage:
@@ -183,9 +161,9 @@ def tirageLettres(data):
     print("Vous avez 20s pour écrire votre mot: ")
     i, o, e = select.select([sys.stdin],[],[],20)
     if i:
-        
         propositionMot = sys.stdin.readline().strip()
         propositionMot = propositionMot.upper()
+
     else:
         print("Vous n'avez pas répondu à temps.")
         propositionMot = ""
@@ -207,11 +185,11 @@ def tirageLettres(data):
             
         sio.emit("envoiMot",{"nom" : nomJoueur , "mot" : propositionMot})
         print("Mot envoyé !")
+
+
 @sio.event
 def victoire(data):
-    
     vainqueurs = affichageListe(data.get("nomsVainqueurs"))
-
     if len(data.get("nomsVainqueurs"))>1:
         print("Les vainqueurs sont",vainqueurs)
     else:

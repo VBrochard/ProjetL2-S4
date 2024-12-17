@@ -38,7 +38,6 @@
             <div class="piocher-button-wrapper">
                 <button class="piocher-button" id="piocherButton" >Piocher</button>
                 <button class="valider-button" id="validerButton" >Valider son tour</button>
-                <!-- Nouveau bouton "Valider" ajouté ici -->
             </div>
         </div>
 
@@ -47,7 +46,6 @@
             <button id="zoomOut">-</button>
         </div>
 
-        <!-- Nouveau champ Nom Joueur et bouton Se connecter en haut à gauche -->
         <div class="nom-joueur-container">
             <div>Nom Joueur:</div>
             <input type="text" id="nomJoueurInput" placeholder="Entrez votre nom">
@@ -62,12 +60,12 @@
         const zoomInButton = document.getElementById('zoomIn');
         const zoomOutButton = document.getElementById('zoomOut');
         const piocherButton = document.getElementById('piocherButton');
-        const validerButton = document.getElementById('validerButton'); // Nouveau bouton "Valider"
+        const validerButton = document.getElementById('validerButton'); 
         const caseModifiable = document.getElementById('case-modifiable');
         const nomJoueurElement = document.getElementById('nomJoueur');
         const nomJoueurInput = document.getElementById('nomJoueurInput');
         const connecterButton = document.getElementById('connecterButton');
-        const entrerButton = document.getElementById('entrerButton'); // Nouveau bouton "Entrer"
+        const entrerButton = document.getElementById('entrerButton'); 
         const AuTourDeElement = document.getElementById("AuTourDe");
         let positionsLettresPosees = [];
         var nomJoueur;
@@ -84,6 +82,7 @@
         }
 
         function genererLettresInitiales(maindepart) {
+            //Génère le deck de chaque joueur
             const elementsLettre = caseModifiable.querySelectorAll('.lettre');
             var i = 0
             elementsLettre.forEach(elementLettre => {
@@ -98,18 +97,19 @@
 
 
         function extraireMotsGrille() {
-            const tailleGrille = 32; // Taille de la grille (32x32)
-            const motsTrouves = []; // Stocke les mots trouvés dans la grille
+            //Renvoie tous les mots de la grille d'au moins 2 lettres
+            const tailleGrille = 32; 
+            const motsTrouves = []; 
 
             for (let row = 0; row < tailleGrille; row++) {
-                let motCourant = ''; // Le mot courant qu'on construit
-                const motsDansLigne = []; // Mots trouvés dans la ligne actuelle
+                let motCourant = ''; 
+                const motsDansLigne = []; 
                 for (let col = 0; col < tailleGrille; col++) {
                     const indexCellule = row * tailleGrille + col;
-                    const cellule = carte.children[indexCellule]; // Sélectionner la cellule dans la grille
-                    const lettreElement = cellule.querySelector('.lettre'); // Récupérer la lettre de la cellule
+                    const cellule = carte.children[indexCellule]; 
+                    const lettreElement = cellule.querySelector('.lettre'); 
                     if (lettreElement && lettreElement.textContent) {
-                        // Si la cellule contient une lettre, l'ajouter au mot en cours
+                        
                         motCourant += lettreElement.textContent;
                     } else if (motCourant.length > 0) {
                         if (motCourant.length >= 2) {
@@ -119,30 +119,31 @@
                     }
                 }
 
-                if (motCourant.length > 0 && motCourant.length >= 2) {
+                if (motCourant.length > 0 && motCourant.length >= 2) {  
                     motsDansLigne.push(motCourant);
                 }
-                motsTrouves.push(...motsDansLigne); // push chaque element de la liste un par un plutot que push une liste dans une liste
+                motsTrouves.push(...motsDansLigne); 
             }
             console.log("Mots trouvés dans la grille :", motsTrouves);
             return motsTrouves;
         }
 
-        // Fonction pour sauvegarder la position de chaque lettre
+        
         function sauvegarderPositionLettre(lettreElement) {
-            const cellule = lettreElement.parentElement; // Cellule qui contient la lettre
-            const indexCellule = Array.from(carte.children).indexOf(cellule); // Trouver l'index de la cellule dans la grille
+            //Mets dans un tableau la position des lettres posées sur le plateau
+            const cellule = lettreElement.parentElement; 
+            const indexCellule = Array.from(carte.children).indexOf(cellule); 
 
             positionsLettresPosees.push({
                 index: indexCellule,
                 lettre: lettreElement.textContent,
-                cellule: cellule // Sauvegarde également la cellule pour un retour rapide
+                cellule: cellule 
             });
         }
 
 
         function resetLettresPosees(valeur) {
-            // Parcourir toutes les positions sauvegardées
+            //Renvoie les lettres au joueur si le(s) mots qu'il a formé(s) sont invalides
             if (valeur == 0) {
                 positionsLettresPosees = [];
                 return 0
@@ -150,13 +151,13 @@
                 positionsLettresPosees.forEach(position => {
                     const { index, lettre, cellule } = position;
 
-                    // Supprimer la lettre de la grille
+                    
                     const lettreElement = cellule.querySelector('.lettre');
                     if (lettreElement) {
                         cellule.removeChild(lettreElement);
                     }
-                    // Revenir la lettre dans la main du joueur (zone modifiable)
-                    const caseVide = caseModifiable.querySelector('.case'); // Trouver une case vide pour remettre la lettre
+                    
+                    const caseVide = caseModifiable.querySelector('.case');
                     if (caseVide) {
                         const nouvelleCase = document.createElement('div');
                         nouvelleCase.classList.add('case');
@@ -171,13 +172,14 @@
                         nouvelleLettre.addEventListener('dragstart', gererDragStart);
                     }
                 });
-                // Réinitialiser le tableau de positions après avoir remis toutes les lettres
+                
                 positionsLettresPosees = [];
                 console.log("Les lettres posées ont été réinitialisées.");
             }
         }
 
         function genererLettresCentre(lettresListe) {
+            //Génère les 5 premières cartes du centre du plateau
             const ligneCentre = 15;
             const colonneCentre = 15;
             for (let i = 0; i < 5; i++) {
@@ -206,24 +208,19 @@
             const elementLettre = document.getElementById(lettreId);
             const celluleCible = event.target;
 
-            // Vérifier si la cellule cible est valide et n'a pas déjà de lettre
             if (celluleCible.classList.contains('case') && !celluleCible.hasChildNodes()) {
-                // Créer un nouvel élément de lettre et l'ajouter à la cellule
                 const nouvelleLettreElement = document.createElement('span');
                 nouvelleLettreElement.classList.add('lettre');
                 nouvelleLettreElement.textContent = elementLettre.textContent;
                 celluleCible.appendChild(nouvelleLettreElement);
 
-                // Retirer la lettre de la zone modifiable (si elle y était)
                 const lettreParent = elementLettre.parentElement;
                 if (lettreParent) {
                     lettreParent.removeChild(elementLettre);
                 }
 
-                // Sauvegarder la position de la lettre posée dans la grille
                 sauvegarderPositionLettre(nouvelleLettreElement);
 
-                // Supprimer les cases vides de la zone modifiable (si nécessaire)
                 supprimerCaseVide();
             }
         }
@@ -251,18 +248,18 @@
             const cellule = carte.children[index];
             const elementLettre = document.createElement('span');
             elementLettre.classList.add('lettre');
-            elementLettre.textContent = lettre; // Ajoute la lettre à la case
+            elementLettre.textContent = lettre; 
             cellule.appendChild(elementLettre)
         }
 
 
 
         piocherButton.addEventListener('click', () => {
-            socket.emit('DemandePioche', nomJoueur)
+            socket.emit('DemandePiocheOM', nomJoueur)
 
         });
 
-        // Action pour le bouton "Valider"
+        
         validerButton.addEventListener('click', () => {
             if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
                 socket.emit('victoireOM', nomJoueur)
@@ -270,33 +267,34 @@
             }
             else {
                 const motsTrouves = extraireMotsGrille();
-                // Vérifier qu'il y a des mots à valider
+                
                 if (motsTrouves.length === 0) {
                     console.log("Aucun mot formé !");
                     socket.emit('finTourOM')
                     return;
                 }
-                // Envoyer les mots au serveur
+                
                 console.log("Envoi des mots au serveur pour validation :", motsTrouves);
-                socket.emit('verifierMots', motsTrouves);
+                socket.emit('verifierMotsOM', motsTrouves);
             }
         });
 
 
-        // Action pour le bouton "Se connecter"
+        
         connecterButton.addEventListener('click', () => {
             nomJoueur = nomJoueurInput.value.trim();
             if (nomJoueur) {
                 nomJoueurElement.textContent = "Joueur : " + nomJoueur;
                 socket.emit("connexionOM", nomJoueur)
-                nomJoueurInput.value = ''; // Réinitialise le champ de saisie après la connexion
+                nomJoueurInput.value = ''; 
             } else {
                 alert('Veuillez entrer un nom de joueur');
             }
         });
 
 
-        socket.on('RetourPioche', (data) => {
+        socket.on('RetourPiocheOM', (data) => {
+            //
             carteTire = data.pioche
             joueur = data.joueur
             if (nomJoueur == joueur) {
@@ -317,10 +315,10 @@
 
 
 
-        socket.on('resultatValidationMots', (tousValides) => {
+        socket.on('resultatValidationMotsOM', (tousValides) => {
             if (tousValides) {
                 console.log("Tous les mots sont valides. Tour suivant.");
-                socket.emit('TransmissionCaseRemplie', { "position": positionsLettresPosees, "nomJ": nomJoueur })
+                socket.emit('TransmissionCaseRemplieOM', { "position": positionsLettresPosees, "nomJ": nomJoueur })
                 resetLettresPosees(0)
                 socket.emit('finTourOM');
             } else {
@@ -329,7 +327,6 @@
                 socket.emit('finTourOM');
             }
         });
-        // Fonction de zoom
         zoomInButton.addEventListener('click', () => {
             carte.style.transform = 'scale(1.2)';
         });
@@ -371,7 +368,7 @@
         })
 
 
-        socket.on('MettreLettre', (data) => {
+        socket.on('MettreLettreOM', (data) => {
             tabLettre = data['position']
             if (nomJoueur != data.nomJ) {
                 for (let i = 0; i < tabLettre.length; i++) {
@@ -381,11 +378,6 @@
             }
         }
         )
-
-        
-
-
-        // Initialiser la grille et les lettres au démarrage
         genererGrille();
 
 

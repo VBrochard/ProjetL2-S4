@@ -36,6 +36,7 @@ try:
     print("Le serveur est configuré pour",nbrJoueur,"joueurs")
     taille_deck = int(sys.argv[2])
     print("Le serveur est configuré pour un deck de",taille_deck,"cartes")
+    
 except ValueError:
     print("Veuillez entrer un nombre valide pour le nombre de joueurs et la taille du deck")
     sys.exit(1)
@@ -125,7 +126,6 @@ def handle_AnnonceJoueur(data):
         socketio.emit('ListePresence',ListeJoueurs)
 
 
-
 @socketio.on('Declancheur')
 def handle_declancheur():
         global nbrJoueur
@@ -184,6 +184,7 @@ def handle_nouveauTour():
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
         jetonPret = 0
 
+
 @socketio.on('envoiMot')
 def handle_envoieMot(data):
     global deck
@@ -230,6 +231,7 @@ def handle_envoieMot(data):
                 "meilleurPossible" : MeilleurPossible,
                 "MotGagnant" : retireDoublon(MeilleurMotsJoueur)
                 })
+
         TokenReponse = 0
         NomMeilleursJoueurs = []
         MeilleurMotsJoueur = []
@@ -281,32 +283,27 @@ def handle_tourSuivantOM():
         jetonTourOM = 0
     socketio.emit('tourSuivantOM',listeJoueursOM[jetonTourOM])
 
-@socketio.on('verifierMots')
+@socketio.on('verifierMotsOM')
 def verifier_mots(mots):
 
     # Valider tous les mots
     tous_valides = all(motExiste(mot) for mot in mots)
 
     # Retourner le résultat au client
-    emit('resultatValidationMots', tous_valides)
+    emit('resultatValidationMotsOM', tous_valides)
 
 
-@socketio.on('DemandePioche')
+@socketio.on('DemandePiocheOM')
 def handle_DemandePioche(data):
     carte = tirageCarteOpti()
-    socketio.emit('RetourPioche',{"joueur" : data, 'pioche' : carte})
+    socketio.emit('RetourPiocheOM',{"joueur" : data, 'pioche' : carte})
 
 
-@socketio.on('TransmissionCaseRemplie')
+@socketio.on('TransmissionCaseRemplieOM')
 def handle_TransmissionCaseRemplie(data):
     tab = data['position']
-    socketio.emit('MettreLettre',{"position" : tab, "nomJ" :  data['nomJ']})
+    socketio.emit('MettreLettreOM',{"position" : tab, "nomJ" :  data['nomJ']})
 
-'''
-
-@socketio.on('remiseEnPioche')
-def handle_RemiseEnPioche(data):
-'''
 
 if __name__ == '__main__':
     socketio.run(app, host= '0.0.0.0', port=5000, debug=True)
