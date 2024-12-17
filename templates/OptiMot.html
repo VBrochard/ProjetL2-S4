@@ -339,7 +339,7 @@
 
 
         socket.on('resultatValidationMotsOM', (tousValides) => {
-            //Récupère le booléen de vérification des mots et vérifie s'il faut tr
+            //Appel de resetLettresPosees en fonction du booléen tousValides
             if (tousValides) {
                 console.log("Tous les mots sont valides. Tour suivant.");
                 socket.emit('TransmissionCaseRemplieOM', { "position": positionsLettresPosees, "nomJ": nomJoueur });
@@ -363,13 +363,20 @@
 
         socket.on('lancementOM', data => {
             console.log(data.liste[0])
+            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
             if (!(nomJoueur == data.liste[0])){
                 document.getElementById("validerButton").disabled = "true";
                 document.getElementById("piocherButton").disabled = "true";
+                elementsLettre.forEach(elementLettre => {
+                    elementLettre.setAttribute('draggable', 'false');
+                })
             }
             else{
                 document.getElementById("validerButton").disabled = "";
                 document.getElementById("piocherButton").disabled = "";
+                elementsLettre.forEach(elementLettre => {
+                    elementLettre.setAttribute('draggable', 'true');
+                })
             }
             AuTourDeElement.textContent = "Au tour de : " + data.liste[0]
             genererLettresCentre(data.depart)
@@ -378,13 +385,21 @@
 
         socket.on('tourSuivantOM', data => {
             console.log(data,nomJoueur)
+            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
             if (!(nomJoueur == data)){
                 document.getElementById("validerButton").disabled = "true";
                 document.getElementById("piocherButton").disabled = "true";
+                
+                elementsLettre.forEach(elementLettre => {
+                    elementLettre.setAttribute('draggable', 'false');
+                })
             }
             else{
                 document.getElementById("validerButton").disabled = "";
                 document.getElementById("piocherButton").disabled = "";
+                elementsLettre.forEach(elementLettre => {
+                    elementLettre.setAttribute('draggable', 'true');
+                })
             }
             AuTourDeElement.textContent = "Au tour de : " + data
         })
