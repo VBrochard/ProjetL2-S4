@@ -73,7 +73,8 @@ def tirageCarteConsonne():
     return eniemeCarte(a, consonnes)
 
 def motMax(listeMots):
-    return len(max(listeMots, key=len))
+    motsValides = [mot for mot in listeMots if motExiste(mot)]
+    return len(max(motsValides, key=len))
 
 def retireDoublon(liste):
     listeRes = []

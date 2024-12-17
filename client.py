@@ -126,7 +126,6 @@ def choixLettre(data):
         print(Style.RESET_ALL)
 
     if data.get("joueur") == nomJoueur:
-        print(choixLettre)
         choixLettre = input("Voyelles ou consonnes ?[v/c]")
         if choixLettre == "v":
             sio.emit('voyelle')
@@ -159,7 +158,7 @@ def tirageLettres(data):
     print(Fore.GREEN+"Lettres finales:",Fore.CYAN+affichage)
     print(Style.RESET_ALL)
     time.sleep(0.1) 
-    print("Vous avez 20s pour écrire votre mot: ")
+    print("Vous avez 30s pour écrire votre mot: ")
     i, o, e = select.select([sys.stdin],[],[],tempsTour)
     if i:
         propositionMot = sys.stdin.readline().strip()
@@ -195,7 +194,7 @@ def victoire(data):
         print("Les vainqueurs sont",vainqueurs)
     else:
         print("Le vainqueur est",vainqueurs)
-    recommencerPartie()
+    
 
 
 sio.wait()
