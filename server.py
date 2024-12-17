@@ -97,10 +97,10 @@ def motExiste(mot):
     return mot.upper() in dico
 
 def retireUneVoyelle_lplm(lettre):
-    voyelles_lplm.remove(lettre)
+    voyelles.remove(lettre)
 
 def retireUneConsonne_lplm(lettre):
-    consonnes_lplm.remove(lettre)
+    consonnes.remove(lettre)
 
 @app.route('/Ressources/<path:filename>')
 def ressources(filename):
