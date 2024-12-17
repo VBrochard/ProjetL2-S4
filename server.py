@@ -96,6 +96,11 @@ def motLePlusLong(s):
 def motExiste(mot):
     return mot.upper() in dico
 
+def retireUneVoyelle_lplm(lettre):
+    voyelles_lplm.remove(lettre)
+
+def retireUneConsonne_lplm(lettre):
+    consonnes_lplm.remove(lettre)
 
 @app.route('/Ressources/<path:filename>')
 def ressources(filename):
@@ -149,7 +154,9 @@ def handle_voyelle():
     global ListeJoueurs
     global jetonTourTirage
     global nbrJoueur
-    deck += tirageCarteVoyelle()
+    b = tirageCarteVoyelle()
+    deck += b
+    retireUneVoyelle_lplm(b)
     jetonTourTirage += 1
     if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
@@ -159,11 +166,13 @@ def handle_voyelle():
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 @socketio.on('consonne')
-def handle_voyelle():
+def handle_consonne():
     global deck
     global ListeJoueurs
     global jetonTourTirage
-    deck += tirageCarteConsonne()
+    a = tirageCarteConsonne()
+    deck += a
+    retireUneConsonne_lplm(a)
     jetonTourTirage += 1
     if jetonTourTirage == nbrJoueur:
         jetonTourTirage = 0
