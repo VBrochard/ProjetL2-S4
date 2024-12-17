@@ -297,6 +297,10 @@ def handle_DemandePioche(data):
     socketio.emit('RetourPioche',{"joueur" : data, 'pioche' : carte})
 
 
+@socketio.on('TransmissionCaseRemplie')
+def handle_TransmissionCaseRemplie(data):
+    tab = data['position']
+    socketio.emit('MettreLettre',{"position" : tab, "nomJ" :  data['nomJ']})
 
 '''
 

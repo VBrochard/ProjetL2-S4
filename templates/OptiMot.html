@@ -167,7 +167,6 @@
                         nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
                         nouvelleCase.appendChild(nouvelleLettre);
                         caseModifiable.appendChild(nouvelleCase);
-
                         nouvelleLettre.setAttribute('draggable', 'true');
                         nouvelleLettre.addEventListener('dragstart', gererDragStart);
                     }
@@ -247,6 +246,16 @@
             });
         }
 
+        function ajouterLettreAIndex(index, lettre) {
+
+            const cellule = carte.children[index];
+            const elementLettre = document.createElement('span');
+            elementLettre.classList.add('lettre');
+            elementLettre.textContent = lettre; // Ajoute la lettre à la case
+            cellule.appendChild(elementLettre)
+        }
+
+
 
         piocherButton.addEventListener('click', () => {
             socket.emit('DemandePioche', nomJoueur)
@@ -302,6 +311,7 @@
                 caseModifiable.appendChild(nouvelleCase);
                 nouvelleLettre.setAttribute('draggable', 'true');
                 nouvelleLettre.addEventListener('dragstart', gererDragStart);
+                socket.emit('finTourOM')
             }
         })
 
@@ -310,6 +320,7 @@
         socket.on('resultatValidationMots', (tousValides) => {
             if (tousValides) {
                 console.log("Tous les mots sont valides. Tour suivant.");
+                socket.emit('TransmissionCaseRemplie', { "position": positionsLettresPosees, "nomJ": nomJoueur })
                 resetLettresPosees(0)
                 socket.emit('finTourOM');
             } else {
@@ -340,6 +351,18 @@
         socket.on('afficheVictoireOM', data => {
             AuTourDeElement.textContent = "Le vainqueur est " + data
         })
+
+
+        socket.on('MettreLettre', (data) => {
+            tabLettre = data['position']
+            if (nomJoueur != data.nomJ) {
+                for (let i = 0; i < tabLettre.length; i++) {
+                    const element = tabLettre[i];
+                    ajouterLettreAIndex(element.index, element.lettre)
+                }
+            }
+        }
+        )
 
 
         // Initialiser la grille et les lettres au démarrage
