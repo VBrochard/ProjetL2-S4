@@ -48,10 +48,10 @@
         </div>
 
         <!-- Nouveau champ Nom Joueur et bouton Se connecter en haut à gauche -->
-        <div class="nom-joueur-container">
+        <div class="nom-joueur-container" >
             <div>Nom Joueur:</div>
             <input type="text" id="nomJoueurInput" placeholder="Entrez votre nom">
-            <button class="connecter-button" id="connecterButton">Se connecter</button>
+            <button class="connecter-button" id="connecterButton" onclick="desacConnexion()">Se connecter</button>
 
         </div>
     </div>
@@ -199,6 +199,10 @@
             event.preventDefault();
         }
 
+        function desacConnexion(){
+            document.getElementsByClassName("nom-joueur-container").hidden = "true"
+        }
+
         function gererDrop(event) {
             event.preventDefault();
 
@@ -256,7 +260,6 @@
         }
 
 
-
         piocherButton.addEventListener('click', () => {
             socket.emit('DemandePioche', nomJoueur)
 
@@ -283,13 +286,12 @@
         });
 
 
-        // Action pour le bouton "Se connecter"
         connecterButton.addEventListener('click', () => {
             nomJoueur = nomJoueurInput.value.trim();
             if (nomJoueur) {
                 nomJoueurElement.textContent = "Joueur : " + nomJoueur;
                 socket.emit("connexionOM", nomJoueur)
-                nomJoueurInput.value = ''; // Réinitialise le champ de saisie après la connexion
+                nomJoueurInput.value = '';
             } else {
                 alert('Veuillez entrer un nom de joueur');
             }
