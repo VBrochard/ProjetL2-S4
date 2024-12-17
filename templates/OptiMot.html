@@ -212,7 +212,7 @@
             const elementLettre = document.getElementById(lettreId);
             const celluleCible = event.target;
 
-            if (celluleCible.classList.contains('case') && !celluleCible.hasChildNodes()) {
+            if (celluleCible.classList.contains('case') && !celluleCible.hasChildNodes() && aVoisinAvecLettre(celluleCible)) {
                 const nouvelleLettreElement = document.createElement('span');
                 nouvelleLettreElement.classList.add('lettre');
                 nouvelleLettreElement.textContent = elementLettre.textContent;
@@ -256,6 +256,26 @@
             cellule.appendChild(elementLettre)
         }
 
+        function aVoisinAvecLettre(cellule) {
+            const index = Array.from(carte.children).indexOf(cellule);
+            const lignes = 32; // Nombre de lignes dans la grille
+            const colonnes = 32; // Nombre de colonnes dans la grille
+
+            // Calculer les voisins (haut, bas, gauche, droite)
+            const voisins = [
+                index - 1,        // Gauche
+                index + 1         // Droite
+            ];
+
+    // Vérifier si un des voisins contient une lettre
+    return voisins.some((voisinIndex) => {
+        if (voisinIndex >= 0 && voisinIndex < lignes * colonnes) { // Assurer un index valide
+            const voisin = carte.children[voisinIndex];
+            return voisin.hasChildNodes(); // Retourne true si un voisin a une lettre
+        }
+        return false;
+    });
+}
 
         piocherButton.addEventListener('click', () => {
             socket.emit('DemandePiocheOM', nomJoueur)
@@ -297,7 +317,7 @@
 
 
         socket.on('RetourPiocheOM', (data) => {
-            //
+            //Ajoute au deck du joueur la carte piochée
             carteTire = data.pioche
             joueur = data.joueur
             if (nomJoueur == joueur) {
@@ -319,13 +339,16 @@
 
 
         socket.on('resultatValidationMotsOM', (tousValides) => {
+            //Récupère le booléen de vérification des mots et vérifie s'il faut tr
             if (tousValides) {
                 console.log("Tous les mots sont valides. Tour suivant.");
-                socket.emit('TransmissionCaseRemplieOM', { "position": positionsLettresPosees, "nomJ": nomJoueur })
+                socket.emit('TransmissionCaseRemplieOM', { "position": positionsLettresPosees, "nomJ": nomJoueur });
+                console.log(positionsLettresPosees)
                 resetLettresPosees(0)
                 socket.emit('finTourOM');
             } else {
                 console.log("Certains mots sont invalides. Réinitialisation des lettres.");
+                console.log(positionsLettresPosees)
                 resetLettresPosees(1);
                 socket.emit('finTourOM');
             }
