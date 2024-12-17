@@ -63,7 +63,7 @@
                 var cacheboutton = document.getElementById('Lancement')
                 cacheboutton.hidden = false;
                 let mess = "Vous êtes maître du jeu, appuyez sur le bouton Lancer la partie pour démarrer"
-                messagesDiv.value += mess + "\n\n" + "Joueurs présents dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n"
+                messagesDiv.value = mess + "\n\n" + "Joueurs présents dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n"
             }
             if (ListeJoueur.length >= 2 && ListeJoueur[0][0] != nomJoueur) {
 
@@ -73,7 +73,7 @@
                 });
                 var msg =
                     "Joueurs présents dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n" +
-                    "Vous êtes au moins 2 joueurs, à l'initiative de l'un d'entre d'entre vous, la partie peut commencer..."
+                    "Vous êtes au moins 2 joueurs, à l'initiative de "+ListeJoueur[0][0]+" la partie peut commencer..."
 
                 messagesDiv.value += msg + '\n';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -163,11 +163,10 @@
 
 
     <script>
-        let caseEnDeplacement = null; // Pour suivre la case en cours de déplacement
+        let caseEnDeplacement = null; 
         let tempsRestant = 30; // Temps de départ en secondes
-        let timerInterval; // Intervalle pour le compte à rebours
+        let timerInterval; 
         let Tour = false;
-        let jeuTermine = false;
 
         function ProchainTour() {
             desacBouton('prochain')
@@ -232,8 +231,7 @@
 
         /**
          * Crée une case avec une lettre qui peut être déplacée
-         * @param {string} lettre - La lettre à afficher dans la case
-         */
+        */
         function creerCaseDeplacable(lettre) {
             const caseLettre = document.createElement('div');
             caseLettre.classList.add('case');
@@ -265,41 +263,32 @@
             return caseVide;
         }
 
-        /**
-         * Gère le début du déplacement d'une case
-         * @param {DragEvent} e 
-         */
         function gererDebutDeplacement(e) {
-            if (jeuTermine) return; // Empêche le déplacement si le jeu est terminé
-            caseEnDeplacement = e.target; // Stocke la case qui est déplacée
+            caseEnDeplacement = e.target; 
             e.dataTransfer.setData('text/plain', e.target.textContent);
             e.target.classList.add('en-train-de-deplacer');
         }
 
-        /**
-         * Gère la fin du déplacement d'une case
-         * @param {DragEvent} e 
-         */
-        function gererFinDeplacement(e) {
-            if (jeuTermine) return; // Empêche le déplacement si le jeu est terminé
+        /*
+        Gère la fin du déplacement d'une case
+        */
+         
+         
+        function gererFinDeplacement(e) { 
             e.target.classList.remove('en-train-de-deplacer');
         }
 
         /**
          * Permet le survol d'une case par une autre en déplacement
-         * @param {DragEvent} e 
          */
         function gererSurvol(e) {
-            if (jeuTermine) return; // Empêche le déplacement si le jeu est terminé
             e.preventDefault(); // Permet le dépôt
         }
 
         /**
          * Gère le dépôt d'une lettre dans une nouvelle case
-         * @param {DragEvent} e 
          */
         function gererDepot(e) {
-            if (jeuTermine) return; // Empêche le déplacement si le jeu est terminé
             e.preventDefault();
 
             const lettre = e.dataTransfer.getData('text/plain');

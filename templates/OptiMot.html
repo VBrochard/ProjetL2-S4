@@ -65,7 +65,6 @@
         const nomJoueurElement = document.getElementById('nomJoueur');
         const nomJoueurInput = document.getElementById('nomJoueurInput');
         const connecterButton = document.getElementById('connecterButton');
-        const entrerButton = document.getElementById('entrerButton'); 
         const AuTourDeElement = document.getElementById("AuTourDe");
         let positionsLettresPosees = [];
         var nomJoueur;
@@ -289,7 +288,7 @@
         validerButton.addEventListener('click', () => {
             if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
                 socket.emit('victoireOM', nomJoueur)
-                console.log(nomJoueur)
+               
             }
             else {
                 const motsTrouves = extraireMotsGrille();
@@ -355,12 +354,10 @@
             if (tousValides) {
                 console.log("Tous les mots sont valides. Tour suivant.");
                 socket.emit('TransmissionCaseRemplieOM', { "position": positionsLettresPosees, "nomJ": nomJoueur });
-                console.log(positionsLettresPosees)
                 resetLettresPosees(0)
                 socket.emit('finTourOM');
             } else {
                 console.log("Certains mots sont invalides. Réinitialisation des lettres.");
-                console.log(positionsLettresPosees)
                 resetLettresPosees(1);
                 socket.emit('finTourOM');
             }
@@ -374,7 +371,6 @@
         });
 
         socket.on('lancementOM', data => {
-            console.log(data.liste[0])
             const elementsLettre = caseModifiable.querySelectorAll('.lettre');
             if (!(nomJoueur == data.liste[0])){
                 document.getElementById("validerButton").disabled = "true";
@@ -395,7 +391,6 @@
         })
 
         socket.on('tourSuivantOM', data => {
-            console.log(data,nomJoueur)
             const elementsLettre = caseModifiable.querySelectorAll('.lettre');
             if (!(nomJoueur == data)){
                 document.getElementById("validerButton").disabled = "true";

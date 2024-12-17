@@ -4,23 +4,17 @@ Phase 1 :
 
 Dhia :
 
-Interface Graphique Crée
+Interface Graphique des deux jeux
 Index qui emmène au different jeu
-
-Le mot le plus long :
-    interface graphique crée avec lettre déplaçable, et chrono implémentée
 
 Samy :
 
-Serveur Python fonctionnel avec les fonctions du jeu
-Toute les communications du serveur sont prêtes
+Fonctions du jeu
+
 
 Bastien :
 
 Interface texte en python qui communique avec le serveur et affiche les bons résultats
-A faire côté client:
-    -Débugger le début de partie à l'initiative d'un joueur: les premiers print ne s'affiche pas directement
-    -Faire le timer en utilisant le module select et la fonction readline pour éviter un input bloquant
 
 Vincent :
 
@@ -32,29 +26,15 @@ Pour lancer le serveur, écrire dans un terminal:
         
         - aller à l'adresse http://127.0.0.1:5000/ pour l'interface graphique
         - Lancer client.py dans un cmd pour l'interface texte
+        - Le plus long mot se lance à l'initiative du premier joueur qui a rejoint ou s'il le nombre maximum de joueur est atteint.
+        - Pour Opti'Mots, la partie se lance dès que le nombre maximum de joueurs est atteint 
 
 
 
+Le plus long mot:
+    -Phase 2 terminée
 
-A faire:
-    -créer une pioche pour le mot le plus long et les autres fonctions(Samy)
-    -timer côté client texte
-    -démarrer à l'initiative (à partir de 2 joueurs jusqu'à un maximum passé en paramètre), passer en paramètre la taille du deck
-    -modifier côté serveur les fonctions piocher en mettant en paramètre la liste à utiliser
+Opti'Mots:
+    -Manque la possibilité de jeter les cartes et de recouvrir les lettres
 
 
-Valeur des lettres dans le scrabble français :
-    A,E,I,L,N,O,R,S,T,U : 1 point
-    D,G,M : 2 points
-    B,C,P : 3 points
-    F,H,V : 4 points
-    J,Q : 8 points
-    K,W,X,Y,Z : 10 points
-
-Pour Opti'Mots (Phase 2):
-    -Chaque joueur reçoit 10 cartes au début
-    -5 cartes sont posées sur le plateau
-    -Possibilité de jeter n cartes pour en repiocher n+1
-    -Piocher une carte fait passer son tour
-    -Possibilité de recouvrir des lettres (si la lettre recouverte est différente de la lettre qu'on pose)
-    -

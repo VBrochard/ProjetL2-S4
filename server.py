@@ -286,12 +286,10 @@ def handle_connexionOM(data):
             retireUneCarte_opti(f)
             deckDepart.append(f)
         socketio.emit("lancementOM",{"liste" :listeJoueursOM,"depart" : deckDepart})
-        print(mainDepart)
 
 
 @socketio.on('victoireOM')
 def handle_victoireOM(data):
-    print(data)
     socketio.emit('afficheVictoireOM',data)
     
 @socketio.on('finTourOM')

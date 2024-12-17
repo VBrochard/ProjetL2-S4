@@ -154,3 +154,9 @@ if len(listeJoueurs) == 2:
                 sio.emit('Declancheur')
                 break
 '''
+
+def motMax(listeMots):
+    motsValides = [mot for mot in listeMots if motExiste(mot)]
+    return len(max(motsValides, key=len))
+
+
