@@ -456,6 +456,20 @@ def handle_connexionBSolitaire(data):
     mainDepart = genererUnDeck(cartes_regime,int(data))
     socketio.emit('MainDepart', mainDepart)
 
+@socketio.on('DemandePiocheSolitaire')
+def handle_DemandePioche():
+    carte = genererUnDeck(cartes_regime,1)[0]
+    socketio.emit('RetourPiocheSolitaire', carte )
+
+@socketio.on('verifierMotsSolitaire')
+def verifier_mots(mots):
+
+    # Valider tous les mots
+    tous_valides = all(motExiste(mot) for mot in mots)
+
+
+    emit('resultatValidationMotsSolitaire', tous_valides)
+
 
 
 if __name__ == '__main__':

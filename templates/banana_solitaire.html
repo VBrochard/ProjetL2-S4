@@ -26,8 +26,8 @@
 
             </div>
             <div class="piocher-button-wrapper">
-                <button class="piocher-button" id="piocherButton" hidden="true">Piocher</button>
-                <button class="valider-button" id="validerButton" hidden="true">Valider</button>
+                <button class="piocher-button" id="piocherButton">Piocher</button>
+                <button class="valider-button" id="validerButton">Valider</button>
             </div>
         </div>
 
@@ -63,7 +63,6 @@
         var nomJoueur;
 
         function genererGrille() {
-            //carte.innerHTML = '';
             for (let i = 0; i < 32 * 32; i++) {
                 const cellule = document.createElement('div');
                 cellule.classList.add('case');
@@ -110,38 +109,50 @@
         }
 
 
+        //Fonction qui cherche les mots horizontaux et verticaux
+        function trouverMots() {
+            const grille = document.querySelectorAll('.case');
+            const taille = 32;  // taille de la grille
+            let mots = [];
 
-
-        function extraireMotsGrille() {
-            //Renvoie tous les mots de la grille d'au moins 2 lettres
-            const tailleGrille = 32;
-            const motsTrouves = [];
-
-            for (let row = 0; row < tailleGrille; row++) {
-                let motCourant = '';
-                const motsDansLigne = [];
-                for (let col = 0; col < tailleGrille; col++) {
-                    const indexCellule = row * tailleGrille + col;
-                    const cellule = carte.children[indexCellule];
-                    const lettreElement = cellule.querySelector('.lettre');
-                    if (lettreElement && lettreElement.textContent) {
-
-                        motCourant += lettreElement.textContent;
-                    } else if (motCourant.length > 0) {
-                        if (motCourant.length >= 2) {
-                            motsDansLigne.push(motCourant);
+            // Fonction pour vérifier une séquence de cellules
+            function extraireMot(sequence) {
+                let mot = '';
+                for (let i = 0; i < sequence.length; i++) {
+                    if (sequence[i].textContent.trim() !== '') {
+                        mot += sequence[i].textContent;
+                    } else {
+                        if (mot.length > 1) {
+                            mots.push(mot);  // Ajouter le mot si sa longueur est supérieure à 1
                         }
-                        motCourant = '';
+                        mot = '';  // Réinitialiser le mot
                     }
                 }
-
-                if (motCourant.length > 0 && motCourant.length >= 2) {
-                    motsDansLigne.push(motCourant);
+                if (mot.length > 1) {
+                    mots.push(mot);  // Ajouter le dernier mot trouvé
                 }
-                motsTrouves.push(...motsDansLigne);
             }
-            console.log("Mots trouvés dans la grille :", motsTrouves);
-            return motsTrouves;
+
+            // Trouver les mots horizontaux
+            for (let i = 0; i < taille; i++) {
+                const ligne = [];
+                for (let j = 0; j < taille; j++) {
+                    ligne.push(grille[i * taille + j]);
+                }
+                extraireMot(ligne);
+            }
+
+            // Trouver les mots verticaux
+            for (let j = 0; j < taille; j++) {
+                const colonne = [];
+                for (let i = 0; i < taille; i++) {
+                    colonne.push(grille[i * taille + j]);
+                }
+                extraireMot(colonne);
+            }
+
+            console.log(mots)
+            return mots;
         }
 
 
@@ -188,8 +199,9 @@
                         nouvelleLettre.addEventListener('dragstart', gererDragStart);
                     }
                 });
-
+                console.log(positionsLettresPosees)
                 positionsLettresPosees = [];
+
                 console.log("Les lettres posées ont été réinitialisées.");
             }
         }
@@ -281,28 +293,24 @@
         }
 
         piocherButton.addEventListener('click', () => {
-            socket.emit('DemandePiocheOM', nomJoueur)
+            socket.emit('DemandePiocheSolitaire')
 
         });
 
 
         validerButton.addEventListener('click', () => {
-            if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
-                socket.emit('victoireOM', nomJoueur)
 
+
+            const motsTrouves = trouverMots();
+
+            if (motsTrouves.length === 0) {
+                console.log("Aucun mot formé !");
+                return;
             }
-            else {
-                const motsTrouves = extraireMotsGrille();
 
-                if (motsTrouves.length === 0) {
-                    console.log("Aucun mot formé !");
-                    socket.emit('finTourOM')
-                    return;
-                }
+            console.log("Envoi des mots au serveur pour validation :", motsTrouves);
+            socket.emit('verifierMotsSolitaire', motsTrouves);
 
-                console.log("Envoi des mots au serveur pour validation :", motsTrouves);
-                socket.emit('verifierMotsOM', motsTrouves);
-            }
         });
 
 
@@ -321,47 +329,41 @@
         });
 
 
-        socket.on('RetourPiocheOM', (data) => {
+        socket.on('RetourPiocheSolitaire', (data) => {
             //Ajoute au deck du joueur la carte piochée
-            carteTire = data.pioche
-            joueur = data.joueur
-            if (nomJoueur == joueur) {
-                const nouvelleCase = document.createElement('div');
-                nouvelleCase.classList.add('case');
-                nouvelleCase.style.backgroundColor = '#f0f0f0';
-                const nouvelleLettre = document.createElement('span');
-                nouvelleLettre.classList.add('lettre');
-                nouvelleLettre.textContent = carteTire;
-                nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
-                nouvelleCase.appendChild(nouvelleLettre);
-                caseModifiable.appendChild(nouvelleCase);
-                nouvelleLettre.setAttribute('draggable', 'true');
-                nouvelleLettre.addEventListener('dragstart', gererDragStart);
-                socket.emit('finTourOM')
-            }
+            carteTire = data
+            const nouvelleCase = document.createElement('div');
+            nouvelleCase.classList.add('case');
+            nouvelleCase.style.backgroundColor = '#f0f0f0';
+            const nouvelleLettre = document.createElement('span');
+            nouvelleLettre.classList.add('lettre');
+            nouvelleLettre.textContent = carteTire;
+            nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+            nouvelleCase.appendChild(nouvelleLettre);
+            caseModifiable.appendChild(nouvelleCase);
+            nouvelleLettre.setAttribute('draggable', 'true');
+            nouvelleLettre.addEventListener('dragstart', gererDragStart);
         })
 
 
         socket.on('MainDepart', (data) => {
-            document.getElementById('piocherButton').hidden = 'false'
-            document.getElementById('validerButton').hidden = 'false'
             genererLettresInitiales(data)
             genererLettresCentre(["A", "A", "A", "A", "A"])
         })
 
 
 
-        socket.on('resultatValidationMotsOM', (tousValides) => {
+        socket.on('resultatValidationMotsSolitaire', (tousValides) => {
             //Appel de resetLettresPosees en fonction du booléen tousValides
             if (tousValides) {
-                console.log("Tous les mots sont valides. Tour suivant.");
-                socket.emit('TransmissionCaseRemplieOM', { "position": positionsLettresPosees, "nomJ": nomJoueur });
+                console.log("Tous les mots sont valides.");
                 resetLettresPosees(0)
-                socket.emit('finTourOM');
+                if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
+                    console.log("Victoire")
+                }
             } else {
                 console.log("Certains mots sont invalides. Réinitialisation des lettres.");
                 resetLettresPosees(1);
-                socket.emit('finTourOM');
             }
         });
         zoomInButton.addEventListener('click', () => {
