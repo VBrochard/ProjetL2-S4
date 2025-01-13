@@ -326,5 +326,33 @@ def handle_TransmissionCaseRemplie(data):
     socketio.emit('MettreLettreOM',{"position" : tab, "nomJ" :  data['nomJ']})
 
 
+
+###############################################################################
+# Nécessaire Banana Solitaire
+
+lettres_regime = {"A": 14, "B": 3, "C": 4, "D":4, "E":21, "F":3, "G": 2, "H": 2, "I":12,"J":1, "K":1, "L":7, "M":4, "N":9, "O":9, "P":3, "Q":1, "R":9, "S":9, "T":9, "U":9,
+"V": 3, "W": 1, "X": 1, "Z": 2}
+
+cartes_regime = [carte for carte, freq in lettres_regime.items() for i in range(freq)]
+
+def genererUnDeck(cartes, taille):
+    deck = []
+    for i in range(taille):
+        a = randint(0, sommeDesFreq(cartes))
+        lettre = eniemeCarte(a, cartes)
+        deck.append(lettre)
+        cartes.remove(lettre)
+    return deck
+
+def deckBanana(nbj):
+    if(nbj == 2 or nbj == 3 or nbj == 4):
+        return genererUnDeck(cartes_regime, 21)
+    if(nbj == 5 or nbj == 6):
+        return genererUnDeck(cartes_regime, 15)
+    if(nbj == 7 or nbj == 8):
+        return genererUnDeck(cartes_regime, 11)
+    return "Erreur, le nombre de joueurs doit être compris entre 2 et 8 inclus "
+
+
 if __name__ == '__main__':
     socketio.run(app, host= '0.0.0.0', port=5000, debug=True)
