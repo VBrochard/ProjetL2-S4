@@ -171,3 +171,4 @@ def deckBanana(nbj):
         return genererUnDeck(cartes_regime, 11)
     return "Erreur, le nombre de joueurs doit être compris entre 2 et 8 inclus "
 
+print(genererUnDeck(cartes_regime,15))

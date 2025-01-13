@@ -13,7 +13,7 @@
 <body>
     <div class="container">
         <div class="absolute inset-0 flex items-center justify-center">
-            <div class="background-text">OPTI'MOT</div>
+            <div class="background-text"></div>
         </div>
 
         <div class="carte-wrapper">
@@ -36,8 +36,8 @@
                 <div class="case" id="case10" draggable="true"><span class="lettre" id="lettre10"></span></div>
             </div>
             <div class="piocher-button-wrapper">
-                <button class="piocher-button" id="piocherButton" >Piocher</button>
-                <button class="valider-button" id="validerButton" >Valider son tour</button>
+                <button class="piocher-button" id="piocherButton">Piocher</button>
+                <button class="valider-button" id="validerButton">Valider son tour</button>
             </div>
         </div>
 
@@ -47,8 +47,9 @@
         </div>
 
         <div class="nom-joueur-container">
-            <div>Nom Joueur:</div>
-            <input type="text" id="nomJoueurInput" placeholder="Entrez votre nom">
+            <div>Connexion Serveur : </div>
+            <input type="text" id="nomJoueurInput" placeholder="Nom">
+            <input type="text" id="TailleDeck" placeholder="Taille Main">
             <button class="connecter-button" id="connecterButton" onclick="desacConnexion()">Se connecter</button>
 
         </div>
@@ -60,9 +61,10 @@
         const zoomInButton = document.getElementById('zoomIn');
         const zoomOutButton = document.getElementById('zoomOut');
         const piocherButton = document.getElementById('piocherButton');
-        const validerButton = document.getElementById('validerButton'); 
+        const validerButton = document.getElementById('validerButton');
         const caseModifiable = document.getElementById('case-modifiable');
         const nomJoueurElement = document.getElementById('nomJoueur');
+        const TailleDeck = document.getElementById('TailleDeck')
         const nomJoueurInput = document.getElementById('nomJoueurInput');
         const connecterButton = document.getElementById('connecterButton');
         const AuTourDeElement = document.getElementById("AuTourDe");
@@ -70,7 +72,8 @@
         var nomJoueur;
 
         function genererGrille() {
-            for (let i = 0; i < 32 * 32; i++) {
+            carte.innerHTML = '';
+            for (let i = 0; i < 28 * 28; i++) {
                 const cellule = document.createElement('div');
                 cellule.classList.add('case');
                 cellule.setAttribute('draggable', 'false');
@@ -81,7 +84,7 @@
         }
 
         function genererLettresInitiales(maindepart) {
-            //Génère le deck de chaque joueur
+            //Génère le deck du joueur
             const elementsLettre = caseModifiable.querySelectorAll('.lettre');
             var i = 0
             elementsLettre.forEach(elementLettre => {
@@ -97,18 +100,18 @@
 
         function extraireMotsGrille() {
             //Renvoie tous les mots de la grille d'au moins 2 lettres
-            const tailleGrille = 32; 
-            const motsTrouves = []; 
+            const tailleGrille = 32;
+            const motsTrouves = [];
 
             for (let row = 0; row < tailleGrille; row++) {
-                let motCourant = ''; 
-                const motsDansLigne = []; 
+                let motCourant = '';
+                const motsDansLigne = [];
                 for (let col = 0; col < tailleGrille; col++) {
                     const indexCellule = row * tailleGrille + col;
-                    const cellule = carte.children[indexCellule]; 
-                    const lettreElement = cellule.querySelector('.lettre'); 
+                    const cellule = carte.children[indexCellule];
+                    const lettreElement = cellule.querySelector('.lettre');
                     if (lettreElement && lettreElement.textContent) {
-                        
+
                         motCourant += lettreElement.textContent;
                     } else if (motCourant.length > 0) {
                         if (motCourant.length >= 2) {
@@ -118,25 +121,25 @@
                     }
                 }
 
-                if (motCourant.length > 0 && motCourant.length >= 2) {  
+                if (motCourant.length > 0 && motCourant.length >= 2) {
                     motsDansLigne.push(motCourant);
                 }
-                motsTrouves.push(...motsDansLigne); 
+                motsTrouves.push(...motsDansLigne);
             }
             console.log("Mots trouvés dans la grille :", motsTrouves);
             return motsTrouves;
         }
 
-        
+
         function sauvegarderPositionLettre(lettreElement) {
             //Mets dans un tableau la position des lettres posées sur le plateau
-            const cellule = lettreElement.parentElement; 
-            const indexCellule = Array.from(carte.children).indexOf(cellule); 
+            const cellule = lettreElement.parentElement;
+            const indexCellule = Array.from(carte.children).indexOf(cellule);
 
             positionsLettresPosees.push({
                 index: indexCellule,
                 lettre: lettreElement.textContent,
-                cellule: cellule 
+                cellule: cellule
             });
         }
 
@@ -150,12 +153,12 @@
                 positionsLettresPosees.forEach(position => {
                     const { index, lettre, cellule } = position;
 
-                    
+
                     const lettreElement = cellule.querySelector('.lettre');
                     if (lettreElement) {
                         cellule.removeChild(lettreElement);
                     }
-                    
+
                     const caseVide = caseModifiable.querySelector('.case');
                     if (caseVide) {
                         const nouvelleCase = document.createElement('div');
@@ -171,24 +174,9 @@
                         nouvelleLettre.addEventListener('dragstart', gererDragStart);
                     }
                 });
-                
+
                 positionsLettresPosees = [];
                 console.log("Les lettres posées ont été réinitialisées.");
-            }
-        }
-
-        function genererLettresCentre(lettresListe) {
-            //Génère les 5 premières cartes du centre du plateau
-            const ligneCentre = 15;
-            const colonneCentre = 15;
-            for (let i = 0; i < 5; i++) {
-                const lettre = lettresListe[i];
-                const indexCellule = (ligneCentre + i) * 32 + colonneCentre;
-                const cellule = carte.children[indexCellule];
-                const elementLettre = document.createElement('span');
-                elementLettre.classList.add('lettre');
-                elementLettre.textContent = lettre;
-                cellule.appendChild(elementLettre);;
             }
         }
 
@@ -200,7 +188,7 @@
             event.preventDefault();
         }
 
-        function desacConnexion(){
+        function desacConnexion() {
             document.getElementsByClassName("nom-joueur-container").hidden = "true"
         }
 
@@ -252,31 +240,31 @@
             const cellule = carte.children[index];
             const elementLettre = document.createElement('span');
             elementLettre.classList.add('lettre');
-            elementLettre.textContent = lettre; 
+            elementLettre.textContent = lettre;
             cellule.appendChild(elementLettre)
         }
 
         function aVoisinAvecLettre(cellule) {
             //Vérifie si la lettre posée est mise à côté d'une autre lettre du plateau
             const index = Array.from(carte.children).indexOf(cellule);
-            const lignes = 32; 
-            const colonnes = 32; 
+            const lignes = 32;
+            const colonnes = 32;
 
             const voisins = [
                 index - colonnes,
                 index + colonnes,
-                index - 1,        
-                index + 1         
+                index - 1,
+                index + 1
             ];
 
             return voisins.some((voisinIndex) => {
-            if (voisinIndex >= 0 && voisinIndex < lignes * colonnes) { 
-                const voisin = carte.children[voisinIndex];
-                return voisin.hasChildNodes(); 
+                if (voisinIndex >= 0 && voisinIndex < lignes * colonnes) {
+                    const voisin = carte.children[voisinIndex];
+                    return voisin.hasChildNodes();
+                }
+                return false;
+            });
         }
-            return false;
-        });
-}
 
         piocherButton.addEventListener('click', () => {
             socket.emit('DemandePiocheOM', nomJoueur)
@@ -284,37 +272,37 @@
 
         });
 
-        
+
         validerButton.addEventListener('click', () => {
             if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
                 socket.emit('victoireOM', nomJoueur)
-               
+
             }
             else {
                 const motsTrouves = extraireMotsGrille();
-                
+
                 if (motsTrouves.length === 0) {
                     console.log("Aucun mot formé !");
                     socket.emit('finTourOM')
                     return;
                 }
-                
+
                 console.log("Envoi des mots au serveur pour validation :", motsTrouves);
                 socket.emit('verifierMotsOM', motsTrouves);
             }
         });
 
 
-        
+
         connecterButton.addEventListener('click', () => {
-            
-            nomJoueur = nomJoueurInput.value.trim();
-            if (nomJoueur) {
-                nomJoueurElement.textContent = "Joueur : " + nomJoueur;
-                socket.emit("connexionOM", nomJoueur)
-                nomJoueurInput.value = ''; 
+            nomJoueur = nomJoueurInput.value;
+            nombreDeck = TailleDeck.value;
+            console.log(nomJoueur)
+            console.log(nombreDeck)
+            if (nomJoueur && nombreDeck) {
+                socket.emit("connexionBSolitaire", nombreDeck)
             } else {
-                alert('Veuillez entrer un nom de joueur');
+                alert('Veuillez entrer un nom de joueur et la taille de votre deck');
             }
         });
 
@@ -341,10 +329,7 @@
 
 
         socket.on('MainDepart', (data) => {
-            if(nomJoueur == data.nom){
-                genererLettresInitiales(data.mainDepart)
-            }
-            return
+                genererLettresInitiales(data)
         })
 
 
@@ -370,61 +355,9 @@
             carte.style.transform = 'scale(0.8)';
         });
 
-        socket.on('lancementOM', data => {
-            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
-            if (!(nomJoueur == data.liste[0])){
-                document.getElementById("validerButton").disabled = "true";
-                document.getElementById("piocherButton").disabled = "true";
-                elementsLettre.forEach(elementLettre => {
-                    elementLettre.setAttribute('draggable', 'false');
-                })
-            }
-            else{
-                document.getElementById("validerButton").disabled = "";
-                document.getElementById("piocherButton").disabled = "";
-                elementsLettre.forEach(elementLettre => {
-                    elementLettre.setAttribute('draggable', 'true');
-                })
-            }
-            AuTourDeElement.textContent = "Au tour de : " + data.liste[0]
-            genererLettresCentre(data.depart)
-        })
-
-        socket.on('tourSuivantOM', data => {
-            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
-            if (!(nomJoueur == data)){
-                document.getElementById("validerButton").disabled = "true";
-                document.getElementById("piocherButton").disabled = "true";
-                
-                elementsLettre.forEach(elementLettre => {
-                    elementLettre.setAttribute('draggable', 'false');
-                })
-            }
-            else{
-                document.getElementById("validerButton").disabled = "";
-                document.getElementById("piocherButton").disabled = "";
-                elementsLettre.forEach(elementLettre => {
-                    elementLettre.setAttribute('draggable', 'true');
-                })
-            }
-            AuTourDeElement.textContent = "Au tour de : " + data
-        })
-
-        socket.on('afficheVictoireOM', data => {
-            AuTourDeElement.textContent = "Le vainqueur est " + data
-        })
 
 
-        socket.on('MettreLettreOM', (data) => {
-            tabLettre = data['position']
-            if (nomJoueur != data.nomJ) {
-                for (let i = 0; i < tabLettre.length; i++) {
-                    const element = tabLettre[i];
-                    ajouterLettreAIndex(element.index, element.lettre)
-                }
-            }
-        }
-        )
+
         genererGrille();
 
 
