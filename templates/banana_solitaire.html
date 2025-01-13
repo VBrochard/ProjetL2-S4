@@ -47,8 +47,9 @@
         </div>
 
         <div class="nom-joueur-container">
-            <div>Nom Joueur:</div>
-            <input type="text" id="nomJoueurInput" placeholder="Entrez votre nom">
+            <div>Connexion Serveur : </div>
+            <input type="text" id="nomJoueurInput" placeholder="Nom">
+            <input type="text" id="TailleDeck" placeholder="Taille Main">
             <button class="connecter-button" id="connecterButton" onclick="desacConnexion()">Se connecter</button>
 
         </div>
@@ -63,6 +64,7 @@
         const validerButton = document.getElementById('validerButton');
         const caseModifiable = document.getElementById('case-modifiable');
         const nomJoueurElement = document.getElementById('nomJoueur');
+        const TailleDeck = document.getElementById('TailleDeck')
         const nomJoueurInput = document.getElementById('nomJoueurInput');
         const connecterButton = document.getElementById('connecterButton');
         const AuTourDeElement = document.getElementById("AuTourDe");
@@ -70,6 +72,7 @@
         var nomJoueur;
 
         function genererGrille() {
+            carte.innerHTML = '';
             for (let i = 0; i < 28 * 28; i++) {
                 const cellule = document.createElement('div');
                 cellule.classList.add('case');
@@ -292,14 +295,14 @@
 
 
         connecterButton.addEventListener('click', () => {
-
-            nomJoueur = nomJoueurInput.value.trim();
-            if (nomJoueur) {
-                nomJoueurElement.textContent = "Joueur : " + nomJoueur;
-                socket.emit("connexionOM", nomJoueur)
-                nomJoueurInput.value = '';
+            nomJoueur = nomJoueurInput.value;
+            nombreDeck = TailleDeck.value;
+            console.log(nomJoueur)
+            console.log(nombreDeck)
+            if (nomJoueur && nombreDeck) {
+                socket.emit("connexionBSolitaire", nombreDeck)
             } else {
-                alert('Veuillez entrer un nom de joueur');
+                alert('Veuillez entrer un nom de joueur et la taille de votre deck');
             }
         });
 
@@ -326,10 +329,7 @@
 
 
         socket.on('MainDepart', (data) => {
-            if (nomJoueur == data.nom) {
-                genererLettresInitiales(data.mainDepart)
-            }
-            return
+                genererLettresInitiales(data)
         })
 
 

@@ -52,11 +52,8 @@ def ouvrirDico():
 
 dico = ouvrirDico()
 
-def sommeDesFreq():
-    b = 0
-    for lettre, freq in lettres_freq.items():
-        b+= freq
-    return b
+def sommeDesFreq(cartes):
+    return len(cartes)
 
 def eniemeCarte(n, tabCartes):
     return tabCartes[n - 1]
@@ -352,6 +349,13 @@ def deckBanana(nbj):
     if(nbj == 7 or nbj == 8):
         return genererUnDeck(cartes_regime, 11)
     return "Erreur, le nombre de joueurs doit être compris entre 2 et 8 inclus "
+
+
+@socketio.on('connexionBSolitaire')
+def handle_connexionBSolitaire(data):
+    mainDepart = genererUnDeck(cartes_regime,int(data))
+    socketio.emit('MainDepart', mainDepart)
+
 
 
 if __name__ == '__main__':
