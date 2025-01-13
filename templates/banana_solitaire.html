@@ -170,41 +170,34 @@
 
 
         function resetLettresPosees(valeur) {
-            //Renvoie les lettres au joueur si le(s) mots qu'il a formé(s) sont invalides
             if (valeur == 0) {
                 positionsLettresPosees = [];
-                return 0
+                return 0;
             } else {
                 positionsLettresPosees.forEach(position => {
                     const { index, lettre, cellule } = position;
-
-
                     const lettreElement = cellule.querySelector('.lettre');
                     if (lettreElement) {
                         cellule.removeChild(lettreElement);
                     }
+                    const nouvelleCase = document.createElement('div');
+                    nouvelleCase.classList.add('case');
+                    nouvelleCase.style.backgroundColor = '#f0f0f0';
+                    const nouvelleLettre = document.createElement('span');
+                    nouvelleLettre.classList.add('lettre');
+                    nouvelleLettre.textContent = lettre;
+                    nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                    nouvelleCase.appendChild(nouvelleLettre);
+                    caseModifiable.appendChild(nouvelleCase);
 
-                    const caseVide = caseModifiable.querySelector('.case');
-                    if (caseVide) {
-                        const nouvelleCase = document.createElement('div');
-                        nouvelleCase.classList.add('case');
-                        nouvelleCase.style.backgroundColor = '#f0f0f0';
-                        const nouvelleLettre = document.createElement('span');
-                        nouvelleLettre.classList.add('lettre');
-                        nouvelleLettre.textContent = lettre;
-                        nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
-                        nouvelleCase.appendChild(nouvelleLettre);
-                        caseModifiable.appendChild(nouvelleCase);
-                        nouvelleLettre.setAttribute('draggable', 'true');
-                        nouvelleLettre.addEventListener('dragstart', gererDragStart);
-                    }
+                    nouvelleLettre.setAttribute('draggable', 'true');
+                    nouvelleLettre.addEventListener('dragstart', gererDragStart);
                 });
-                console.log(positionsLettresPosees)
                 positionsLettresPosees = [];
-
                 console.log("Les lettres posées ont été réinitialisées.");
             }
         }
+
 
         function gererDragStart(event) {
             event.dataTransfer.setData('text', event.target.id);
