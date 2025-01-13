@@ -27,14 +27,9 @@ lettres_freq_lplm = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 
 lettres_freq_opti = {"A": 5, "B": 1, "C": 2, "D":2, "E":9, "F":2, "G": 1, "H": 1, "I":5,"J":1, "K":1, "L":3, "M":3, "N":3, "O":3, "P":2, "Q":1, "R":3, "S":4, "T":3, "U":3,
 "V": 2, "W": 1, "X": 1, "Z": 1}
 
-
 cartes_freq_lplm = [carte for carte, freq in lettres_freq_lplm.items() for i in range(freq)]
 cartes_freq_opti = [carte for carte, freq in lettres_freq_opti.items() for i in range(freq)]
 
-taille_deck_lplm = 7
-taille_deck_opti = 10
-
-print(cartes_freq_opti)
 
 def sommeDesFreq(cartes):
     return len(cartes)
@@ -70,13 +65,6 @@ def calculScore(mot):
         if lettre in lettres_points_10:
             score +=10
     return score
-
-def genererUnDeck(cartes, taille):
-    deck = []
-    for i in range(taille):
-        a = randint(0, sommeDesFreq(cartes))
-        deck.append(eniemeCarte(a, cartes))
-    return deck
 
 voyelles_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte in "AEIOUY" for i in range(freq)]
 consonnes_lplm = [carte for carte, freq in lettres_freq_lplm.items() if carte not in "AEIOUY" for i in range(freq)]
@@ -160,3 +148,31 @@ def motMax(listeMots):
     return len(max(motsValides, key=len))
 
 
+lettres_regime = {"A": 14, "B": 3, "C": 4, "D":4, "E":21, "F":3, "G": 2, "H": 2, "I":12,"J":1, "K":1, "L":7, "M":4, "N":9, "O":9, "P":3, "Q":1, "R":9, "S":9, "T":9, "U":9,
+"V": 3, "W": 1, "X": 1, "Z": 2}
+
+cartes_regime = [carte for carte, freq in lettres_regime.items() for i in range(freq)]
+
+def genererUnDeck(cartes, taille):
+    deck = []
+    for i in range(taille):
+        a = randint(0, sommeDesFreq(cartes))
+        lettre = eniemeCarte(a, cartes)
+        deck.append(lettre)
+        cartes.remove(lettre)
+    return deck
+
+def deckBanana(nbj):
+    if(nbj == 2 or nbj == 3 or nbj == 4):
+        return genererUnDeck(cartes_regime, 21)
+    if(nbj == 5 or nbj == 6):
+        return genererUnDeck(cartes_regime, 15)
+    if(nbj == 7 or nbj == 8):
+        return genererUnDeck(cartes_regime, 11)
+    return "Erreur, le nombre de joueurs doit être compris entre 2 et 8 inclus "
+
+print(cartes_regime)
+print("///////////")
+print(deckBanana(2))
+print("///////////")
+print(cartes_regime)
