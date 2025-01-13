@@ -151,43 +151,8 @@
                 extraireMot(colonne);
             }
 
+            console.log(mots)
             return mots;
-        }
-
-
-
-
-
-        function extraireMotsGrille() {
-            //Renvoie tous les mots de la grille d'au moins 2 lettres
-            const tailleGrille = 32;
-            const motsTrouves = [];
-
-            for (let row = 0; row < tailleGrille; row++) {
-                let motCourant = '';
-                const motsDansLigne = [];
-                for (let col = 0; col < tailleGrille; col++) {
-                    const indexCellule = row * tailleGrille + col;
-                    const cellule = carte.children[indexCellule];
-                    const lettreElement = cellule.querySelector('.lettre');
-                    if (lettreElement && lettreElement.textContent) {
-
-                        motCourant += lettreElement.textContent;
-                    } else if (motCourant.length > 0) {
-                        if (motCourant.length >= 2) {
-                            motsDansLigne.push(motCourant);
-                        }
-                        motCourant = '';
-                    }
-                }
-
-                if (motCourant.length > 0 && motCourant.length >= 2) {
-                    motsDansLigne.push(motCourant);
-                }
-                motsTrouves.push(...motsDansLigne);
-            }
-            console.log("Mots trouvés dans la grille :", motsTrouves);
-            return motsTrouves;
         }
 
 
@@ -234,8 +199,9 @@
                         nouvelleLettre.addEventListener('dragstart', gererDragStart);
                     }
                 });
-
+                console.log(positionsLettresPosees)
                 positionsLettresPosees = [];
+
                 console.log("Les lettres posées ont été réinitialisées.");
             }
         }
@@ -333,23 +299,18 @@
 
 
         validerButton.addEventListener('click', () => {
-            console.log(trouverMots())
-            if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
-                console.log("Victoire")
 
+
+            const motsTrouves = trouverMots();
+
+            if (motsTrouves.length === 0) {
+                console.log("Aucun mot formé !");
+                return;
             }
-            else {
-                const motsTrouves = extraireMotsGrille();
 
-                if (motsTrouves.length === 0) {
-                    console.log("Aucun mot formé !");
-                    socket.emit('finTourOM')
-                    return;
-                }
+            console.log("Envoi des mots au serveur pour validation :", motsTrouves);
+            socket.emit('verifierMotsSolitaire', motsTrouves);
 
-                console.log("Envoi des mots au serveur pour validation :", motsTrouves);
-                socket.emit('verifierMotsOM', motsTrouves);
-            }
         });
 
 
@@ -392,17 +353,17 @@
 
 
 
-        socket.on('resultatValidationMotsOM', (tousValides) => {
+        socket.on('resultatValidationMotsSolitaire', (tousValides) => {
             //Appel de resetLettresPosees en fonction du booléen tousValides
             if (tousValides) {
-                console.log("Tous les mots sont valides. Tour suivant.");
-                socket.emit('TransmissionCaseRemplieOM', { "position": positionsLettresPosees, "nomJ": nomJoueur });
+                console.log("Tous les mots sont valides.");
                 resetLettresPosees(0)
-                socket.emit('finTourOM');
+                if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
+                    console.log("Victoire")
+                }
             } else {
                 console.log("Certains mots sont invalides. Réinitialisation des lettres.");
                 resetLettresPosees(1);
-                socket.emit('finTourOM');
             }
         });
         zoomInButton.addEventListener('click', () => {
