@@ -4,6 +4,8 @@ from random import *
 from itertools import permutations
 import sys
 import time
+import requests
+from bs4 import BeautifulSoup
 
 
 
@@ -98,6 +100,79 @@ def retireUneVoyelle_lplm(lettre):
 
 def retireUneConsonne_lplm(lettre):
     consonnes.remove(lettre)
+
+def splitUpper(txt):
+    ajout = False
+    res = ""
+    
+    for i in range(len(txt)):
+        if ((txt[i].isupper() or txt[i] == "(") and ajout==False ):
+            res+=txt[i]
+            ajout = True
+            
+        elif txt[i] == "<":
+            ajout=False
+            
+        else:
+            if ajout:
+                res+=txt[i]
+    return res
+
+def recupInfoMot(mot):
+    mot = mot.lower()
+    nature = ""
+    definition = ""
+    nb_lettres = len(mot)
+    premiereLettre = mot[0]
+    listeTerminaisons = ["er","ir","re"]
+    url = "https://fr.wikwik.org/"+mot
+    response = requests.get(url)
+    if response.status_code == 200:
+
+        soup = BeautifulSoup(response.content,"html.parser")
+        ligne = soup.find_all("li")[:1]
+
+        if " art." in str(ligne[0]):
+            nature = "Article"
+        
+        elif " n." in str(ligne[0]):
+            nature = "Nom"
+        
+        elif " conj. " in str(ligne[0]):
+            nature = "Conjonction"
+        
+        elif " v. " in str(ligne[0]):
+            nature = "Verbe"
+        
+        elif " adj. " in str(ligne[0]):
+            nature = "Adjectif"
+        
+        elif " pron." in str(ligne[0]):
+            nature = "Pronom"
+        
+        elif " adv." in str(ligne[0]):
+            nature = "Adverbe"
+
+        elif " interj." in str(ligne[0]) or " ono. " in str(ligne[0]):
+            nature = "Interjection"
+        
+        elif " prép." in str(ligne[0]):
+            nature = "Préposition"
+
+        definition=splitUpper(str(ligne[0]))
+        if nature == "Verbe" and not(mot[:(len(mot)-2)] in listeTerminaisons):
+            coupe = definition.split()
+            definition = ""
+            for i in range(len(coupe)-2):
+                if i<len(coupe)-2:
+                    definition+=coupe[i]+" "
+                else:
+                    definition+=coupe[i]
+        
+        return ["Longueur du mot: "+str(len(mot)), "Nature du mot: "+nature , "Première lettre du mot: "+mot[0], "Définition du mot: "+definition]
+    else:
+        print("Chargement de la page impossible")
+        return   
 
 @app.route('/Ressources/<path:filename>')
 def ressources(filename):
@@ -207,6 +282,7 @@ def handle_envoieMot(data):
     global listePropositions
     global listeMots
 
+
     listePropositions.append([data.get("nom"),data.get("mot")])
     listeMots.append(data.get("mot"))
     
@@ -249,6 +325,11 @@ def handle_envoieMot(data):
         listePropositions = []
         listeMots = []
 
+@socketio.on('indice')
+def handle_demandeIndice(data):
+    global deck
+    listeIndices = recupInfoMot(motLePlusLong(deck))
+    socketio.emit('retourIndice',{"indice":listeIndices[data.get("nbIndices")], "nomJoueur":data.get("nomJoueur")})
 
 ##########################################################################
 #Variables Opti'Mot

@@ -14,6 +14,7 @@
         let tailleDeck = 7;
         let nomJoueur;
         let TokenValide = false
+        let nbIndices = 0;
 
         socket.on('EnvoieTailleDeck', (data) => {
             tailleDeck = data
@@ -93,6 +94,7 @@
             timer.hidden = false;
             TokenValide = false;
             activBouton('valider')
+            activBouton('bouton-indice')
             desacBouton('prochain')
             deck = data.deck
             initialiserGrille()
@@ -107,6 +109,7 @@
         socket.on('résultat', (data) => {
             var timer = document.getElementById('timer')
             timer.hidden = true;
+            desacBouton('bouton-indice')
             activBouton('prochain')
             var NomMeilleurJoueur = data.nom
             var ListeJoueurs = data.ListeScore
@@ -130,6 +133,13 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
 
+        socket.on('retourIndice', (data) => {
+            if (data.nomJoueur == nomJoueur){
+                document.getElementById('Systeme').value += data.indice + "\n";
+            }
+            
+        })
+
     </script>
 </head>
 
@@ -145,6 +155,7 @@
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
     <div class="button-container">
+        <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice</button>
         <button id="bouton-valider" onclick="EnvoieMot()" hidden=true>Valider</button>
         <button id="newTour" onclick="ProchainTour()" hidden=true>Prêt pour le prochain</button>
     </div>
@@ -186,9 +197,18 @@
             }
         }
 
+        function demandeIndice(){
+            socket.emit('indice',{"nbIndices": nbIndices, "nomJoueur": nomJoueur});
+            nbIndices++;
+            if (nbIndices == 4){
+                document.getElementById("bouton-indice").hidden = "true";
+            }
+        }
+
 
         function EnvoieMot() {
             TokenValide = true
+            nbIndices = 0
             desacBouton('valider')
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
@@ -198,6 +218,7 @@
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
             socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
+            
         }
 
         function tirage(e) {
@@ -339,6 +360,7 @@
         }
 
         function desacBouton(idBouton) {
+            let indice = document.getElementById('bouton-indice');
             let newtour = document.getElementById('newTour');
             let barrivee = document.getElementById('arrivee');
             let valider = document.getElementById('bouton-valider')
@@ -370,6 +392,10 @@
                 lancerPartie.hidden = true
                 return 0
             }
+            if (idBouton == 'bouton-indice'){
+                indice.hidden = false
+                return 0
+            }
         }
 
         function activBouton(idBouton) {
@@ -378,6 +404,7 @@
             let valider = document.getElementById('bouton-valider')
             let msgTempsEcoule = document.getElementById('tempsEcoule')
             let lancerPartie = document.getElementById('Lancement')
+            let indice = document.getElementById('bouton-indice');
             var voy = document.getElementById('voyelle')
             var cons = document.getElementById('consonne')
             if (idBouton == 'arrivee') {
@@ -402,6 +429,10 @@
             }
             if (idBouton == 'Lancement') {
                 lancerPartie.hidden = false
+                return 0
+            }
+            if (idBouton == 'bouton-indice'){
+                indice.hidden = false
                 return 0
             }
         }
