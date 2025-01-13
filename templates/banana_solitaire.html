@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banana Solitaire</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/Ressources/style_banana_solitaire.css">
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="absolute inset-0 flex items-center justify-center">
+            <div class="background-text">OPTI'MOT</div>
+        </div>
+
+        <div class="carte-wrapper">
+            <div class="carte" id="carte"></div>
+        </div>
+
+        <div class="info-box">
+            <div id="AuTourDe">Au tour de :</div>
+            <div id="nomJoueur">Joueur:</div>
+            <div class="case-modifiable" id="case-modifiable">
+                <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
+                <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
+                <div class="case" id="case3" draggable="true"><span class="lettre" id="lettre3"></span></div>
+                <div class="case" id="case4" draggable="true"><span class="lettre" id="lettre4"></span></div>
+                <div class="case" id="case5" draggable="true"><span class="lettre" id="lettre5"></span></div>
+                <div class="case" id="case6" draggable="true"><span class="lettre" id="lettre6"></span></div>
+                <div class="case" id="case7" draggable="true"><span class="lettre" id="lettre7"></span></div>
+                <div class="case" id="case8" draggable="true"><span class="lettre" id="lettre8"></span></div>
+                <div class="case" id="case9" draggable="true"><span class="lettre" id="lettre9"></span></div>
+                <div class="case" id="case10" draggable="true"><span class="lettre" id="lettre10"></span></div>
+            </div>
+            <div class="piocher-button-wrapper">
+                <button class="piocher-button" id="piocherButton" >Piocher</button>
+                <button class="valider-button" id="validerButton" >Valider son tour</button>
+            </div>
+        </div>
+
+        <div class="boutons-zoom">
+            <button id="zoomIn">+</button>
+            <button id="zoomOut">-</button>
+        </div>
+
+        <div class="nom-joueur-container">
+            <div>Nom Joueur:</div>
+            <input type="text" id="nomJoueurInput" placeholder="Entrez votre nom">
+            <button class="connecter-button" id="connecterButton" onclick="desacConnexion()">Se connecter</button>
+
+        </div>
+    </div>
+
+    <script>
+        const socket = io()
+        const carte = document.querySelector('#carte');
+        const zoomInButton = document.getElementById('zoomIn');
+        const zoomOutButton = document.getElementById('zoomOut');
+        const piocherButton = document.getElementById('piocherButton');
+        const validerButton = document.getElementById('validerButton'); 
+        const caseModifiable = document.getElementById('case-modifiable');
+        const nomJoueurElement = document.getElementById('nomJoueur');
+        const nomJoueurInput = document.getElementById('nomJoueurInput');
+        const connecterButton = document.getElementById('connecterButton');
+        const AuTourDeElement = document.getElementById("AuTourDe");
+        let positionsLettresPosees = [];
+        var nomJoueur;
+
+        function genererGrille() {
+            for (let i = 0; i < 32 * 32; i++) {
+                const cellule = document.createElement('div');
+                cellule.classList.add('case');
+                cellule.setAttribute('draggable', 'false');
+                cellule.addEventListener('dragover', gererDragOver);
+                cellule.addEventListener('drop', gererDrop);
+                carte.appendChild(cellule);
+            }
+        }
+
+        function genererLettresInitiales(maindepart) {
+            //Génère le deck de chaque joueur
+            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
+            var i = 0
+            elementsLettre.forEach(elementLettre => {
+                elementLettre.textContent = maindepart[i];
+                elementLettre.setAttribute('draggable', 'true');
+                elementLettre.addEventListener('dragstart', gererDragStart);
+                i++
+            });
+        }
+
+
+
+
+        function extraireMotsGrille() {
+            //Renvoie tous les mots de la grille d'au moins 2 lettres
+            const tailleGrille = 32; 
+            const motsTrouves = []; 
+
+            for (let row = 0; row < tailleGrille; row++) {
+                let motCourant = ''; 
+                const motsDansLigne = []; 
+                for (let col = 0; col < tailleGrille; col++) {
+                    const indexCellule = row * tailleGrille + col;
+                    const cellule = carte.children[indexCellule]; 
+                    const lettreElement = cellule.querySelector('.lettre'); 
+                    if (lettreElement && lettreElement.textContent) {
+                        
+                        motCourant += lettreElement.textContent;
+                    } else if (motCourant.length > 0) {
+                        if (motCourant.length >= 2) {
+                            motsDansLigne.push(motCourant);
+                        }
+                        motCourant = '';
+                    }
+                }
+
+                if (motCourant.length > 0 && motCourant.length >= 2) {  
+                    motsDansLigne.push(motCourant);
+                }
+                motsTrouves.push(...motsDansLigne); 
+            }
+            console.log("Mots trouvés dans la grille :", motsTrouves);
+            return motsTrouves;
+        }
+
+        
+        function sauvegarderPositionLettre(lettreElement) {
+            //Mets dans un tableau la position des lettres posées sur le plateau
+            const cellule = lettreElement.parentElement; 
+            const indexCellule = Array.from(carte.children).indexOf(cellule); 
+
+            positionsLettresPosees.push({
+                index: indexCellule,
+                lettre: lettreElement.textContent,
+                cellule: cellule 
+            });
+        }
+
+
+        function resetLettresPosees(valeur) {
+            //Renvoie les lettres au joueur si le(s) mots qu'il a formé(s) sont invalides
+            if (valeur == 0) {
+                positionsLettresPosees = [];
+                return 0
+            } else {
+                positionsLettresPosees.forEach(position => {
+                    const { index, lettre, cellule } = position;
+
+                    
+                    const lettreElement = cellule.querySelector('.lettre');
+                    if (lettreElement) {
+                        cellule.removeChild(lettreElement);
+                    }
+                    
+                    const caseVide = caseModifiable.querySelector('.case');
+                    if (caseVide) {
+                        const nouvelleCase = document.createElement('div');
+                        nouvelleCase.classList.add('case');
+                        nouvelleCase.style.backgroundColor = '#f0f0f0';
+                        const nouvelleLettre = document.createElement('span');
+                        nouvelleLettre.classList.add('lettre');
+                        nouvelleLettre.textContent = lettre;
+                        nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                        nouvelleCase.appendChild(nouvelleLettre);
+                        caseModifiable.appendChild(nouvelleCase);
+                        nouvelleLettre.setAttribute('draggable', 'true');
+                        nouvelleLettre.addEventListener('dragstart', gererDragStart);
+                    }
+                });
+                
+                positionsLettresPosees = [];
+                console.log("Les lettres posées ont été réinitialisées.");
+            }
+        }
+
+        function genererLettresCentre(lettresListe) {
+            //Génère les 5 premières cartes du centre du plateau
+            const ligneCentre = 15;
+            const colonneCentre = 15;
+            for (let i = 0; i < 5; i++) {
+                const lettre = lettresListe[i];
+                const indexCellule = (ligneCentre + i) * 32 + colonneCentre;
+                const cellule = carte.children[indexCellule];
+                const elementLettre = document.createElement('span');
+                elementLettre.classList.add('lettre');
+                elementLettre.textContent = lettre;
+                cellule.appendChild(elementLettre);;
+            }
+        }
+
+        function gererDragStart(event) {
+            event.dataTransfer.setData('text', event.target.id);
+        }
+
+        function gererDragOver(event) {
+            event.preventDefault();
+        }
+
+        function desacConnexion(){
+            document.getElementsByClassName("nom-joueur-container").hidden = "true"
+        }
+
+        function gererDrop(event) {
+            event.preventDefault();
+
+            const lettreId = event.dataTransfer.getData('text');
+            const elementLettre = document.getElementById(lettreId);
+            const celluleCible = event.target;
+
+            if (celluleCible.classList.contains('case') && !celluleCible.hasChildNodes() && aVoisinAvecLettre(celluleCible)) {
+                const nouvelleLettreElement = document.createElement('span');
+                nouvelleLettreElement.classList.add('lettre');
+                nouvelleLettreElement.textContent = elementLettre.textContent;
+                celluleCible.appendChild(nouvelleLettreElement);
+
+                const lettreParent = elementLettre.parentElement;
+                if (lettreParent) {
+                    lettreParent.removeChild(elementLettre);
+                }
+
+                sauvegarderPositionLettre(nouvelleLettreElement);
+                document.getElementById('piocherButton').disabled = 'true'
+
+                supprimerCaseVide();
+            }
+        }
+
+
+        function supprimerCaseVide() {
+            const casesSousNom = caseModifiable.querySelectorAll('.case');
+            casesSousNom.forEach(caseElement => {
+                if (!caseElement.hasChildNodes()) {
+                    caseElement.remove();
+                }
+            });
+        }
+
+        function activerDragPourLettres() {
+            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
+            elementsLettre.forEach(lettre => {
+                lettre.setAttribute('draggable', 'true');
+                lettre.addEventListener('dragstart', gererDragStart);
+            });
+        }
+
+        function ajouterLettreAIndex(index, lettre) {
+
+            const cellule = carte.children[index];
+            const elementLettre = document.createElement('span');
+            elementLettre.classList.add('lettre');
+            elementLettre.textContent = lettre; 
+            cellule.appendChild(elementLettre)
+        }
+
+        function aVoisinAvecLettre(cellule) {
+            //Vérifie si la lettre posée est mise à côté d'une autre lettre du plateau
+            const index = Array.from(carte.children).indexOf(cellule);
+            const lignes = 32; 
+            const colonnes = 32; 
+
+            const voisins = [
+                index - colonnes,
+                index + colonnes,
+                index - 1,        
+                index + 1         
+            ];
+
+            return voisins.some((voisinIndex) => {
+            if (voisinIndex >= 0 && voisinIndex < lignes * colonnes) { 
+                const voisin = carte.children[voisinIndex];
+                return voisin.hasChildNodes(); 
+        }
+            return false;
+        });
+}
+
+        piocherButton.addEventListener('click', () => {
+            socket.emit('DemandePiocheOM', nomJoueur)
+            resetLettresPosees(1)
+
+        });
+
+        
+        validerButton.addEventListener('click', () => {
+            if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
+                socket.emit('victoireOM', nomJoueur)
+               
+            }
+            else {
+                const motsTrouves = extraireMotsGrille();
+                
+                if (motsTrouves.length === 0) {
+                    console.log("Aucun mot formé !");
+                    socket.emit('finTourOM')
+                    return;
+                }
+                
+                console.log("Envoi des mots au serveur pour validation :", motsTrouves);
+                socket.emit('verifierMotsOM', motsTrouves);
+            }
+        });
+
+
+        
+        connecterButton.addEventListener('click', () => {
+            
+            nomJoueur = nomJoueurInput.value.trim();
+            if (nomJoueur) {
+                nomJoueurElement.textContent = "Joueur : " + nomJoueur;
+                socket.emit("connexionOM", nomJoueur)
+                nomJoueurInput.value = ''; 
+            } else {
+                alert('Veuillez entrer un nom de joueur');
+            }
+        });
+
+
+        socket.on('RetourPiocheOM', (data) => {
+            //Ajoute au deck du joueur la carte piochée
+            carteTire = data.pioche
+            joueur = data.joueur
+            if (nomJoueur == joueur) {
+                const nouvelleCase = document.createElement('div');
+                nouvelleCase.classList.add('case');
+                nouvelleCase.style.backgroundColor = '#f0f0f0';
+                const nouvelleLettre = document.createElement('span');
+                nouvelleLettre.classList.add('lettre');
+                nouvelleLettre.textContent = carteTire;
+                nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                nouvelleCase.appendChild(nouvelleLettre);
+                caseModifiable.appendChild(nouvelleCase);
+                nouvelleLettre.setAttribute('draggable', 'true');
+                nouvelleLettre.addEventListener('dragstart', gererDragStart);
+                socket.emit('finTourOM')
+            }
+        })
+
+
+        socket.on('MainDepart', (data) => {
+            if(nomJoueur == data.nom){
+                genererLettresInitiales(data.mainDepart)
+            }
+            return
+        })
+
+
+
+        socket.on('resultatValidationMotsOM', (tousValides) => {
+            //Appel de resetLettresPosees en fonction du booléen tousValides
+            if (tousValides) {
+                console.log("Tous les mots sont valides. Tour suivant.");
+                socket.emit('TransmissionCaseRemplieOM', { "position": positionsLettresPosees, "nomJ": nomJoueur });
+                resetLettresPosees(0)
+                socket.emit('finTourOM');
+            } else {
+                console.log("Certains mots sont invalides. Réinitialisation des lettres.");
+                resetLettresPosees(1);
+                socket.emit('finTourOM');
+            }
+        });
+        zoomInButton.addEventListener('click', () => {
+            carte.style.transform = 'scale(1.2)';
+        });
+
+        zoomOutButton.addEventListener('click', () => {
+            carte.style.transform = 'scale(0.8)';
+        });
+
+        socket.on('lancementOM', data => {
+            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
+            if (!(nomJoueur == data.liste[0])){
+                document.getElementById("validerButton").disabled = "true";
+                document.getElementById("piocherButton").disabled = "true";
+                elementsLettre.forEach(elementLettre => {
+                    elementLettre.setAttribute('draggable', 'false');
+                })
+            }
+            else{
+                document.getElementById("validerButton").disabled = "";
+                document.getElementById("piocherButton").disabled = "";
+                elementsLettre.forEach(elementLettre => {
+                    elementLettre.setAttribute('draggable', 'true');
+                })
+            }
+            AuTourDeElement.textContent = "Au tour de : " + data.liste[0]
+            genererLettresCentre(data.depart)
+        })
+
+        socket.on('tourSuivantOM', data => {
+            const elementsLettre = caseModifiable.querySelectorAll('.lettre');
+            if (!(nomJoueur == data)){
+                document.getElementById("validerButton").disabled = "true";
+                document.getElementById("piocherButton").disabled = "true";
+                
+                elementsLettre.forEach(elementLettre => {
+                    elementLettre.setAttribute('draggable', 'false');
+                })
+            }
+            else{
+                document.getElementById("validerButton").disabled = "";
+                document.getElementById("piocherButton").disabled = "";
+                elementsLettre.forEach(elementLettre => {
+                    elementLettre.setAttribute('draggable', 'true');
+                })
+            }
+            AuTourDeElement.textContent = "Au tour de : " + data
+        })
+
+        socket.on('afficheVictoireOM', data => {
+            AuTourDeElement.textContent = "Le vainqueur est " + data
+        })
+
+
+        socket.on('MettreLettreOM', (data) => {
+            tabLettre = data['position']
+            if (nomJoueur != data.nomJ) {
+                for (let i = 0; i < tabLettre.length; i++) {
+                    const element = tabLettre[i];
+                    ajouterLettreAIndex(element.index, element.lettre)
+                }
+            }
+        }
+        )
+        genererGrille();
+
+
+    </script>
+</body>
+
+</html>

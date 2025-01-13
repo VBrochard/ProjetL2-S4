@@ -119,6 +119,10 @@ def LeMotlepluslong():
 def Optimot():
     return render_template('OptiMot.html')
 
+@app.route('/banana_solitaire.html')
+def Banana_Solitaire():
+    return render_template('banana_solitaire.html')
+
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
     global ListeJoueurs
