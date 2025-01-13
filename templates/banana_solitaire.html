@@ -21,7 +21,7 @@
         </div>
 
         <div class="info-box">
-            <div id="nomJoueur"></div>
+            <div id="nomJoueur">Bonne Chance !</div>
             <div class="case-modifiable" id="case-modifiable">
 
             </div>
@@ -36,7 +36,7 @@
             <button id="zoomOut">-</button>
         </div>
 
-        <div class="nom-joueur-container">
+        <div class="nom-joueur-container" id="ConnexionDiv">
             <div>Connexion Serveur : </div>
             <input type="text" id="nomJoueurInput" placeholder="Nom">
             <input type="text" id="TailleDeck" placeholder="Taille Main">
@@ -349,13 +349,22 @@
         socket.on('resultatValidationMotsSolitaire', (tousValides) => {
             //Appel de resetLettresPosees en fonction du booléen tousValides
             if (tousValides) {
-                console.log("Tous les mots sont valides.");
-                resetLettresPosees(0)
+
+                if (document.querySelectorAll("#case-modifiable .lettre").length > 0) {
+                    console.log("Tous les mots sont valides mais le deck pas utilisée entierement");
+                    document.getElementById('nomJoueur').textContent = "Il faut placer toute tes lettres pour gagner"
+                    resetLettresPosees(1)
+                    return
+                }
+
                 if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
+                    document.getElementById('nomJoueur').textContent = "Victoire !!!!"
                     console.log("Victoire")
                 }
+
             } else {
                 console.log("Certains mots sont invalides. Réinitialisation des lettres.");
+                document.getElementById('nomJoueur').textContent = "Dommage, réessaye !"
                 resetLettresPosees(1);
             }
         });
