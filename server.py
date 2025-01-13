@@ -73,6 +73,8 @@ def tirageCarteConsonne():
 
 def motMax(listeMots):
     motsValides = [mot for mot in listeMots if motExiste(mot)]
+    if motsValides == []:
+        return 0
     return len(max(motsValides, key=len))
 
 def retireDoublon(liste):
@@ -291,7 +293,7 @@ def handle_envoieMot(data):
     nomsVainqueurs = []
     scoresVainqueurs = []
     if TokenReponse == nbrJoueur:
-
+        
         tailleMotPlusGrand = motMax(listeMots)
         for reponse in listePropositions:
             if len(reponse[1]) == tailleMotPlusGrand and motExiste(reponse[1]):

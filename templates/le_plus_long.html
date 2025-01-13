@@ -209,7 +209,9 @@
         function EnvoieMot() {
             TokenValide = true
             nbIndices = 0
+            mot = ""
             desacBouton('valider')
+            desacBouton('bouton-indice')
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
@@ -342,6 +344,7 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
+            
             tempsRestant = 30
             timerInterval = setInterval(function () {
                 tempsRestant--;
@@ -353,6 +356,7 @@
                         return 0
                     }
                     EnvoieMot();
+                    desacBouton('bouton-indice')
                     clearInterval(timerInterval);
                     document.getElementById('timer').hidden = true;
                 }
