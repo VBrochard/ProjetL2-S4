@@ -34,7 +34,7 @@
     display: grid;
     grid-template-columns: repeat(32, 1fr);
     grid-template-rows: repeat(32, 1fr);
-    gap: 0;
+    gap: 0px;
     transition: transform 0.1s ease-out;
     max-width: 100%;
     max-height: 100%;

@@ -21,23 +21,13 @@
         </div>
 
         <div class="info-box">
-            <div id="AuTourDe">Au tour de :</div>
-            <div id="nomJoueur">Joueur:</div>
+            <div id="nomJoueur"></div>
             <div class="case-modifiable" id="case-modifiable">
-                <div class="case" id="case1" draggable="true"><span class="lettre" id="lettre1"></span></div>
-                <div class="case" id="case2" draggable="true"><span class="lettre" id="lettre2"></span></div>
-                <div class="case" id="case3" draggable="true"><span class="lettre" id="lettre3"></span></div>
-                <div class="case" id="case4" draggable="true"><span class="lettre" id="lettre4"></span></div>
-                <div class="case" id="case5" draggable="true"><span class="lettre" id="lettre5"></span></div>
-                <div class="case" id="case6" draggable="true"><span class="lettre" id="lettre6"></span></div>
-                <div class="case" id="case7" draggable="true"><span class="lettre" id="lettre7"></span></div>
-                <div class="case" id="case8" draggable="true"><span class="lettre" id="lettre8"></span></div>
-                <div class="case" id="case9" draggable="true"><span class="lettre" id="lettre9"></span></div>
-                <div class="case" id="case10" draggable="true"><span class="lettre" id="lettre10"></span></div>
+
             </div>
             <div class="piocher-button-wrapper">
-                <button class="piocher-button" id="piocherButton">Piocher</button>
-                <button class="valider-button" id="validerButton">Valider son tour</button>
+                <button class="piocher-button" id="piocherButton" hidden="true">Piocher</button>
+                <button class="valider-button" id="validerButton" hidden="true">Valider</button>
             </div>
         </div>
 
@@ -68,12 +58,13 @@
         const nomJoueurInput = document.getElementById('nomJoueurInput');
         const connecterButton = document.getElementById('connecterButton');
         const AuTourDeElement = document.getElementById("AuTourDe");
+        let tailleDeck = 0;
         let positionsLettresPosees = [];
         var nomJoueur;
 
         function genererGrille() {
-            carte.innerHTML = '';
-            for (let i = 0; i < 28 * 28; i++) {
+            //carte.innerHTML = '';
+            for (let i = 0; i < 32 * 32; i++) {
                 const cellule = document.createElement('div');
                 cellule.classList.add('case');
                 cellule.setAttribute('draggable', 'false');
@@ -83,16 +74,39 @@
             }
         }
 
+        function genererLettresCentre(lettresListe) {
+            //Génère les 5 premières cartes du centre du plateau
+            const ligneCentre = 31;
+            const colonneCentre = 31;
+            for (let i = 0; i < 1; i++) {
+                const lettre = lettresListe[i];
+                const indexCellule = (ligneCentre + i) * 32 + colonneCentre;
+                const cellule = carte.children[indexCellule];
+                const elementLettre = document.createElement('span');
+                elementLettre.classList.add('lettre');
+                elementLettre.textContent = lettre;
+                cellule.appendChild(elementLettre);;
+            }
+        }
+
         function genererLettresInitiales(maindepart) {
             //Génère le deck du joueur
             const elementsLettre = caseModifiable.querySelectorAll('.lettre');
             var i = 0
-            elementsLettre.forEach(elementLettre => {
-                elementLettre.textContent = maindepart[i];
-                elementLettre.setAttribute('draggable', 'true');
-                elementLettre.addEventListener('dragstart', gererDragStart);
+            for (var j = 0; j < tailleDeck; j++) {
+                const nouvelleCase = document.createElement('div');
+                nouvelleCase.classList.add('case');
+                nouvelleCase.style.backgroundColor = '#f0f0f0';
+                const nouvelleLettre = document.createElement('span');
+                nouvelleLettre.classList.add('lettre');
+                nouvelleLettre.textContent = maindepart[i];
+                nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                nouvelleCase.appendChild(nouvelleLettre);
+                caseModifiable.appendChild(nouvelleCase);
+                nouvelleLettre.setAttribute('draggable', 'true');
+                nouvelleLettre.addEventListener('dragstart', gererDragStart);
                 i++
-            });
+            };
         }
 
 
@@ -199,23 +213,23 @@
             const elementLettre = document.getElementById(lettreId);
             const celluleCible = event.target;
 
-            if (celluleCible.classList.contains('case') && !celluleCible.hasChildNodes() && aVoisinAvecLettre(celluleCible)) {
-                const nouvelleLettreElement = document.createElement('span');
-                nouvelleLettreElement.classList.add('lettre');
-                nouvelleLettreElement.textContent = elementLettre.textContent;
-                celluleCible.appendChild(nouvelleLettreElement);
-
-                const lettreParent = elementLettre.parentElement;
-                if (lettreParent) {
-                    lettreParent.removeChild(elementLettre);
+            if (celluleCible.classList.contains('case')) {
+                if (!celluleCible.hasChildNodes()) {
+                    celluleCible.appendChild(elementLettre);
+                } else {
+                    const lettreExistante = celluleCible.querySelector('.lettre');
+                    if (lettreExistante) {
+                        caseModifiable.appendChild(lettreExistante);
+                    }
+                    celluleCible.appendChild(elementLettre);
                 }
-
-                sauvegarderPositionLettre(nouvelleLettreElement);
-                document.getElementById('piocherButton').disabled = 'true'
-
+                elementLettre.setAttribute('draggable', 'true');
+                elementLettre.addEventListener('dragstart', gererDragStart);
+                sauvegarderPositionLettre(elementLettre);
                 supprimerCaseVide();
             }
         }
+
 
 
         function supprimerCaseVide() {
@@ -268,7 +282,6 @@
 
         piocherButton.addEventListener('click', () => {
             socket.emit('DemandePiocheOM', nomJoueur)
-            resetLettresPosees(1)
 
         });
 
@@ -297,6 +310,7 @@
         connecterButton.addEventListener('click', () => {
             nomJoueur = nomJoueurInput.value;
             nombreDeck = TailleDeck.value;
+            tailleDeck = nombreDeck;
             console.log(nomJoueur)
             console.log(nombreDeck)
             if (nomJoueur && nombreDeck) {
@@ -329,7 +343,10 @@
 
 
         socket.on('MainDepart', (data) => {
-                genererLettresInitiales(data)
+            document.getElementById('piocherButton').hidden = 'false'
+            document.getElementById('validerButton').hidden = 'false'
+            genererLettresInitiales(data)
+            genererLettresCentre(["A", "A", "A", "A", "A"])
         })
 
 
@@ -358,7 +375,10 @@
 
 
 
-        genererGrille();
+        document.addEventListener('DOMContentLoaded', (event) => {
+            genererGrille();
+        });
+
 
 
     </script>
