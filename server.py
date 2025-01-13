@@ -437,6 +437,11 @@ def handle_connexionBSolitaire(data):
     mainDepart = genererUnDeck(cartes_regime,int(data))
     socketio.emit('MainDepart', mainDepart)
 
+@socketio.on('DemandePiocheSolitaire')
+def handle_DemandePioche():
+    carte = genererUnDeck(cartes_regime,1)[0]
+    socketio.emit('RetourPiocheSolitaire', carte )
+
 
 
 if __name__ == '__main__':
