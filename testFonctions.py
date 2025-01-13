@@ -171,4 +171,83 @@ def deckBanana(nbj):
         return genererUnDeck(cartes_regime, 11)
     return "Erreur, le nombre de joueurs doit être compris entre 2 et 8 inclus "
 
-print(genererUnDeck(cartes_regime,15))
+def splitUpper(txt):
+    ajout = False
+    res = ""
+    for i in range(len(txt)):
+        if txt[i].isupper() or (ajout==False and txt[i]==")"):
+            res+=txt[i]
+            ajout = True
+        elif txt[i] == "<" or txt[i] == "(":
+            ajout=False
+        else:
+            if ajout:
+                res+=txt[i]
+    return res
+
+            
+
+
+def recupInfoMot(mot):
+    nature = ""
+    definition = ""
+    nb_lettres = len(mot)
+    premiereLettre = mot[0]
+    listeTerminaisons = ["er","ir","re"]
+
+    url = "https://fr.wikwik.org/"+mot
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.content,"html.parser")
+
+        ligne = soup.find_all("li")[:1]
+        if " art." in str(ligne[0]):
+            nature = "Article"
+        
+        elif " n. " in str(ligne[0]):
+            nature = "Nom"
+        
+        elif " conj. " in str(ligne[0]):
+            nature = "Conjonction"
+        
+        elif " v. " in str(ligne[0]):
+            nature = "Verbe"
+        
+        elif " adj. " in str(ligne[0]):
+            nature = "Adjectif"
+        
+        elif " pron." in str(ligne[0]):
+            nature = "Pronom"
+        
+        elif " adv." in str(ligne[0]):
+            nature = "Adverbe"
+
+        elif " interj." in str(ligne[0]) or " ono. " in str(ligne[0]):
+            nature = "Interjection"
+        
+        elif " prép." in str(ligne[0]):
+            nature = "Préposition"
+
+        definition=splitUpper(str(ligne[0]))
+    
+        if nature == "Verbe" and not(mot[:(len(mot)-2)] in listeTerminaisons):
+            
+            coupe = definition.split()
+            definition = ""
+            for i in range(len(coupe)-2):
+                if i<len(coupe)-2:
+                    definition+=coupe[i]+" "
+                else:
+                    definition+=coupe[i]
+        
+            
+
+    print("Nature de",mot+": "+nature+"\nDéfinition: "+definition)
+      
+            
+  
+        
+
+recupInfoMot("oiseau")
+
