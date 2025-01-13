@@ -109,51 +109,59 @@
         }
 
 
-        //Fonction qui cherche les mots horizontaux et verticaux
-        function trouverMots() {
-            const grille = document.querySelectorAll('.case');
-            const taille = 32;  // taille de la grille
-            let mots = [];
+        function analyserGrille() {
+            const cellules = document.querySelectorAll('.case');
+            const visited = Array(cellules.length).fill(false); // Tableau pour suivre les cellules visitées
+            const mots = []; // Liste pour stocker les mots trouvés
 
-            // Fonction pour vérifier une séquence de cellules
-            function extraireMot(sequence) {
-                let mot = '';
-                for (let i = 0; i < sequence.length; i++) {
-                    if (sequence[i].textContent.trim() !== '') {
-                        mot += sequence[i].textContent;
-                    } else {
-                        if (mot.length > 1) {
-                            mots.push(mot);  // Ajouter le mot si sa longueur est supérieure à 1
-                        }
-                        mot = '';  // Réinitialiser le mot
+            function estLettre(val) {
+                return /^[A-Za-z]$/.test(val);
+            }
+
+            // Fonction pour rechercher les mots dans une direction (haut, bas, gauche, droite)
+            function trouverMot(index, direction) {
+                let mot = [];
+                let i = index;
+                while (i >= 0 && i < cellules.length && estLettre(cellules[i].textContent.trim())) {
+                    mot.push(cellules[i].textContent.trim());
+                    visited[i] = true; // Marquer la cellule comme visitée
+                    // Calculer l'indice suivant en fonction de la direction
+                    if (direction === 'horizontal') {
+                        i += 1; // Avancer à droite
+                        if (i % 32 === 0) break; // Éviter de dépasser la ligne
+                    } else if (direction === 'vertical') {
+                        i += 32; // Avancer vers le bas
                     }
                 }
-                if (mot.length > 1) {
-                    mots.push(mot);  // Ajouter le dernier mot trouvé
+                return mot.length > 1 ? mot.join('') : ''; // On ne garde que les mots de plus de 1 lettre
+            }
+
+            // Recherche de la première lettre et exploration des mots horizontaux et verticaux
+            for (let i = 0; i < cellules.length; i++) {
+                if (estLettre(cellules[i].textContent.trim())) {
+                    // Vérifier et ajouter le mot horizontal (gauche à droite)
+                    if (!visited[i]) {
+                        let motHorizontal = trouverMot(i, 'horizontal');
+                        if (motHorizontal && !mots.includes(motHorizontal)) mots.push(motHorizontal);
+                    }
+
+                    // Vérifier et ajouter le mot vertical (haut à bas)
+                    if (!visited[i]) {
+                        let motVertical = trouverMot(i, 'vertical');
+                        if (motVertical && !mots.includes(motVertical)) mots.push(motVertical);
+                    }
+
+                    break; // Arrêter après avoir trouvé la première lettre
                 }
             }
 
-            // Trouver les mots horizontaux
-            for (let i = 0; i < taille; i++) {
-                const ligne = [];
-                for (let j = 0; j < taille; j++) {
-                    ligne.push(grille[i * taille + j]);
-                }
-                extraireMot(ligne);
-            }
-
-            // Trouver les mots verticaux
-            for (let j = 0; j < taille; j++) {
-                const colonne = [];
-                for (let i = 0; i < taille; i++) {
-                    colonne.push(grille[i * taille + j]);
-                }
-                extraireMot(colonne);
-            }
-
-            console.log(mots)
+            console.log('Mots trouvés:', mots);
             return mots;
         }
+
+
+
+
 
 
         function sauvegarderPositionLettre(lettreElement) {
@@ -286,6 +294,7 @@
         }
 
         piocherButton.addEventListener('click', () => {
+            tailleDeck++
             socket.emit('DemandePiocheSolitaire')
 
         });
@@ -294,7 +303,7 @@
         validerButton.addEventListener('click', () => {
 
 
-            const motsTrouves = trouverMots();
+            const motsTrouves = analyserGrille();
 
             if (motsTrouves.length === 0) {
                 console.log("Aucun mot formé !");
