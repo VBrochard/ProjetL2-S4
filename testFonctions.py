@@ -1,6 +1,8 @@
 from random import *
 from itertools import permutations
 import time
+import requests
+from bs4 import BeautifulSoup
 
 def ouvrirDico():
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
@@ -174,12 +176,15 @@ def deckBanana(nbj):
 def splitUpper(txt):
     ajout = False
     res = ""
+    
     for i in range(len(txt)):
-        if txt[i].isupper() or (ajout==False and txt[i]==")"):
+        if ((txt[i].isupper() or txt[i] == "(") and ajout==False ):
             res+=txt[i]
             ajout = True
-        elif txt[i] == "<" or txt[i] == "(":
+            
+        elif txt[i] == "<":
             ajout=False
+            
         else:
             if ajout:
                 res+=txt[i]
@@ -194,18 +199,17 @@ def recupInfoMot(mot):
     nb_lettres = len(mot)
     premiereLettre = mot[0]
     listeTerminaisons = ["er","ir","re"]
-
     url = "https://fr.wikwik.org/"+mot
     response = requests.get(url)
-
     if response.status_code == 200:
-        soup = BeautifulSoup(response.content,"html.parser")
 
+        soup = BeautifulSoup(response.content,"html.parser")
         ligne = soup.find_all("li")[:1]
+
         if " art." in str(ligne[0]):
             nature = "Article"
         
-        elif " n. " in str(ligne[0]):
+        elif " n." in str(ligne[0]):
             nature = "Nom"
         
         elif " conj. " in str(ligne[0]):
@@ -230,9 +234,7 @@ def recupInfoMot(mot):
             nature = "Préposition"
 
         definition=splitUpper(str(ligne[0]))
-    
         if nature == "Verbe" and not(mot[:(len(mot)-2)] in listeTerminaisons):
-            
             coupe = definition.split()
             definition = ""
             for i in range(len(coupe)-2):
@@ -241,13 +243,18 @@ def recupInfoMot(mot):
                 else:
                     definition+=coupe[i]
         
+        return ["Longueur du mot: "+str(len(mot)), "Nature du mot: "+nature , "Première lettre du mot: "+mot[0], "Définition du mot: "+definition]
+    else:
+        print("Chargement de la page impossible")
+        return   
             
 
-    print("Nature de",mot+": "+nature+"\nDéfinition: "+definition)
+    
       
             
   
         
 
-recupInfoMot("oiseau")
+print(motMax(["test","xklmX"]))
+
 

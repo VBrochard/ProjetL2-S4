@@ -39,6 +39,7 @@
         })
 
         socket.on('victoire', (data) => {
+            activBouton("recommencerPartie")
             var ListeJoueur = data.tableauScores
             var recapScore = ""
             ListeJoueur.forEach(item => {
@@ -107,8 +108,10 @@
         })
 
         socket.on('résultat', (data) => {
+            
             var timer = document.getElementById('timer')
             timer.hidden = true;
+            
             desacBouton('bouton-indice')
             activBouton('prochain')
             var NomMeilleurJoueur = data.nom
@@ -140,6 +143,10 @@
             
         })
 
+        socket.on("retourAccueil", () => {
+            window.location.href = '/le_plus_long.html';
+        })
+
     </script>
 </head>
 
@@ -158,6 +165,7 @@
         <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice</button>
         <button id="bouton-valider" onclick="EnvoieMot()" hidden=true>Valider</button>
         <button id="newTour" onclick="ProchainTour()" hidden=true>Prêt pour le prochain</button>
+        <button id="recommencerPartie" onclick="recommencerPartie()" hidden="true">Recommencer</button>
     </div>
     <div class="voycons">
         <button id="voyelle" onclick="tirage('voyelle')" hidden=true>Tirer une voyelle</button>
@@ -182,6 +190,15 @@
         function ProchainTour() {
             desacBouton('prochain')
             socket.emit('nouveauTour')
+        }
+
+        function recommencerPartie(){
+            nomJoueur = ""
+            ListeJoueur = []
+            deck = []
+            TokenValide = false
+            socket.emit("recommencerPartie")
+            document.getElementById("recommencerPartie").hidden = "true";
         }
 
         function ConnexionServeur() {
@@ -370,6 +387,7 @@
             let valider = document.getElementById('bouton-valider')
             let msgTempsEcoule = document.getElementById('tempsEcoule')
             let lancerPartie = document.getElementById('Lancement')
+            let recommencer = document.getElementById("recommencerPartie")
             var voy = document.getElementById('voyelle')
             var cons = document.getElementById('consonne')
             if (idBouton == 'arrivee') {
@@ -397,7 +415,11 @@
                 return 0
             }
             if (idBouton == 'bouton-indice'){
-                indice.hidden = false
+                indice.hidden = true
+                return 0
+            }
+            if (idBouton == 'recommencerPartie'){
+                recommencer.hidden = true
                 return 0
             }
         }
@@ -409,6 +431,7 @@
             let msgTempsEcoule = document.getElementById('tempsEcoule')
             let lancerPartie = document.getElementById('Lancement')
             let indice = document.getElementById('bouton-indice');
+            let recommencer = document.getElementById("recommencerPartie");
             var voy = document.getElementById('voyelle')
             var cons = document.getElementById('consonne')
             if (idBouton == 'arrivee') {
@@ -437,6 +460,10 @@
             }
             if (idBouton == 'bouton-indice'){
                 indice.hidden = false
+                return 0
+            }
+            if (idBouton == 'recommencerPartie'){
+                recommencer.hidden = false
                 return 0
             }
         }

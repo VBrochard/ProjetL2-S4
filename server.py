@@ -21,7 +21,7 @@ MeilleurMotsJoueur = []
 NomMeilleursJoueurs = []
 listePropositions = []
 MeilleurPossible = ""
-limiteScore = 10
+limiteScore = 2
 jetonPret = 0
 listeMots = []
 jetonTourTirage = 0
@@ -332,6 +332,23 @@ def handle_demandeIndice(data):
     global deck
     listeIndices = recupInfoMot(motLePlusLong(deck))
     socketio.emit('retourIndice',{"indice":listeIndices[data.get("nbIndices")], "nomJoueur":data.get("nomJoueur")})
+
+@socketio.on('recommencerPartie')
+def handle_recommencerPartioe():
+    global ListeJoueurs 
+    global voyelles
+    global consonnes
+    global deck
+    global jetonTourTirage
+
+    jetonTourTirage = 0
+    deck = []
+    ListeJoueurs = []
+    voyelles = [carte for carte, freq in lettres_freq.items() if carte in "AEIOUY" for i in range(freq)]
+    consonnes = [carte for carte, freq in lettres_freq.items() if carte not in "AEIOUY" for i in range(freq)]
+    print("Passage socket serveur")
+    socketio.emit("retourAccueil")
+
 
 ##########################################################################
 #Variables Opti'Mot
