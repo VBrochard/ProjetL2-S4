@@ -125,32 +125,27 @@
             }
         }
 
-        function ListeIDverticaux(index){
-
-            const cellules = document.querySelectorAll('.case')
-            console.log("Index vertical visite en cours : " + index)
-            visited.push(index)
-            if (!idVerticaux.includes(index)){
-                idVerticaux.push(index)
-            }
-            IdBas = index + 32
-            IdHaut = index - 32
-            IdGauche = index - 1
-            IdDroit = index + 1
-            if (cellules[IdBas].textContent != "" && !visited.includes(IdBas)){
-                ListeIDverticaux(IdBas)
-            }
-            if (cellules[IdHaut].textContent != "" && !visited.includes(IdHaut)){
-                ListeIDverticaux(IdHaut)
-            }
-            if (cellules[IdGauche].textContent != "" && !visited.includes(IdGauche)){
-                ListeIDhorizontaux(IdGauche)
-            }
-            if (cellules[IdDroit].textContent != "" && !visited.includes(IdDroit)){
-                ListeIDhorizontaux(IdDroit)
-            }
+        function voisins(point){
+            return [point+1,point-1,point+32,point-32];
         }
-
+        function parcoursLargeur(pointDepart){
+            const cellules = document.querySelectorAll('.case');
+            aTraiter = []
+            chemin = []
+            aTraiter.push(pointDepart)
+            while (aTraiter.length > 0){
+                var elt = aTraiter.shift()
+                for (var v of voisins(elt)){
+                    if (!(v in chemin) && cellules[v].textContent != "" && !(chemin.includes(v))){
+                        chemin.push(v)
+                        aTraiter.push(v)
+                    }
+                }
+            }
+    
+            return chemin
+        }
+/*
         function ListeIDhorizontaux(index){
             const cellules = document.querySelectorAll('.case')
             console.log("Index horizontal visite en cours : " + index)
@@ -178,6 +173,51 @@
         }
 
 
+*/
+        function construitMotsHorizontaux(listeIndices){
+            listeIndices.sort();
+            listeTemp = [];
+            res = [];
+            for (elt of listeIndices){
+                if (listeIndices.includes(elt+1)){
+                    listeTemp.push(elt);
+                }
+                else{
+                    listeTemp.push(elt)
+                    if (listeTemp.length > 1){
+                        res.push(listeTemp)
+                    }
+                    listeTemp = []
+                }
+            }
+            return res
+        }
+
+        function construitMotsVerticaux(listeIndices){
+            listeIndices.sort();
+            i = 0;
+            res = [];
+            dejaVu = [];
+            while (i < listeIndices.length){
+                aVisiter = listeIndices[i]
+                dejaVu.push(aVisiter)
+                listeTemp = []
+        
+                while (listeIndices.includes(aVisiter) && !(dejaVu.includes(aVisiter+32))){
+                    listeTemp.push(aVisiter)
+                    aVisiter += 32
+                    dejaVu.push(aVisiter)
+                }
+            
+                if (listeTemp.length > 1){
+                    res.push(listeTemp)
+                }
+
+                i+=1;
+            }
+
+            return res
+        }
 
 
         function analyserGrille() {
@@ -185,10 +225,16 @@
             const indexes = positionsLettresPosees.map(element => element.index);
             console.log("tableau :" + indexes)
             console.log("Debut indice : " + FindPremierIndice())
-            ListeIDhorizontaux(FindPremierIndice())
-            ListeIDverticaux(FindPremierIndice())
-            console.log("Vertical : " + idVerticaux)
-            console.log("Horizontaux : " + idHorizontaux)
+            //ListeIDhorizontaux(FindPremierIndice())
+            //ListeIDverticaux(FindPremierIndice())
+            tab = parcoursLargeur(FindPremierIndice())
+            var valide = tab.length == tailleDeck;
+            if (valide){
+                var idMotsVerticaux = construitMotsVerticaux(tab);
+                var idMotsHorizontaux = construitMotsHorizontaux(tab);
+                console.log("Vertical: "+idMotsVerticaux+'\nHorizontal: '+idMotsHorizontaux+"\nParcours: "+tab);
+            }
+            //console.log("Horizontaux : " + idHorizontaux)
         }
 
 

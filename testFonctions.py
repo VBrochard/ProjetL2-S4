@@ -304,10 +304,11 @@ def parcours(pointDepart,tab):
     return chemin
 
 
-tab = [492,493,524,461,429,397,398,399,494,491]
+
+tab = [429,461,493,494,526]
 print("Horizontal:",construitMotsHorizontaux(tab))
 print("Vertical:",construitMotsVerticaux(tab))
-print("Parcours:",len(parcours(397,tab)) == 10)
+
   
         
 
