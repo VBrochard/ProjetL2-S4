@@ -468,12 +468,14 @@ def handle_DemandePioche():
 
 @socketio.on('verifierMotsSolitaire')
 def verifier_mots(mots):
-
     # Valider tous les mots
     tous_valides = all(motExiste(mot) for mot in mots)
-
-
     emit('resultatValidationMotsSolitaire', tous_valides)
+
+@socketio.on('ResetPartieSolitaire')
+def ResetPartieSolitaire():
+    global cartes_regime
+    cartes_regime = [carte for carte, freq in lettres_regime.items() for i in range(freq)]
 
 #####################################################################
 #Le compte est bon

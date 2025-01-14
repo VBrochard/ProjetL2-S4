@@ -21,13 +21,15 @@
         </div>
 
         <div class="info-box">
-            <div id="nomJoueur">Bonne Chance !</div>
+            <div id="nomJoueur"></div>
             <div class="case-modifiable" id="case-modifiable">
 
             </div>
             <div class="piocher-button-wrapper">
                 <button class="piocher-button" id="piocherButton">Piocher</button>
                 <button class="valider-button" id="validerButton">Valider</button>
+                <button id="menu" onclick="window.location.href = '/'">Retour au menu</button>
+                <button id="Reset" onclick="ResetPartie()">Reset</button>
             </div>
         </div>
 
@@ -41,6 +43,7 @@
             <input type="text" id="nomJoueurInput" placeholder="Nom">
             <input type="text" id="TailleDeck" placeholder="Taille Main">
             <button class="connecter-button" id="connecterButton" onclick="desacConnexion()">Se connecter</button>
+
 
         </div>
     </div>
@@ -59,11 +62,19 @@
         const connecterButton = document.getElementById('connecterButton');
         const AuTourDeElement = document.getElementById("AuTourDe");
         let tailleDeck = 0;
+        let deck = []
         let positionsLettresPosees = [];
         var nomJoueur;
-        var idVerticaux = []
-        var idHorizontaux = []
-        var visited = []
+
+        function ResetPartie() {
+            socket.emit('ResetPartieSolitaire')
+            deck = []
+            tailleDeck = 0
+            carte.innerHTML = '';
+            genererGrille()
+            remiseenmain()
+            document.getElementById('nomJoueur').textContent = "Reconnectez vous pour relancer une partie"
+        }
 
         function genererGrille() {
             for (let i = 0; i < 32 * 32; i++) {
@@ -93,6 +104,7 @@
 
         function genererLettresInitiales(maindepart) {
             //Génère le deck du joueur
+            deck = maindepart
             const elementsLettre = caseModifiable.querySelectorAll('.lettre');
             var i = 0
             for (var j = 0; j < tailleDeck; j++) {
@@ -111,80 +123,52 @@
             };
         }
 
-        function estLettre(val) {
-                return /^[A-Za-z]$/.test(val);
-            }
-
-        function FindPremierIndice(){
+        function FindPremierIndice() {
             const cellules = document.querySelectorAll('.case');
             var index = 0
-            for (index;index<1024;index++){
-                if(estLettre(cellules[index].textContent)){
+            for (index; index < 1024; index++) {
+                if (estLettre(cellules[index].textContent)) {
                     return index
                 }
             }
         }
 
-        function voisins(point){
-            return [point+1,point-1,point+32,point-32];
+        function estLettre(val) {
+            return /^[A-Za-z]$/.test(val);
         }
-        function parcoursLargeur(pointDepart){
+
+
+        function voisins(point) {
+            return [point + 1, point - 1, point + 32, point - 32];
+        }
+        function parcoursLargeur(pointDepart) {
             const cellules = document.querySelectorAll('.case');
             aTraiter = []
             chemin = []
             aTraiter.push(pointDepart)
-            while (aTraiter.length > 0){
+            while (aTraiter.length > 0) {
                 var elt = aTraiter.shift()
-                for (var v of voisins(elt)){
-                    if (!(v in chemin) && cellules[v].textContent != "" && !(chemin.includes(v))){
+                for (var v of voisins(elt)) {
+                    if (!(v in chemin) && cellules[v].textContent != "" && !(chemin.includes(v))) {
                         chemin.push(v)
                         aTraiter.push(v)
                     }
                 }
             }
-    
             return chemin
         }
-/*
-        function ListeIDhorizontaux(index){
-            const cellules = document.querySelectorAll('.case')
-            console.log("Index horizontal visite en cours : " + index)
-            visited.push(index)
-            if (!idHorizontaux.includes(index)){
-                idHorizontaux.push(index)
-                return
-            }
-            IdBas = index + 32
-            IdHaut = index - 32
-            IdGauche = index - 1
-            IdDroit = index + 1
-            if (cellules[IdBas].textContent != "" && !visited.includes(IdBas)){
-                ListeIDverticaux(IdBas)
-            }
-            if (cellules[IdHaut].textContent != "" && !visited.includes(IdHaut)){
-                ListeIDverticaux(IdHaut)
-            }
-            if (cellules[IdGauche].textContent != "" && !visited.includes(IdGauche)){
-                ListeIDhorizontaux(IdGauche)
-            }
-            if (cellules[IdDroit].textContent != "" && !visited.includes(IdDroit)){
-                ListeIDhorizontaux(IdDroit)
-            }
-        }
 
-
-*/
-        function construitMotsHorizontaux(listeIndices){
+        function construitMotsHorizontaux(listeIndices) {
             listeIndices.sort();
             listeTemp = [];
             res = [];
-            for (elt of listeIndices){
-                if (listeIndices.includes(elt+1)){
+            for (elt of listeIndices) {
+                if (listeIndices.includes(elt + 1)) {
                     listeTemp.push(elt);
                 }
-                else{
+                else {
                     listeTemp.push(elt)
-                    if (listeTemp.length > 1){
+                    if (listeTemp.length > 1) {
                         res.push(listeTemp)
                     }
                     listeTemp = []
@@ -193,62 +177,53 @@
             return res
         }
 
-        function construitMotsVerticaux(listeIndices){
+        function construitMotsVerticaux(listeIndices) {
             listeIndices.sort();
             i = 0;
             res = [];
             dejaVu = [];
-            while (i < listeIndices.length){
+            while (i < listeIndices.length) {
                 aVisiter = listeIndices[i]
                 dejaVu.push(aVisiter)
                 listeTemp = []
-        
-                while (listeIndices.includes(aVisiter) && !(dejaVu.includes(aVisiter+32))){
+                while (listeIndices.includes(aVisiter) && !(dejaVu.includes(aVisiter + 32))) {
                     listeTemp.push(aVisiter)
                     aVisiter += 32
                     dejaVu.push(aVisiter)
                 }
-            
-                if (listeTemp.length > 1){
+                if (listeTemp.length > 1) {
                     res.push(listeTemp)
                 }
-
-                i+=1;
+                i += 1;
             }
-
             return res
         }
 
 
         function analyserGrille() {
             const cellules = document.querySelectorAll('.case')
-            const indexes = positionsLettresPosees.map(element => element.index);
-            console.log("tableau :" + indexes)
-            console.log("Debut indice : " + FindPremierIndice())
-            //ListeIDhorizontaux(FindPremierIndice())
-            //ListeIDverticaux(FindPremierIndice())
             tab = parcoursLargeur(FindPremierIndice())
             var valide = tab.length == tailleDeck;
-            if (valide){
+            if (valide) {
                 var idMotsVerticaux = construitMotsVerticaux(tab);
                 var idMotsHorizontaux = construitMotsHorizontaux(tab);
-                console.log("Vertical: "+idMotsVerticaux+'\nHorizontal: '+idMotsHorizontaux+"\nParcours: "+tab);
+                console.log("Vertical: " + idMotsVerticaux + '\nHorizontal: ' + idMotsHorizontaux + "\nParcours: " + tab);
                 var listeTotale = idMotsHorizontaux.concat(idMotsVerticaux)
                 var listeMots = [];
-                for (elt of listeTotale){
+                for (elt of listeTotale) {
                     var mot = "";
-                    for (lettre of elt){
+                    for (lettre of elt) {
                         mot += cellules[lettre].textContent;
                     }
                     listeMots.push(mot)
                 }
                 console.log(listeMots)
-                socket.emit('verifierMotsSolitaire',listeMots)
+                socket.emit('verifierMotsSolitaire', listeMots)
             }
-            else{
+            else {
+                document.getElementById('nomJoueur').textContent = "Il faut placer toute tes lettres et en un même bloc"
                 resetLettresPosees(1);
             }
-            //console.log("Horizontaux : " + idHorizontaux)
         }
 
 
@@ -268,6 +243,24 @@
             });
         }
 
+        function remiseenmain() {
+            caseModifiable.innerHTML = '';
+            for (i of deck) {
+                const nouvelleCase = document.createElement('div');
+                nouvelleCase.classList.add('case');
+                nouvelleCase.style.backgroundColor = '#f0f0f0';
+                const nouvelleLettre = document.createElement('span');
+                nouvelleLettre.classList.add('lettre');
+                nouvelleLettre.textContent = i;
+                nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                nouvelleCase.appendChild(nouvelleLettre);
+                caseModifiable.appendChild(nouvelleCase);
+
+                nouvelleLettre.setAttribute('draggable', 'true');
+                nouvelleLettre.addEventListener('dragstart', gererDragStart);
+            }
+        }
+
 
         function resetLettresPosees(valeur) {
 
@@ -282,19 +275,8 @@
                     if (lettreElement) {
                         cellule.removeChild(lettreElement);
                     }
-                    const nouvelleCase = document.createElement('div');
-                    nouvelleCase.classList.add('case');
-                    nouvelleCase.style.backgroundColor = '#f0f0f0';
-                    const nouvelleLettre = document.createElement('span');
-                    nouvelleLettre.classList.add('lettre');
-                    nouvelleLettre.textContent = lettre;
-                    nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
-                    nouvelleCase.appendChild(nouvelleLettre);
-                    caseModifiable.appendChild(nouvelleCase);
-
-                    nouvelleLettre.setAttribute('draggable', 'true');
-                    nouvelleLettre.addEventListener('dragstart', gererDragStart);
                 });
+                remiseenmain()
                 positionsLettresPosees = [];
                 console.log("Les lettres posées ont été réinitialisées.");
             }
@@ -357,7 +339,6 @@
         }
 
         function ajouterLettreAIndex(index, lettre) {
-
             const cellule = carte.children[index];
             const elementLettre = document.createElement('span');
             elementLettre.classList.add('lettre');
@@ -365,49 +346,21 @@
             cellule.appendChild(elementLettre)
         }
 
-        function aVoisinAvecLettre(cellule) {
-            //Vérifie si la lettre posée est mise à côté d'une autre lettre du plateau
-            const index = Array.from(carte.children).indexOf(cellule);
-            const lignes = 32;
-            const colonnes = 32;
-
-            const voisins = [
-                index - colonnes,
-                index + colonnes,
-                index - 1,
-                index + 1
-            ];
-
-            return voisins.some((voisinIndex) => {
-                if (voisinIndex >= 0 && voisinIndex < lignes * colonnes) {
-                    const voisin = carte.children[voisinIndex];
-                    return voisin.hasChildNodes();
-                }
-                return false;
-            });
-        }
-
         piocherButton.addEventListener('click', () => {
             tailleDeck++
             socket.emit('DemandePiocheSolitaire')
-
         });
 
 
         validerButton.addEventListener('click', () => {
-
-
             const motsTrouves = []
             analyserGrille();
-
             if (motsTrouves.length === 0) {
                 console.log("Aucun mot formé !");
                 return;
             }
-
             console.log("Envoi des mots au serveur pour validation :", motsTrouves);
             socket.emit('verifierMotsSolitaire', motsTrouves);
-
         });
 
 
@@ -420,6 +373,7 @@
             console.log(nombreDeck)
             if (nomJoueur && nombreDeck) {
                 socket.emit("connexionBSolitaire", nombreDeck)
+                document.getElementById('nomJoueur').textContent = "Bonne Chance " + nomJoueur + " !"
             } else {
                 alert('Veuillez entrer un nom de joueur et la taille de votre deck');
             }
@@ -429,6 +383,7 @@
         socket.on('RetourPiocheSolitaire', (data) => {
             //Ajoute au deck du joueur la carte piochée
             carteTire = data
+            deck.push(carteTire)
             const nouvelleCase = document.createElement('div');
             nouvelleCase.classList.add('case');
             nouvelleCase.style.backgroundColor = '#f0f0f0';
