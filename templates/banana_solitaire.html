@@ -230,9 +230,20 @@
             tab = parcoursLargeur(FindPremierIndice())
             var valide = tab.length == tailleDeck;
             if (valide){
-                var idMotsVerticaux = construitMotsVerticaux(tab).length;
-                var idMotsHorizontaux = construitMotsHorizontaux(tab).length;
+                var idMotsVerticaux = construitMotsVerticaux(tab);
+                var idMotsHorizontaux = construitMotsHorizontaux(tab);
                 console.log("Vertical: "+idMotsVerticaux+'\nHorizontal: '+idMotsHorizontaux+"\nParcours: "+tab);
+                var listeTotale = idMotsHorizontaux.concat(idMotsVerticaux)
+                var listeMots = [];
+                for (elt of listeTotale){
+                    var mot = "";
+                    for (lettre of elt){
+                        mot += cellules[lettre].textContent;
+                    }
+                    listeMots.push(mot)
+                }
+                console.log(listeMots)
+                socket.emit('verifierMotsSolitaire',listeMots)
             }
             else{
                 resetLettresPosees(1);
