@@ -61,6 +61,9 @@
         let tailleDeck = 0;
         let positionsLettresPosees = [];
         var nomJoueur;
+        var idVerticaux = []
+        var idHorizontaux = []
+        var visited = []
 
         function genererGrille() {
             for (let i = 0; i < 32 * 32; i++) {
@@ -108,55 +111,84 @@
             };
         }
 
-
-        function analyserGrille() {
-            const cellules = document.querySelectorAll('.case');
-            const visited = Array(cellules.length).fill(false); // Tableau pour suivre les cellules visitées
-            const mots = []; // Liste pour stocker les mots trouvés
-
-            function estLettre(val) {
+        function estLettre(val) {
                 return /^[A-Za-z]$/.test(val);
             }
 
-            // Fonction pour rechercher les mots dans une direction (haut, bas, gauche, droite)
-            function trouverMot(index, direction) {
-                let mot = [];
-                let i = index;
-                while (i >= 0 && i < cellules.length && estLettre(cellules[i].textContent.trim())) {
-                    mot.push(cellules[i].textContent.trim());
-                    visited[i] = true; // Marquer la cellule comme visitée
-                    // Calculer l'indice suivant en fonction de la direction
-                    if (direction === 'horizontal') {
-                        i += 1; // Avancer à droite
-                        if (i % 32 === 0) break; // Éviter de dépasser la ligne
-                    } else if (direction === 'vertical') {
-                        i += 32; // Avancer vers le bas
-                    }
-                }
-                return mot.length > 1 ? mot.join('') : ''; // On ne garde que les mots de plus de 1 lettre
-            }
-
-            // Recherche de la première lettre et exploration des mots horizontaux et verticaux
-            for (let i = 0; i < cellules.length; i++) {
-                if (estLettre(cellules[i].textContent.trim())) {
-                    // Vérifier et ajouter le mot horizontal (gauche à droite)
-                    if (!visited[i]) {
-                        let motHorizontal = trouverMot(i, 'horizontal');
-                        if (motHorizontal && !mots.includes(motHorizontal)) mots.push(motHorizontal);
-                    }
-
-                    // Vérifier et ajouter le mot vertical (haut à bas)
-                    if (!visited[i]) {
-                        let motVertical = trouverMot(i, 'vertical');
-                        if (motVertical && !mots.includes(motVertical)) mots.push(motVertical);
-                    }
-
-                    break; // Arrêter après avoir trouvé la première lettre
+        function FindPremierIndice(){
+            const cellules = document.querySelectorAll('.case');
+            var index = 0
+            for (index;index<1024;index++){
+                if(estLettre(cellules[index].textContent)){
+                    return index
                 }
             }
+        }
 
-            console.log('Mots trouvés:', mots);
-            return mots;
+        function ListeIDverticaux(index){
+
+            const cellules = document.querySelectorAll('.case')
+            console.log("Index vertical visite en cours : " + index)
+            visited.push(index)
+            if (!idVerticaux.includes(index)){
+                idVerticaux.push(index)
+            }
+            IdBas = index + 32
+            IdHaut = index - 32
+            IdGauche = index - 1
+            IdDroit = index + 1
+            if (cellules[IdBas].textContent != "" && !visited.includes(IdBas)){
+                ListeIDverticaux(IdBas)
+            }
+            if (cellules[IdHaut].textContent != "" && !visited.includes(IdHaut)){
+                ListeIDverticaux(IdHaut)
+            }
+            if (cellules[IdGauche].textContent != "" && !visited.includes(IdGauche)){
+                ListeIDhorizontaux(IdGauche)
+            }
+            if (cellules[IdDroit].textContent != "" && !visited.includes(IdDroit)){
+                ListeIDhorizontaux(IdDroit)
+            }
+        }
+
+        function ListeIDhorizontaux(index){
+            const cellules = document.querySelectorAll('.case')
+            console.log("Index horizontal visite en cours : " + index)
+            visited.push(index)
+            if (!idHorizontaux.includes(index)){
+                idHorizontaux.push(index)
+                return
+            }
+            IdBas = index + 32
+            IdHaut = index - 32
+            IdGauche = index - 1
+            IdDroit = index + 1
+            if (cellules[IdBas].textContent != "" && !visited.includes(IdBas)){
+                ListeIDverticaux(IdBas)
+            }
+            if (cellules[IdHaut].textContent != "" && !visited.includes(IdHaut)){
+                ListeIDverticaux(IdHaut)
+            }
+            if (cellules[IdGauche].textContent != "" && !visited.includes(IdGauche)){
+                ListeIDhorizontaux(IdGauche)
+            }
+            if (cellules[IdDroit].textContent != "" && !visited.includes(IdDroit)){
+                ListeIDhorizontaux(IdDroit)
+            }
+        }
+
+
+
+
+        function analyserGrille() {
+            const cellules = document.querySelectorAll('.case')
+            const indexes = positionsLettresPosees.map(element => element.index);
+            console.log("tableau :" + indexes)
+            console.log("Debut indice : " + FindPremierIndice())
+            ListeIDhorizontaux(FindPremierIndice())
+            ListeIDverticaux(FindPremierIndice())
+            console.log("Vertical : " + idVerticaux)
+            console.log("Horizontaux : " + idHorizontaux)
         }
 
 
@@ -178,12 +210,14 @@
 
 
         function resetLettresPosees(valeur) {
+
             if (valeur == 0) {
                 positionsLettresPosees = [];
                 return 0;
             } else {
                 positionsLettresPosees.forEach(position => {
                     const { index, lettre, cellule } = position;
+
                     const lettreElement = cellule.querySelector('.lettre');
                     if (lettreElement) {
                         cellule.removeChild(lettreElement);
@@ -303,7 +337,8 @@
         validerButton.addEventListener('click', () => {
 
 
-            const motsTrouves = analyserGrille();
+            const motsTrouves = []
+            analyserGrille();
 
             if (motsTrouves.length === 0) {
                 console.log("Aucun mot formé !");
