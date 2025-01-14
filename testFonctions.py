@@ -251,10 +251,66 @@ def recupInfoMot(mot):
 
     
       
+def construitMotsHorizontaux(listeIndices):
+    listeIndices.sort()
+    listeTemp = []
+    res = []
+    for elt in listeIndices:
+        if elt+1 in listeIndices:
+            listeTemp.append(elt)
+        else:
+            listeTemp.append(elt)
+            if len(listeTemp) > 1:
+                res.append(listeTemp)
+            listeTemp = []
+    return res
+        
+def construitMotsVerticaux(listeIndices):
+    listeIndices.sort()
+    i = 0
+    res = []
+    dejaVu = []
+    while i < len(listeIndices):
+        aVisiter = listeIndices[i]
+        dejaVu.append(aVisiter)
+        listeTemp = []
+        
+        while (aVisiter in listeIndices) and (aVisiter+32 not in dejaVu):
+            listeTemp.append(aVisiter)
+            aVisiter += 32
+            dejaVu.append(aVisiter)
             
+        if len(listeTemp) > 1:
+            res.append(listeTemp)
+
+        i+=1
+
+    return res
+
+def voisins(point):
+    return [point+1,point-1,point+32,point-32]
+
+def parcours(pointDepart,tab):
+    aTraiter = []
+    chemin = []
+    aTraiter.append(pointDepart)
+    while len(aTraiter) > 0:
+        elt = aTraiter.pop(0)
+        for v in voisins(elt):
+            if not(v in chemin) and v in tab:
+                chemin.append(v)
+                aTraiter.append(v)
+    
+    return chemin
+
+
+tab = [492,493,524,461,429,397,398,399,494,491]
+print("Horizontal:",construitMotsHorizontaux(tab))
+print("Vertical:",construitMotsVerticaux(tab))
+print("Parcours:",len(parcours(397,tab)) == 10)
   
         
 
-print(motMax(["test","xklmX"]))
+
 
 
