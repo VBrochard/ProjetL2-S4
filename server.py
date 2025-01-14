@@ -201,6 +201,10 @@ def Banana_Solitaire():
 def Le_Compte_est_Bon():
     return render_template('le_compte_est_bon.html')
 
+@app.route('/banana_speed.html')
+def Banana_Speed():
+    return render_template('banana_speed.html')
+
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
     global ListeJoueurs
