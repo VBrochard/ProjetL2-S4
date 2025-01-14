@@ -230,9 +230,12 @@
             tab = parcoursLargeur(FindPremierIndice())
             var valide = tab.length == tailleDeck;
             if (valide){
-                var idMotsVerticaux = construitMotsVerticaux(tab);
-                var idMotsHorizontaux = construitMotsHorizontaux(tab);
+                var idMotsVerticaux = construitMotsVerticaux(tab).length;
+                var idMotsHorizontaux = construitMotsHorizontaux(tab).length;
                 console.log("Vertical: "+idMotsVerticaux+'\nHorizontal: '+idMotsHorizontaux+"\nParcours: "+tab);
+            }
+            else{
+                resetLettresPosees(1);
             }
             //console.log("Horizontaux : " + idHorizontaux)
         }
