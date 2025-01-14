@@ -20,22 +20,14 @@
             tailleDeck = data
         })
 
-        socket.on('choixLettre', (data) => {
+        socket.on('debut', (data) => {
             deck = data.deck
+            objectif = data.objectif
+            document.getElementById("objectif").innerHTML = "Objectif à atteindre: "+objectif+"\n"
             initialiserGrille()
-            if (data.joueur == nomJoueur) {
-                activBouton('voyelle')
-                activBouton('consonne')
-                var msg = "Tirez une voyelle ou une consonne"
-                messagesDiv = document.getElementById('Systeme');
-                messagesDiv.value = msg + '\n';
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            } else {
-                var msg = "C'est à un autre joueur de tirer une lettre"
-                messagesDiv = document.getElementById('Systeme');
-                messagesDiv.value = msg + '\n';
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            }
+            document.getElementById("Systeme").value = "A vous de jouer !"
+            activBouton("valider")
+
         })
 
         socket.on('victoire', (data) => {
@@ -107,29 +99,15 @@
             deck = data.deck
         })
 
-        socket.on('résultat', (data) => {
+        socket.on('resultat', (data) => {
 
-            var timer = document.getElementById('timer')
-            timer.hidden = true;
+            noms = data.noms
+            score = data.score
 
-            desacBouton('bouton-indice')
             activBouton('prochain')
-            var NomMeilleurJoueur = data.nom
-            var ListeJoueurs = data.ListeScore
-            var PointGagner = data.PointGagnée
-            var MeilleurPossible = data.meilleurPossible
-            var MeilleurMotJoueur = data.MotGagnant
-            var recapScore = ""
-            ListeJoueurs.forEach(item => {
-                recapScore += item[0] + " : " + item[1] + " points\n";
-            });
             var msg =
-                "Le gagnant du tour est : " + NomMeilleurJoueur + '\n' +
-                "Il remporte " + PointGagner + " Points " +
-                "avec le mot : " + MeilleurMotJoueur + "\n\n" +
-                "Le meilleur mot possible était : " + MeilleurPossible + "\n\n" +
-                "Récapitulatif des scores : " + "\n\n" +
-                recapScore + "\n" +
+                "Les gagnants sont: " + noms + '\n' +
+                "Il a obtenu le nombre: " + score +"\n\n" +
                 "Appuyer sur le bouton prêt pour passer au prochain tour"
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
@@ -147,6 +125,7 @@
             window.location.href = '/le_plus_long.html';
         })
 
+
     </script>
 </head>
 
@@ -157,13 +136,14 @@
         </div>
     </header>
     <h1>Le Compte est Bon</h1>
+    <div id="objectif"></div>
     <div id="timer" hidden="true"></div>
     <div id="tempsEcoule">Temps écoulé!</div>
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
     <div class="button-container">
         <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice</button>
-        <button id="bouton-valider" onclick="EnvoieMot()" hidden=true>Valider</button>
+        <button id="bouton-valider" onclick="envoiReponse()" hidden=true>Valider</button>
         <button id="newTour" onclick="ProchainTour()" hidden=true>Prêt pour le prochain</button>
         <button id="recommencerPartie" onclick="recommencerPartie()" hidden="true">Recommencer</button>
     </div>
@@ -209,47 +189,15 @@
                 messagesDiv = document.getElementById('Systeme');
                 messagesDiv.value = msg + '\n';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                socket.emit('AnnonceJoueur', nomJoueur)
+                socket.emit('AnnonceJoueurCB', nomJoueur)
                 socket.emit('DemandeTailleDeck')
             }
         }
 
-        function demandeIndice() {
-            socket.emit('indice', { "nbIndices": nbIndices, "nomJoueur": nomJoueur });
-            nbIndices++;
-            if (nbIndices == 4) {
-                document.getElementById("bouton-indice").hidden = "true";
-            }
-        }
+        
 
 
-        function EnvoieMot() {
-            TokenValide = true
-            nbIndices = 0
-            mot = ""
-            desacBouton('valider')
-            desacBouton('bouton-indice')
-            var ligne = document.getElementById('ligne-2').innerText;
-            nomJoueur = nom.value;
-            ligne = ligne.replace(/\n/g, '');
-            var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
-            messagesDiv = document.getElementById('Systeme');
-            messagesDiv.value = msg + '\n';
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
-
-        }
-
-        function tirage(e) {
-            if (e == 'voyelle') {
-                socket.emit('voyelle')
-            }
-            if (e == 'consonne') {
-                socket.emit('consonne')
-            }
-            desacBouton('voyelle')
-            desacBouton('consonne')
-        }
+       
 
         //Initialise les grilles avec les lettres et les cases vides
         function initialiserGrille() {
@@ -263,7 +211,7 @@
             });
             // Remplit la deuxième ligne avec des cases vides
             ligne2.innerHTML = ""
-            for (let i = 0; i < tailleDeck; i++) {
+            for (let i = 0; i < 10; i++) {
                 const caseVide = creerCaseVide();
                 ligne2.appendChild(caseVide);
             }
@@ -466,6 +414,19 @@
                 recommencer.hidden = false
                 return 0
             }
+        }
+
+        function envoiReponse(){
+            nomJoueur = nom.value;
+            desacBouton('valider')
+            var ligne = document.getElementById('ligne-2').innerText;
+            ligne = ligne.replace(/\n/g, '');
+            var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            socket.emit('verification',{"nom": nomJoueur, "proposition":ligne})
         }
     </script>
 </body>

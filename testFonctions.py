@@ -3,6 +3,8 @@ from itertools import permutations
 import time
 import requests
 from bs4 import BeautifulSoup
+import re
+import math
 
 def ouvrirDico():
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
@@ -305,12 +307,47 @@ def parcours(pointDepart,tab):
 
 
 
-tab = [429,461,493,494,526]
-print("Horizontal:",construitMotsHorizontaux(tab))
-print("Vertical:",construitMotsVerticaux(tab))
+def creerListeNombres():
+    return [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,25,50,75,100]
 
+def construireMainNombres(lstNombres):
+    main = []
+    while len(main) < 6:
+        indiceRandom = randint(0,(len(lstNombres)-1))
+        main.append(lstNombres[indiceRandom])
+        lstNombres.pop(indiceRandom)
+    main += ["*","*","*","*","-","-","-","-","+","+","+","+","/","/","/","/"]
+    return main
+
+def construitOperation(calcul):
+    return math.floor(eval(calcul))
+
+def toutIndex(lst,cible):
+    res = []
+    for i in range(len(lst)):
+        if lst[i] == cible:
+            res.append(i)
+    return res
+
+
+
+def vainqueurs(listeProposition,objectif):
+    lstVainqueurs = []
+    lstScores = []
+    for i in range(len(listeProposition)):
+        if listeProposition[i][1] == objectif:
+            lstVainqueurs.append(i)[0]
+        else:
+            lstScores.append(abs(objectif - listeProposition[i][1]))
+    if lstVainqueurs != []:
+        return lstVainqueurs
+    
+    for elt in toutIndex(lstScores,min(lstScores)):
+        lstVainqueurs.append(listeProposition[elt])
+    
+    return lstVainqueurs
   
-        
+print(vainqueurs([['P1', 1875], ['P2', 225]],219))
 
 
 

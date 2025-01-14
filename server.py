@@ -6,6 +6,7 @@ import sys
 import time
 import requests
 from bs4 import BeautifulSoup
+import math
 
 
 
@@ -480,6 +481,108 @@ def ResetPartieSolitaire():
     global cartes_regime
     cartes_regime = [carte for carte, freq in lettres_regime.items() for i in range(freq)]
 
+#####################################################################
+#Le compte est bon
+
+def creerListeNombres():
+    return [1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,25,50,75,100]
+
+listeJoueursCB = []
+deckCB = []
+listeGlobale = creerListeNombres()
+objectif = 0
+listeProp = []
+listeVainqueurs = []
+
+
+
+
+
+def construireMainNombres(lstNombres):
+    main = []
+    while len(main) < 6:
+        indiceRandom = randint(0,(len(lstNombres)-1))
+        main.append(lstNombres[indiceRandom])
+        lstNombres.pop(indiceRandom)
+    main += ["*","*","*","*","-","-","-","-","+","+","+","+","/","/","/","/"]
+    return main
+
+def construitOperation(calcul):
+    return math.floor(eval(calcul))
+
+def toutIndex(lst,cible):
+    res = []
+    for i in range(len(lst)):
+        if lst[i] == cible:
+            res.append(i)
+    return res
+
+def vainqueurs(listeProposition,objectif):
+    lstVainqueurs = []
+    lstScores = []
+    for i in range(len(listeProposition)):
+        if listeProposition[i][1] == objectif:
+            lstVainqueurs.append(i)[0]
+        else:
+            lstScores.append(abs(objectif - listeProposition[i][1]))
+    if lstVainqueurs != []:
+        return lstVainqueurs
+    
+    for elt in toutIndex(lstScores,min(lstScores)):
+        lstVainqueurs.append(listeProposition[elt])
+    
+    return lstVainqueurs
+  
+
+@socketio.on('AnnonceJoueurCB')
+def handle_AnnonceJoueur(data):
+    global listeJoueursCB
+    global deckCB
+    global objectif
+
+    listeJoueursCB.append([str(data),0])
+    print(data, "Rejoint la partie")
+    if len(listeJoueursCB) == nbrJoueur:
+        socketio.emit('Lancement',listeJoueursCB)
+        deckCB = construireMainNombres(listeGlobale)
+        objectif = randint(101,999)
+        time.sleep(0.5)
+        socketio.emit('debut',{"deck":deckCB,"objectif":objectif})
+    else:
+        socketio.emit('ListePresence',listeJoueursCB)
+
+
+@socketio.on('DeclancheurCB')
+def handle_declancheur():
+        global nbrJoueur
+        nbrJoueur = len(listeJoueursCB)
+        socketio.emit('Lancement',listeJoueursCB)
+        time.sleep(0.5)
+        socketio.emit('afficheLettres',deck)
+        time.sleep(0.5)
+        socketio.emit('choixLettre',{"deck":deck,"joueur":listeJoueursCB[jetonTourTirage][0]})
+
+@socketio.on('verification')
+def handle_verification(data):
+    global objectif
+    global nbrJoueur
+    global listeProp
+    global listeVainqueurs
+
+    
+    listeProp.append([data.get("nom"),construitOperation(data.get('proposition'))])
+    print("ListeProp",listeProp)
+    if len(listeProp) == nbrJoueur:
+        listeVainqueurs = vainqueurs(listeProp,objectif)
+
+        noms = []
+        score = listeVainqueurs[0][1]
+        for elt in listeVainqueurs:
+            noms.append(elt[0])
+
+        socketio.emit('resultat',{"noms":noms,"score":score})
+        listeVainqueurs = []
+        listeProp = []
 
 
 if __name__ == '__main__':
