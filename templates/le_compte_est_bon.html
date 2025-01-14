@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Le Compte est Bon</title>
+    <link rel="stylesheet" href="/Ressources/style_le_compte_est_bon.css">
+    <script src="https://cdn.socket.io/4.5.0/socket.io.min.js"></script>
+    <script>
+        const socket = io()
+        let deck = []
+        let ListeJoueur = []
+        let tailleDeck = 7;
+        let nomJoueur;
+        let TokenValide = false
+        let nbIndices = 0;
+
+        socket.on('EnvoieTailleDeck', (data) => {
+            tailleDeck = data
+        })
+
+        socket.on('choixLettre', (data) => {
+            deck = data.deck
+            initialiserGrille()
+            if (data.joueur == nomJoueur) {
+                activBouton('voyelle')
+                activBouton('consonne')
+                var msg = "Tirez une voyelle ou une consonne"
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            } else {
+                var msg = "C'est à un autre joueur de tirer une lettre"
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        })
+
+        socket.on('victoire', (data) => {
+            activBouton("recommencerPartie")
+            var ListeJoueur = data.tableauScores
+            var recapScore = ""
+            ListeJoueur.forEach(item => {
+                recapScore += item[0] + " : " + item[1] + " points\n";
+            });
+            var msg =
+                "Félicitations à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n" +
+                "Récapitulatif final des scores : \n\n" + recapScore
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        })
+
+        socket.on('ListePresence', (data) => {
+            ListeJoueur = data
+            console.log(ListeJoueur)
+            messagesDiv = document.getElementById('Systeme');
+            var RecapJoueurs = ""
+            if (ListeJoueur.length == 2 && ListeJoueur[0][0] == nomJoueur) {
+                ListeJoueur.forEach(item => {
+                    RecapJoueurs += item[0] + " ";
+                });
+                var cacheboutton = document.getElementById('Lancement')
+                cacheboutton.hidden = false;
+                let mess = "Vous êtes maître du jeu, appuyez sur le bouton Lancer la partie pour démarrer"
+                messagesDiv.value = mess + "\n\n" + "Joueurs présents dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n"
+            }
+            if (ListeJoueur.length >= 2 && ListeJoueur[0][0] != nomJoueur) {
+
+
+                ListeJoueur.forEach(item => {
+                    RecapJoueurs += item[0] + " ";
+                });
+                var msg =
+                    "Joueurs présents dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n" +
+                    "Vous êtes au moins 2 joueurs, à l'initiative de " + ListeJoueur[0][0] + " la partie peut commencer..."
+
+                messagesDiv.value += msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            }
+        })
+
+
+        socket.on('Lancement', (data) => {
+            ListeJoueur = data
+            var cacheboutton = document.getElementById('Lancement')
+            cacheboutton.hidden = true;
+        })
+
+        socket.on('tirageLettres', (data) => {
+            demarrerCompteur();
+            var timer = document.getElementById('timer')
+            timer.hidden = false;
+            TokenValide = false;
+            activBouton('valider')
+            activBouton('bouton-indice')
+            desacBouton('prochain')
+            deck = data.deck
+            initialiserGrille()
+            var msg = "A vous de jouer \n\n" + "Vous avez 30 secondes pour envoyer votre réponse sinon elle sera envoyée automatiquement"
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            deck = []
+            deck = data.deck
+        })
+
+        socket.on('résultat', (data) => {
+
+            var timer = document.getElementById('timer')
+            timer.hidden = true;
+
+            desacBouton('bouton-indice')
+            activBouton('prochain')
+            var NomMeilleurJoueur = data.nom
+            var ListeJoueurs = data.ListeScore
+            var PointGagner = data.PointGagnée
+            var MeilleurPossible = data.meilleurPossible
+            var MeilleurMotJoueur = data.MotGagnant
+            var recapScore = ""
+            ListeJoueurs.forEach(item => {
+                recapScore += item[0] + " : " + item[1] + " points\n";
+            });
+            var msg =
+                "Le gagnant du tour est : " + NomMeilleurJoueur + '\n' +
+                "Il remporte " + PointGagner + " Points " +
+                "avec le mot : " + MeilleurMotJoueur + "\n\n" +
+                "Le meilleur mot possible était : " + MeilleurPossible + "\n\n" +
+                "Récapitulatif des scores : " + "\n\n" +
+                recapScore + "\n" +
+                "Appuyer sur le bouton prêt pour passer au prochain tour"
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        })
+
+        socket.on('retourIndice', (data) => {
+            if (data.nomJoueur == nomJoueur) {
+                document.getElementById('Systeme').value += data.indice + "\n";
+            }
+
+        })
+
+        socket.on("retourAccueil", () => {
+            window.location.href = '/le_plus_long.html';
+        })
+
+    </script>
+</head>
+
+<body>
+    <header>
+        <div class="nav">
+            <button id="menu" onclick="window.location.href = '/'">Retour au menu</button>
+        </div>
+    </header>
+    <h1>Le Compte est Bon</h1>
+    <div id="timer" hidden="true"></div>
+    <div id="tempsEcoule">Temps écoulé!</div>
+    <div class="grille" id="ligne-1"></div>
+    <div class="grille" id="ligne-2"></div>
+    <div class="button-container">
+        <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice</button>
+        <button id="bouton-valider" onclick="EnvoieMot()" hidden=true>Valider</button>
+        <button id="newTour" onclick="ProchainTour()" hidden=true>Prêt pour le prochain</button>
+        <button id="recommencerPartie" onclick="recommencerPartie()" hidden="true">Recommencer</button>
+    </div>
+    <div class="voycons">
+        <button id="voyelle" onclick="tirage('voyelle')" hidden=true>Tirer une voyelle</button>
+        <button id="consonne" onclick="tirage('consonne')" hidden=true>Tirer une consonne</button>
+    </div>
+    <div class="systeme">
+        <input id="nom" placeholder="Tapez votre nom" type="text" required />
+        <button id="arrivee" onclick="ConnexionServeur()">Se connecter</button>
+        <textarea id="Systeme" rows="10" readonly></textarea>
+    </div>
+    <div>
+        <button id="Lancement" hidden="true" onclick="socket.emit('Declancheur')">Lancer la Partie</button>
+    </div>
+
+
+    <script>
+        let caseEnDeplacement = null;
+        let tempsRestant = 30; // Temps de départ en secondes
+        let timerInterval;
+        let Tour = false;
+
+        function ProchainTour() {
+            desacBouton('prochain')
+            socket.emit('nouveauTour')
+        }
+
+        function recommencerPartie() {
+            nomJoueur = ""
+            ListeJoueur = []
+            deck = []
+            TokenValide = false
+            socket.emit("recommencerPartie")
+            document.getElementById("recommencerPartie").hidden = "true";
+        }
+
+        function ConnexionServeur() {
+            nomJoueur = nom.value;
+            if (String(nomJoueur)) {
+                desacBouton('arrivee')
+                var msg = "Bienvenue " + nomJoueur + " ! \n\n" + "En attente d'autre joueurs..."
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                socket.emit('AnnonceJoueur', nomJoueur)
+                socket.emit('DemandeTailleDeck')
+            }
+        }
+
+        function demandeIndice() {
+            socket.emit('indice', { "nbIndices": nbIndices, "nomJoueur": nomJoueur });
+            nbIndices++;
+            if (nbIndices == 4) {
+                document.getElementById("bouton-indice").hidden = "true";
+            }
+        }
+
+
+        function EnvoieMot() {
+            TokenValide = true
+            nbIndices = 0
+            mot = ""
+            desacBouton('valider')
+            desacBouton('bouton-indice')
+            var ligne = document.getElementById('ligne-2').innerText;
+            nomJoueur = nom.value;
+            ligne = ligne.replace(/\n/g, '');
+            var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
+
+        }
+
+        function tirage(e) {
+            if (e == 'voyelle') {
+                socket.emit('voyelle')
+            }
+            if (e == 'consonne') {
+                socket.emit('consonne')
+            }
+            desacBouton('voyelle')
+            desacBouton('consonne')
+        }
+
+        //Initialise les grilles avec les lettres et les cases vides
+        function initialiserGrille() {
+            const ligne1 = document.getElementById('ligne-1');
+            const ligne2 = document.getElementById('ligne-2');
+
+            ligne1.innerHTML = ""
+            deck.forEach(deck => {
+                const caseLettre = creerCaseDeplacable(deck);
+                ligne1.appendChild(caseLettre);
+            });
+            // Remplit la deuxième ligne avec des cases vides
+            ligne2.innerHTML = ""
+            for (let i = 0; i < tailleDeck; i++) {
+                const caseVide = creerCaseVide();
+                ligne2.appendChild(caseVide);
+            }
+        }
+
+        /**
+         * Crée une case avec une lettre qui peut être déplacée
+        */
+        function creerCaseDeplacable(lettre) {
+            const caseLettre = document.createElement('div');
+            caseLettre.classList.add('case');
+            caseLettre.textContent = lettre;
+
+            // Rendre la case déplaçable
+            caseLettre.setAttribute('draggable', true);
+            caseLettre.addEventListener('dragstart', gererDebutDeplacement);
+            caseLettre.addEventListener('dragend', gererFinDeplacement);
+
+            // Permettre le dépôt dans cette case
+            caseLettre.addEventListener('dragover', gererSurvol);
+            caseLettre.addEventListener('drop', gererDepot);
+
+            return caseLettre;
+        }
+
+        /**
+         * Crée une case vide
+         */
+        function creerCaseVide() {
+            const caseVide = document.createElement('div');
+            caseVide.classList.add('case', 'vide');
+
+            // Permettre le dépôt dans cette case
+            caseVide.addEventListener('dragover', gererSurvol);
+            caseVide.addEventListener('drop', gererDepot);
+
+            return caseVide;
+        }
+
+        function gererDebutDeplacement(e) {
+            caseEnDeplacement = e.target;
+            e.dataTransfer.setData('text/plain', e.target.textContent);
+            e.target.classList.add('en-train-de-deplacer');
+        }
+
+        /*
+        Gère la fin du déplacement d'une case
+        */
+
+
+        function gererFinDeplacement(e) {
+            e.target.classList.remove('en-train-de-deplacer');
+        }
+
+        /**
+         * Permet le survol d'une case par une autre en déplacement
+         */
+        function gererSurvol(e) {
+            e.preventDefault(); // Permet le dépôt
+        }
+
+        /**
+         * Gère le dépôt d'une lettre dans une nouvelle case
+         */
+        function gererDepot(e) {
+            e.preventDefault();
+
+            const lettre = e.dataTransfer.getData('text/plain');
+            if (e.target.classList.contains('vide') || e.target.classList.contains('case')) {
+                // Place la lettre dans la case cible
+                e.target.textContent = lettre;
+                e.target.classList.remove('vide');
+
+                // Rend la case cible déplaçable
+                e.target.setAttribute('draggable', true);
+                e.target.addEventListener('dragstart', gererDebutDeplacement);
+                e.target.addEventListener('dragend', gererFinDeplacement);
+
+                // Permet de déposer dans cette case
+                e.target.addEventListener('dragover', gererSurvol);
+                e.target.addEventListener('drop', gererDepot);
+
+                // Vide la case d'origine
+                if (caseEnDeplacement) {
+                    caseEnDeplacement.textContent = '';
+                    caseEnDeplacement.classList.add('vide');
+                    caseEnDeplacement.removeAttribute('draggable');
+                    caseEnDeplacement.removeEventListener('dragstart', gererDebutDeplacement);
+                    caseEnDeplacement.removeEventListener('dragend', gererFinDeplacement);
+                    caseEnDeplacement = null;
+                }
+            }
+        }
+        /**
+         * Démarre le compte à rebours de 30 secondes
+         */
+        function demarrerCompteur() {
+
+            tempsRestant = 30
+            timerInterval = setInterval(function () {
+                tempsRestant--;
+                document.getElementById('timer').textContent = tempsRestant;
+                if (tempsRestant == 0) {
+                    if (TokenValide == true) {
+                        clearInterval(timerInterval);
+                        document.getElementById('timer').hidden = true;
+                        return 0
+                    }
+                    EnvoieMot();
+                    desacBouton('bouton-indice')
+                    clearInterval(timerInterval);
+                    document.getElementById('timer').hidden = true;
+                }
+            }, 1000); // Mise à jour toutes les secondes
+        }
+
+        function desacBouton(idBouton) {
+            let indice = document.getElementById('bouton-indice');
+            let newtour = document.getElementById('newTour');
+            let barrivee = document.getElementById('arrivee');
+            let valider = document.getElementById('bouton-valider')
+            let msgTempsEcoule = document.getElementById('tempsEcoule')
+            let lancerPartie = document.getElementById('Lancement')
+            let recommencer = document.getElementById("recommencerPartie")
+            var voy = document.getElementById('voyelle')
+            var cons = document.getElementById('consonne')
+            if (idBouton == 'arrivee') {
+                barrivee.disabled = true
+                return 0
+            }
+            if (idBouton == 'valider') {
+                valider.hidden = true
+                return 0
+            }
+            if (idBouton == 'prochain') {
+                newtour.hidden = true
+                return 0
+            }
+            if (idBouton == 'voyelle') {
+                voy.hidden = true
+                return 0
+            }
+            if (idBouton == 'consonne') {
+                cons.hidden = true
+                return 0
+            }
+            if (idBouton == 'Lancement') {
+                lancerPartie.hidden = true
+                return 0
+            }
+            if (idBouton == 'bouton-indice') {
+                indice.hidden = true
+                return 0
+            }
+            if (idBouton == 'recommencerPartie') {
+                recommencer.hidden = true
+                return 0
+            }
+        }
+
+        function activBouton(idBouton) {
+            let newtour = document.getElementById('newTour');
+            let barrivee = document.getElementById('arrivee');
+            let valider = document.getElementById('bouton-valider')
+            let msgTempsEcoule = document.getElementById('tempsEcoule')
+            let lancerPartie = document.getElementById('Lancement')
+            let indice = document.getElementById('bouton-indice');
+            let recommencer = document.getElementById("recommencerPartie");
+            var voy = document.getElementById('voyelle')
+            var cons = document.getElementById('consonne')
+            if (idBouton == 'arrivee') {
+                barrivee.disabled = false
+                return 0
+            }
+            if (idBouton == 'valider') {
+                valider.hidden = false
+                return 0
+            }
+            if (idBouton == 'prochain') {
+                newtour.hidden = false
+                return 0
+            }
+            if (idBouton == 'voyelle') {
+                voy.hidden = false
+                return 0
+            }
+            if (idBouton == 'consonne') {
+                cons.hidden = false
+                return 0
+            }
+            if (idBouton == 'Lancement') {
+                lancerPartie.hidden = false
+                return 0
+            }
+            if (idBouton == 'bouton-indice') {
+                indice.hidden = false
+                return 0
+            }
+            if (idBouton == 'recommencerPartie') {
+                recommencer.hidden = false
+                return 0
+            }
+        }
+    </script>
+</body>
+
+</html>

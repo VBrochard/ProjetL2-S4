@@ -197,6 +197,10 @@ def Optimot():
 def Banana_Solitaire():
     return render_template('banana_solitaire.html')
 
+@app.route('/le_compte_est_bon.html')
+def Le_Compte_est_Bon():
+    return render_template('le_compte_est_bon.html')
+
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
     global ListeJoueurs
