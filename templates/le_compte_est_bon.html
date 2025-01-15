@@ -15,6 +15,7 @@
         let nomJoueur;
         let TokenValide = false
         let nbIndices = 0;
+        let mainCalcul = []
 
         socket.on('EnvoieTailleDeck', (data) => {
             tailleDeck = data
@@ -134,8 +135,8 @@
         })
 
         socket.on('retourCalcul', (data) => {
+            const ligne = document.getElementById("ligne-1")
             if (data.Joueurs == nomJoueur) {
-                const ligne = document.getElementById("ligne-1")
                 const caseLettre = creerCaseDeplacable(data.expression);
                 ligne.appendChild(caseLettre);
                 const ligne2 = document.getElementById('ligne-2');
@@ -175,6 +176,25 @@
                 }
                 const caseVide = creerCaseVide();
                 ligne2.appendChild(caseVide);
+
+                const cases = ligne.querySelectorAll('.case')
+                console.log(cases)
+                console.log(cases.length)
+                for (var x = 0; x < cases.length; x++) {
+                    if (cases[x].innerText == "") {
+                        continue
+                    } else {
+                        mainCalcul.push(cases[x].innerText)
+                    }
+                }
+                console.log(mainCalcul)
+
+
+                ligne.innerHTML = ""
+                mainCalcul.forEach(deck => {
+                    const caseLettre = creerCaseDeplacable(deck);
+                    ligne.appendChild(caseLettre);
+                });
             }
         })
 
