@@ -686,7 +686,7 @@ def handle_nouveauTourCB():
 @socketio.on('calculer')
 def handle_calculer(data):
     print(data)
-    socketio.emit("retourCalcul",construitOperation(data))
+    socketio.emit("retourCalcul",{"expression" :construitOperation(data.get("expression")),"Joueurs" : data.get("Joueurs")})
 
 
 

@@ -24,7 +24,7 @@
             activBouton('bouton-calcul')
             deck = data.deck
             objectif = data.objectif
-            document.getElementById("objectif").innerHTML = "Objectif à atteindre: "+objectif+"\n"
+            document.getElementById("objectif").innerHTML = "Objectif à atteindre: " + objectif + "\n"
             initialiserGrille()
             document.getElementById("Systeme").value = "A vous de jouer !"
             activBouton("valider")
@@ -108,14 +108,14 @@
             recapScoreCB = ""
 
             tableau.forEach(item => {
-                recapScoreCB += item[0]+ " : "+item[1]+ " points.\n";
+                recapScoreCB += item[0] + " : " + item[1] + " points.\n";
             })
 
             activBouton('prochain')
             var msg =
                 "Les gagnants sont: " + noms + '\n' +
-                "Il a obtenu le nombre: " + score +"\n\n" +
-                "Récapitulatif des scores: \n"+recapScoreCB +
+                "Il a obtenu le nombre: " + score + "\n\n" +
+                "Récapitulatif des scores: \n" + recapScoreCB +
                 "Appuyer sur le bouton prêt pour passer au prochain tour"
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
@@ -133,10 +133,49 @@
             window.location.href = '/le_plus_long.html';
         })
 
-        socket.on('retourCalcul', (data) =>{
-            const ligne = document.getElementById("ligne-1")
-            const caseLettre = creerCaseDeplacable(data);
-            ligne.appendChild(caseLettre);
+        socket.on('retourCalcul', (data) => {
+            if (data.Joueurs == nomJoueur) {
+                const ligne = document.getElementById("ligne-1")
+                const caseLettre = creerCaseDeplacable(data.expression);
+                ligne.appendChild(caseLettre);
+                const ligne2 = document.getElementById('ligne-2');
+                ligne2.innerHTML = ""
+                for (let i = 0; i < 4; i++) {
+                    const caseVide = creerCaseVide();
+                    ligne2.appendChild(caseVide);
+
+                    const select = document.createElement('select')
+
+                    const option1 = document.createElement('option')
+                    option1.value = ' '
+                    option1.textContent = ''
+                    select.appendChild(option1)
+
+                    const option2 = document.createElement('option')
+                    option2.value = '+'
+                    option2.textContent = '+'
+                    select.appendChild(option2)
+
+                    const option3 = document.createElement('option')
+                    option3.value = '-'
+                    option3.textContent = '-'
+                    select.appendChild(option3)
+
+                    const option4 = document.createElement('option')
+                    option4.value = '*'
+                    option4.textContent = '*'
+                    select.appendChild(option4)
+
+                    const option5 = document.createElement('option')
+                    option5.value = '/'
+                    option5.textContent = '/'
+                    select.appendChild(option5)
+
+                    ligne2.appendChild(select)
+                }
+                const caseVide = creerCaseVide();
+                ligne2.appendChild(caseVide);
+            }
         })
 
 
@@ -188,65 +227,65 @@
             socket.emit('nouveauTourCB')
         }
 
-        function calculer(){
+        function calculer() {
             listeOperateurs = []
             expression = ""
-            
-            
-            var ligne = document.getElementById('ligne-2'); 
-            
-            
+
+
+            var ligne = document.getElementById('ligne-2');
+
+
             const selects = ligne.querySelectorAll('select')
             selects.forEach(select => {
                 const valeurOperateur = select.value;
-                if (valeurOperateur){
+                if (valeurOperateur) {
                     listeOperateurs.push(valeurOperateur)
                 }
             })
             const cases = ligne.querySelectorAll('.case')
             //Teste la validité
             estValide = true;
-            for (let i = 0 ; i<listeOperateurs.length ; i++){
-                console.log(i+": "+cases[i].innerText, listeOperateurs[i], cases[i+1].innerText)
-                if (listeOperateurs[i] == " " && cases[i].innerText=="" && cases[i+1].innerText != ""){
+            for (let i = 0; i < listeOperateurs.length; i++) {
+                console.log(i + ": " + cases[i].innerText, listeOperateurs[i], cases[i + 1].innerText)
+                if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
-                    estValide=false
+                    estValide = false
                     break
                 }
-                if (listeOperateurs[i] == " " && cases[i].innerText!="" && cases[i+1].innerText != ""){
+                if (listeOperateurs[i] == " " && cases[i].innerText != "" && cases[i + 1].innerText != "") {
                     console.log("Cas 2")
-                    estValide=false
+                    estValide = false
                     break
                 }
-                if (listeOperateurs[i] != " " && cases[i].innerText!="" && cases[i+1].innerText == ""){
+                if (listeOperateurs[i] != " " && cases[i].innerText != "" && cases[i + 1].innerText == "") {
                     console.log("Cas 3")
-                    estValide=false
+                    estValide = false
                     break
                 }
             }
             console.log(estValide)
-            if (estValide){
-                 //Vider la liste opérateurs de ses ""
-            
+            if (estValide) {
+                //Vider la liste opérateurs de ses ""
+
                 //Récupère l'expression sous forme de string
-                for(var i=0; i<listeOperateurs.length; i++){
-                    if (i == listeOperateurs.length - 1){
-                        expression+=cases[i].innerText+listeOperateurs[i]+cases[i+1].innerText
+                for (var i = 0; i < listeOperateurs.length; i++) {
+                    if (i == listeOperateurs.length - 1) {
+                        expression += cases[i].innerText + listeOperateurs[i] + cases[i + 1].innerText
                         break
                     }
-                    expression+=cases[i].innerText+listeOperateurs[i]
+                    expression += cases[i].innerText + listeOperateurs[i]
                 }
-                document.getElementById("warning").innerHTML= "<h3></h3>"
-                }
-            else{
-                document.getElementById("warning").innerHTML= "<h3> Expression invalide </h3>"
+                document.getElementById("warning").innerHTML = "<h3></h3>"
             }
-            cases.forEach(elt =>{
+            else {
+                document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
+            }
+            /*cases.forEach(elt => {
                 ligne.appendChild(creerCaseVide())
-            })
-            socket.emit("calculer",expression)
+            })*/
+            socket.emit("calculer", { "expression": expression, "Joueurs": nomJoueur })
         }
-        
+
 
         function recommencerPartie() {
             nomJoueur = ""
@@ -270,10 +309,10 @@
             }
         }
 
-        
 
 
-       
+
+
 
         //Initialise les grilles avec les lettres et les cases vides
         function initialiserGrille() {
@@ -290,7 +329,7 @@
             for (let i = 0; i < 4; i++) {
                 const caseVide = creerCaseVide();
                 ligne2.appendChild(caseVide);
-                
+
                 const select = document.createElement('select')
 
                 const option1 = document.createElement('option')
@@ -317,7 +356,7 @@
                 option5.value = '/'
                 option5.textContent = '/'
                 select.appendChild(option5)
-                
+
                 ligne2.appendChild(select)
             }
             const caseVide = creerCaseVide();
@@ -477,7 +516,7 @@
                 recommencer.hidden = true
                 return 0
             }
-            if (idBouton == 'bouton-calcul'){
+            if (idBouton == 'bouton-calcul') {
                 document.getElementById(idBouton).hidden = true
             }
         }
@@ -524,67 +563,67 @@
                 recommencer.hidden = false
                 return 0
             }
-            if (idBouton == 'bouton-calcul'){
+            if (idBouton == 'bouton-calcul') {
                 document.getElementById(idBouton).hidden = false
             }
         }
-        function envoiReponse(){
+        function envoiReponse() {
             listeOperateurs = []
             expression = ""
-            
-            
-            var ligne = document.getElementById('ligne-2'); 
-            
-            
+
+
+            var ligne = document.getElementById('ligne-2');
+
+
             const selects = ligne.querySelectorAll('select')
             selects.forEach(select => {
                 const valeurOperateur = select.value;
-                if (valeurOperateur){
+                if (valeurOperateur) {
                     listeOperateurs.push(valeurOperateur)
                 }
             })
             const cases = ligne.querySelectorAll('.case')
             //Teste la validité
             estValide = true;
-            for (let i = 0 ; i<listeOperateurs.length ; i++){
-                console.log(i+": "+cases[i].innerText, listeOperateurs[i], cases[i+1].innerText)
-                if (listeOperateurs[i] == " " && cases[i].innerText=="" && cases[i+1].innerText != ""){
+            for (let i = 0; i < listeOperateurs.length; i++) {
+                console.log(i + ": " + cases[i].innerText, listeOperateurs[i], cases[i + 1].innerText)
+                if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
-                    estValide=false
+                    estValide = false
                     break
                 }
-                if (listeOperateurs[i] == " " && cases[i].innerText!="" && cases[i+1].innerText != ""){
+                if (listeOperateurs[i] == " " && cases[i].innerText != "" && cases[i + 1].innerText != "") {
                     console.log("Cas 2")
-                    estValide=false
+                    estValide = false
                     break
                 }
-                if (listeOperateurs[i] != " " && cases[i].innerText!="" && cases[i+1].innerText == ""){
+                if (listeOperateurs[i] != " " && cases[i].innerText != "" && cases[i + 1].innerText == "") {
                     console.log("Cas 3")
-                    estValide=false
+                    estValide = false
                     break
                 }
             }
-            
-            if (estValide){
+
+            if (estValide) {
                 //Vider la liste opérateurs de ses ""
-                for (let i=0 ; i<listeOperateurs.length; i++){
-                    if (listeOperateurs[i] == ""){
-                        listeOperateurs.splice(i,1)
+                for (let i = 0; i < listeOperateurs.length; i++) {
+                    if (listeOperateurs[i] == "") {
+                        listeOperateurs.splice(i, 1)
                     }
                 }
                 //Récupère l'expression sous forme de string
-                for(var i=0; i<listeOperateurs.length; i++){
-                    if (i == listeOperateurs.length - 1){
-                        expression+=cases[i].innerText+listeOperateurs[i]+cases[i+1].innerText
+                for (var i = 0; i < listeOperateurs.length; i++) {
+                    if (i == listeOperateurs.length - 1) {
+                        expression += cases[i].innerText + listeOperateurs[i] + cases[i + 1].innerText
                         break
                     }
-                    expression+=cases[i].innerText+listeOperateurs[i]
+                    expression += cases[i].innerText + listeOperateurs[i]
                 }
-                document.getElementById("warning").innerHTML= "<h3></h3>"
+                document.getElementById("warning").innerHTML = "<h3></h3>"
                 desacBouton('valider')
-                }
-            else{
-                document.getElementById("warning").innerHTML= "<h3> Expression invalide </h3>"
+            }
+            else {
+                document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
             nomJoueur = nom.value;
             var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
@@ -592,9 +631,9 @@
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-            socket.emit('verificationCB',{"nom": nomJoueur, "proposition":expression})
+            socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
         }
-    
+
     </script>
 </body>
 
