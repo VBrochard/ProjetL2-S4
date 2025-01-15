@@ -31,6 +31,7 @@ nbrBananaSpeed = 0
 
 
 
+
 if len(sys.argv) < 3 or len(sys.argv) > 5:
     print("Veuillez spécifier en argument le nombre de joueurs et la taille du deck")
     sys.exit(1)
@@ -504,6 +505,62 @@ def verifier_mots(mots):
 def ResetPartieSolitaire():
     global cartes_regime
     cartes_regime = [carte for carte, freq in lettres_regime.items() for i in range(freq)]
+
+###############################################################################
+# Nécessaire Banana Speed
+
+lettres_regime_speed = {"A": 14, "B": 3, "C": 4, "D":4, "E":21, "F":3, "G": 2, "H": 2, "I":12,"J":1, "K":1, "L":7, "M":4, "N":9, "O":9, "P":3, "Q":1, "R":9, "S":9, "T":9, "U":9,
+"V": 3, "W": 1, "X": 1, "Z": 2}
+
+cartes_regime_speed = [carte for carte, freq in lettres_regime_speed.items() for i in range(freq)]
+
+
+nbrJoueurSpeed = 0
+listeJoueursSpeed = []
+
+def genererUnDeckSpeed(cartes, taille):
+    deck = []
+    for i in range(taille):
+        a = randint(0, sommeDesFreq(cartes))
+        lettre = eniemeCarte(a, cartes)
+        deck.append(lettre)
+        cartes.remove(lettre)
+    return deck
+
+
+@socketio.on('connexionSpeed')
+def handle_connexionBSpeed(data):
+    global nbrJoueurSpeed
+    global listeJoueursSpeed
+    nbrJoueurSpeed += 1
+    listeJoueursSpeed.append(data)
+    if(nbrJoueurSpeed == 2):
+        mainDepart = genererUnDeckSpeed(cartes_regime_speed,nbrBananaSpeed)
+        socketio.emit('MainDepartSpeed', mainDepart)
+
+@socketio.on('DemandePiocheSpeed')
+def handle_DemandePioche(data):
+    carte = genererUnDeck(cartes_regime_speed,1)[0]
+    socketio.emit('RetourPiocheSpeed', {"carte" : carte,"Joueur" : data} )
+
+@socketio.on('verifierMotsSpeed')
+def verifier_mots(mots):
+    # Valider tous les mots
+    tous_valides = all(motExiste(mot) for mot in mots)
+    emit('resultatValidationMotsSpeed', tous_valides)
+
+@socketio.on('ResetPartieSpeed')
+def ResetPartieSpeed():
+    global cartes_regime_speed
+    global nbrJoueurSpeed
+    global listeJoueursSpeed
+    nbrJoueurSpeed = 0
+    listeJoueursSpeed = []
+    cartes_regime_speed = [carte for carte, freq in lettres_regime_speed.items() for i in range(freq)]
+
+@socketio.on('AlerteVictoireSolitaire')
+def AlerteVictoire(data):
+    socketio.emit('AlerteAutreJoueurSolitaire',data)
 
 #####################################################################
 #Le compte est bon
