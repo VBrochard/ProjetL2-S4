@@ -155,6 +155,7 @@
     <div id="tempsEcoule">Temps écoulé!</div>
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
+    <div id="warning"></div>
     <div class="button-container">
         <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice</button>
         <button id="bouton-valider" onclick="envoiReponse()" hidden=true>Valider</button>
@@ -486,27 +487,43 @@
             const selects = ligne.querySelectorAll('select')
             selects.forEach(select => {
                 const valeurOperateur = select.value;
-                if (valeurOperateur != " "){
+                if (valeurOperateur){
                     listeOperateurs.push(valeurOperateur)
                 }
             })
             const cases = ligne.querySelectorAll('.case')
-            
-            //for (let i=0 ; i<listeOperateurs.lenghth; i++){
-            //    expression+=(cases[i].toString()+listeOperateurs[i]+cases[i+1].tostring());
-            //}
-
-
-            for(var i=0; i<listeOperateurs.length; i++){
-                if(cases[i+1].textContent == ""){
-                    expression += cases[i].textContent
+            //Teste la validité
+            estValide = true;
+            for (let i = 0 ; i<listeOperateurs.length ; i++){
+                console.log(cases[i].innerText, listeOperateurs[i], cases[i+1].innerText)
+                if (listeOperateurs[i] == " " && cases[i].innerText!="" && cases[i+1].innerText == ""){
+                    estValide=false
                     break
                 }
-                
-                expression+= cases[i].textContent + listeOperateurs[i]
+                if (listeOperateurs[i] == " " && cases[i].innerText!="" && cases[i+1].innerText != ""){
+                    estValide=false
+                    break
+                }
             }
             
-            console.log(expression)
+            if (estValide){
+                 //Vider la liste opérateurs de ses ""
+            
+                //Récupère l'expression sous forme de string
+                for(var i=0; i<listeOperateurs.length; i++){
+                    if (i == listeOperateurs.length - 1){
+                        expression+=cases[i].innerText+listeOperateurs[i]+cases[i+1].innerText
+                        break
+                    }
+                    expression+=cases[i].innerText+listeOperateurs[i]
+                }
+                console.log(listeOperateurs)
+                console.log(expression)
+                }
+                else{
+                    document.getElementById("warning").innerHTML= "<h3> Expression invalide </h3>"
+                }
+           
             
 
             nomJoueur = nom.value;
@@ -520,6 +537,7 @@
 
             socket.emit('verificationCB',{"nom": nomJoueur, "proposition":ligne})
         }
+    
     </script>
 </body>
 
