@@ -30,8 +30,8 @@ body {
 }
 
 .case {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     background-color: #10b981;
     color: white;
     display: flex;
@@ -41,6 +41,14 @@ body {
     border-radius: 4px;
     cursor: pointer;
     user-select: none;
+}
+
+select {
+    width : 40px;
+    height : 40px;
+    background-color: #07885d;
+    text-align: center;
+    font-size: large;
 }
 
 .case.vide {
