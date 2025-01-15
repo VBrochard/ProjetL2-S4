@@ -497,13 +497,15 @@
             //}
 
 
-            for(var i=0; i<4;i++){
+            for(var i=0; i<listeOperateurs.length; i++){
                 if(cases[i+1].textContent == ""){
                     expression += cases[i].textContent
                     break
                 }
+                
                 expression+= cases[i].textContent + listeOperateurs[i]
             }
+            
             console.log(expression)
             
 
