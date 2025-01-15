@@ -202,6 +202,10 @@ def Arrivée():
     socketio.emit('connecté')
     return render_template('index.html')
 
+@app.route('/index.html')
+def returnMenu():
+    return render_template('index.html')
+
 @app.route('/le_plus_long.html')
 def LeMotlepluslong():
     return render_template('le_plus_long.html')
@@ -221,6 +225,10 @@ def Le_Compte_est_Bon():
 @app.route('/banana_speed.html')
 def Banana_Speed():
     return render_template('banana_speed.html')
+
+@app.route('/BananaGramms.html')
+def BananaGramms():
+    return render_template('BananaGramms.html')
 
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
@@ -287,7 +295,7 @@ def handle_consonne():
 
 
 @socketio.on('nouveauTour')
-def handle_nouveauTour():
+def handle_nouveauTour(data):
     global jetonPret
     global deck
     deck = []
@@ -479,7 +487,7 @@ def deckBanana(nbj):
 @socketio.on('connexionBSolitaire')
 def handle_connexionBSolitaire(data):
     mainDepart = genererUnDeck(cartes_regime,int(data))
-    socketio.emit('MainDepart', mainDepart)
+    socketio.emit('MainDepartBSolitaire', mainDepart)
 
 @socketio.on('DemandePiocheSolitaire')
 def handle_DemandePioche():
@@ -509,9 +517,7 @@ listeGlobale = creerListeNombres()
 objectif = 0
 listeProp = []
 listeVainqueurs = []
-
-
-
+jetonPretCB = 0
 
 
 def construireMainNombres(lstNombres):
@@ -519,8 +525,6 @@ def construireMainNombres(lstNombres):
     while len(main) < 6:
         indiceRandom = randint(0,(len(lstNombres)-1))
         main.append(lstNombres[indiceRandom])
-        lstNombres.pop(indiceRandom)
-    main += ["*","*","*","*","-","-","-","-","+","+","+","+","/","/","/","/"]
     return main
 
 def construitOperation(calcul):
@@ -536,18 +540,21 @@ def toutIndex(lst,cible):
 def vainqueurs(listeProposition,objectif):
     lstVainqueurs = []
     lstScores = []
+    score = 0
+    score = 7
     for i in range(len(listeProposition)):
         if listeProposition[i][1] == objectif:
-            lstVainqueurs.append(i)[0]
+            lstVainqueurs.append(listeProposition[i])
+            score = 10
         else:
             lstScores.append(abs(objectif - listeProposition[i][1]))
     if lstVainqueurs != []:
-        return lstVainqueurs
+        return lstVainqueurs,score
     
     for elt in toutIndex(lstScores,min(lstScores)):
         lstVainqueurs.append(listeProposition[elt])
     
-    return lstVainqueurs
+    return lstVainqueurs,score
   
 
 @socketio.on('AnnonceJoueurCB')
@@ -571,34 +578,59 @@ def handle_AnnonceJoueur(data):
 @socketio.on('DeclancheurCB')
 def handle_declancheur():
         global nbrJoueur
+        deck = construireMainNombres(listeGlobale)
+        objectif = randint(101,999)
         nbrJoueur = len(listeJoueursCB)
         socketio.emit('Lancement',listeJoueursCB)
         time.sleep(0.5)
-        socketio.emit('afficheLettres',deck)
-        time.sleep(0.5)
-        socketio.emit('choixLettre',{"deck":deck,"joueur":listeJoueursCB[jetonTourTirage][0]})
+        socketio.emit('debut',{"deck":deck,"objectif":objectif})
 
-@socketio.on('verification')
-def handle_verification(data):
+@socketio.on('verificationCB')
+def handle_verificationCB(data):
     global objectif
     global nbrJoueur
     global listeProp
     global listeVainqueurs
+    global deck
+    global listeJoueursCB
 
-    
     listeProp.append([data.get("nom"),construitOperation(data.get('proposition'))])
     print("ListeProp",listeProp)
     if len(listeProp) == nbrJoueur:
-        listeVainqueurs = vainqueurs(listeProp,objectif)
+        listeVainqueurs,points = vainqueurs(listeProp,objectif)
 
         noms = []
-        score = listeVainqueurs[0][1]
+        scoreVainqueur = listeVainqueurs[0][1]
         for elt in listeVainqueurs:
             noms.append(elt[0])
+        
+        for elt in listeJoueursCB:
+            if elt[0] in noms:
+                elt[1]+=points
 
-        socketio.emit('resultat',{"noms":noms,"score":score})
+
+        socketio.emit('resultat',{"noms":noms,"scoreVainqueur":scoreVainqueur,"tableau":listeJoueursCB})
         listeVainqueurs = []
         listeProp = []
+        deck = []
+
+@socketio.on('nouveauTourCB')
+def handle_nouveauTourCB():
+    global jetonPretCB
+    global deck
+
+    jetonPretCB+=1
+    if jetonPretCB == nbrJoueur:
+        deck = construireMainNombres(listeGlobale)
+        objectif = randint(101,999)
+        socketio.emit('debut',{"deck":deck, "objectif":objectif})
+        jetonPretCB = 0
+
+@socketio.on('calculer')
+def handle_calculer(data):
+    print(data)
+    socketio.emit("retourCalcul",construitOperation(data))
+
 
 
 if __name__ == '__main__':

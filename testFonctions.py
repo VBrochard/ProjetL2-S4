@@ -334,20 +334,24 @@ def toutIndex(lst,cible):
 def vainqueurs(listeProposition,objectif):
     lstVainqueurs = []
     lstScores = []
+    score = 0
+    score = 7
     for i in range(len(listeProposition)):
         if listeProposition[i][1] == objectif:
-            lstVainqueurs.append(i)[0]
+            lstVainqueurs.append(listeProposition[i])
+            score = 10
         else:
             lstScores.append(abs(objectif - listeProposition[i][1]))
     if lstVainqueurs != []:
-        return lstVainqueurs
+        return lstVainqueurs,score
     
     for elt in toutIndex(lstScores,min(lstScores)):
         lstVainqueurs.append(listeProposition[elt])
     
-    return lstVainqueurs
+    return lstVainqueurs,score
   
-print(vainqueurs([['P1', 1875], ['P2', 225]],219))
+lst,score = vainqueurs([['P1', 448], ['P3', 8],['P2',186]],186)
+print(score)
 
 
 

@@ -28,7 +28,7 @@
             <div class="piocher-button-wrapper">
                 <button class="piocher-button" id="piocherButton">Piocher</button>
                 <button class="valider-button" id="validerButton">Valider</button>
-                <button id="menu" onclick="window.location.href = '/'">Retour au menu</button>
+                <button id="menu" onclick="returMenu()">Retour au menu</button>
                 <button id="Reset" onclick="ResetPartie()">Reset</button>
             </div>
         </div>
@@ -85,6 +85,11 @@
                 cellule.addEventListener('drop', gererDrop);
                 carte.appendChild(cellule);
             }
+        }
+
+        function returMenu(){
+            socket.emit('ResetPartieSolitaire')
+            window.location.href = 'index.html'
         }
 
         function genererLettresCentre(lettresListe) {
@@ -397,7 +402,7 @@
         })
 
 
-        socket.on('MainDepart', (data) => {
+        socket.on('MainDepartBSolitaire', (data) => {
             genererLettresInitiales(data)
             genererLettresCentre(["X"])
         })
