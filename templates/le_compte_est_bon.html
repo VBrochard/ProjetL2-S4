@@ -233,7 +233,7 @@
             });
             // Remplit la deuxième ligne avec des cases vides
             ligne2.innerHTML = ""
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 4; i++) {
                 const caseVide = creerCaseVide();
                 ligne2.appendChild(caseVide);
                 
@@ -266,6 +266,8 @@
                 
                 ligne2.appendChild(select)
             }
+            const caseVide = creerCaseVide();
+            ligne2.appendChild(caseVide);
         }
 
         /**
@@ -490,8 +492,17 @@
             })
             const cases = ligne.querySelectorAll('.case')
             
-            for (let i=0 ; i<listeOperateurs.lenghth; i++){
-                expression+=(cases[i].toString()+listeOperateurs[i]+cases[i+1].tostring());
+            //for (let i=0 ; i<listeOperateurs.lenghth; i++){
+            //    expression+=(cases[i].toString()+listeOperateurs[i]+cases[i+1].tostring());
+            //}
+
+
+            for(var i=0; i<4;i++){
+                if(cases[i+1].textContent == ""){
+                    expression += cases[i].textContent
+                    break
+                }
+                expression+= cases[i].textContent + listeOperateurs[i]
             }
             console.log(expression)
             
