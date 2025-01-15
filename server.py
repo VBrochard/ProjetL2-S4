@@ -16,7 +16,7 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 TokenReponse = int(0)
 ListeJoueurs = []
 
-#Variables mot le plus long
+#Variables Serveur
 deck = []
 MeilleurMotsJoueur = []
 NomMeilleursJoueurs = []
