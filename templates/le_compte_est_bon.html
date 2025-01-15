@@ -21,6 +21,7 @@
         })
 
         socket.on('debut', (data) => {
+            activBouton('bouton-calcul')
             deck = data.deck
             objectif = data.objectif
             document.getElementById("objectif").innerHTML = "Objectif à atteindre: "+objectif+"\n"
@@ -102,12 +103,19 @@
         socket.on('resultat', (data) => {
 
             noms = data.noms
-            score = data.score
+            score = data.scoreVainqueur
+            tableau = data.tableau
+            recapScoreCB = ""
+
+            tableau.forEach(item => {
+                recapScoreCB += item[0]+ " : "+item[1]+ " points.\n";
+            })
 
             activBouton('prochain')
             var msg =
                 "Les gagnants sont: " + noms + '\n' +
                 "Il a obtenu le nombre: " + score +"\n\n" +
+                "Récapitulatif des scores: \n"+recapScoreCB +
                 "Appuyer sur le bouton prêt pour passer au prochain tour"
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
@@ -123,6 +131,12 @@
 
         socket.on("retourAccueil", () => {
             window.location.href = '/le_plus_long.html';
+        })
+
+        socket.on('retourCalcul', (data) =>{
+            const ligne = document.getElementById("ligne-1")
+            const caseLettre = creerCaseDeplacable(data);
+            ligne.appendChild(caseLettre);
         })
 
 
@@ -144,6 +158,7 @@
     <div class="button-container">
         <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice</button>
         <button id="bouton-valider" onclick="envoiReponse()" hidden=true>Valider</button>
+        <button id="bouton-calcul" onclick="calculer()" hidden="true">Calculer</button>
         <button id="newTour" onclick="ProchainTour()" hidden=true>Prêt pour le prochain</button>
         <button id="recommencerPartie" onclick="recommencerPartie()" hidden="true">Recommencer</button>
     </div>
@@ -157,7 +172,7 @@
         <textarea id="Systeme" rows="10" readonly></textarea>
     </div>
     <div>
-        <button id="Lancement" hidden="true" onclick="socket.emit('Declancheur')">Lancer la Partie</button>
+        <button id="Lancement" hidden="true" onclick="socket.emit('DeclancheurCB')">Lancer la Partie</button>
     </div>
 
 
@@ -169,8 +184,15 @@
 
         function ProchainTour() {
             desacBouton('prochain')
-            socket.emit('nouveauTour')
+            socket.emit('nouveauTourCB')
         }
+
+        function calculer(){
+            var ligne2 = document.getElementById('ligne-2').innerText;
+            ligne2 = ligne2.replace(/\n/g, '');
+            socket.emit('calculer',ligne2)
+        }
+        
 
         function recommencerPartie() {
             nomJoueur = ""
@@ -211,9 +233,38 @@
             });
             // Remplit la deuxième ligne avec des cases vides
             ligne2.innerHTML = ""
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 5; i++) {
                 const caseVide = creerCaseVide();
                 ligne2.appendChild(caseVide);
+                
+                const select = document.createElement('select')
+
+                const option1 = document.createElement('option')
+                option1.value = ' '
+                option1.textContent = ''
+                select.appendChild(option1)
+
+                const option2 = document.createElement('option')
+                option2.value = '+'
+                option2.textContent = '+'
+                select.appendChild(option2)
+
+                const option3 = document.createElement('option')
+                option3.value = '-'
+                option3.textContent = '-'
+                select.appendChild(option3)
+
+                const option4 = document.createElement('option')
+                option4.value = '*'
+                option4.textContent = '*'
+                select.appendChild(option4)
+
+                const option5 = document.createElement('option')
+                option5.value = '/'
+                option5.textContent = '/'
+                select.appendChild(option5)
+                
+                ligne2.appendChild(select)
             }
         }
 
@@ -370,6 +421,9 @@
                 recommencer.hidden = true
                 return 0
             }
+            if (idBouton == 'bouton-calcul'){
+                document.getElementById(idBouton).hidden = true
+            }
         }
 
         function activBouton(idBouton) {
@@ -414,19 +468,36 @@
                 recommencer.hidden = false
                 return 0
             }
+            if (idBouton == 'bouton-calcul'){
+                document.getElementById(idBouton).hidden = false
+            }
         }
 
         function envoiReponse(){
+            listeOperateurs = []
+            listeOperandes = []
+            
             nomJoueur = nom.value;
             desacBouton('valider')
-            var ligne = document.getElementById('ligne-2').innerText;
+            var ligne = document.getElementById('ligne-2'); 
+            const cases = ligne.querySelectorAll('.case-vide');
+            cases.forEach(caseElement => {
+                const valeur = caseElement.textContent
+                listeOperandes.push(valeur)
+            })
+            console.log(listeOperandes)
+            
+            const selects = ligne.querySelectorAll('select')
+            
+
+
             ligne = ligne.replace(/\n/g, '');
             var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-            socket.emit('verification',{"nom": nomJoueur, "proposition":ligne})
+            socket.emit('verificationCB',{"nom": nomJoueur, "proposition":ligne})
         }
     </script>
 </body>
