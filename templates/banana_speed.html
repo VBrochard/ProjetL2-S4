@@ -28,7 +28,7 @@
             <div class="piocher-button-wrapper">
                 <button class="piocher-button" id="piocherButton">Piocher</button>
                 <button class="valider-button" id="validerButton">Valider</button>
-                <button id="menu" onclick="window.location.href = 'index.html'">Retour au menu</button>
+                <button id="menu" onclick="window.location.href = 'BananaGramms.html'">Retour au menu</button>
                 <button id="Reset" onclick="ResetPartie()">Reset</button>
             </div>
         </div>
@@ -41,7 +41,6 @@
         <div class="nom-joueur-container" id="ConnexionDiv">
             <div>Connexion Serveur : </div>
             <input type="text" id="nomJoueurInput" placeholder="Nom">
-            <input type="text" id="TailleDeck" placeholder="Taille Main">
             <button class="connecter-button" id="connecterButton" onclick="desacConnexion()">Se connecter</button>
 
 
@@ -67,9 +66,8 @@
         var nomJoueur;
 
         function ResetPartie() {
-            socket.emit('ResetPartieSolitaire')
+            socket.emit('ResetPartieSpeed')
             deck = []
-            tailleDeck = 0
             carte.innerHTML = '';
             genererGrille()
             remiseenmain()
@@ -126,7 +124,7 @@
         function FindPremierIndice() {
             const cellules = document.querySelectorAll('.case');
             var index = 0
-            for (index; index < 1024; index++) {
+            for (index; index < 1023; index++) {
                 if (estLettre(cellules[index].textContent)) {
                     return index
                 }
@@ -218,7 +216,7 @@
                     listeMots.push(mot)
                 }
                 console.log(listeMots)
-                socket.emit('verifierMotsSolitaire', listeMots)
+                socket.emit('verifierMotsSpeed', listeMots)
             }
             else {
                 document.getElementById('nomJoueur').textContent = "Il faut placer toute tes lettres et en un même bloc"
@@ -347,7 +345,7 @@
 
         piocherButton.addEventListener('click', () => {
             tailleDeck++
-            socket.emit('DemandePiocheSolitaire')
+            socket.emit('DemandePiocheSpeed', nomJoueur)
         });
 
 
@@ -359,52 +357,58 @@
                 return;
             }
             console.log("Envoi des mots au serveur pour validation :", motsTrouves);
-            socket.emit('verifierMotsSolitaire', motsTrouves);
+            socket.emit('verifierMotsSpeed', motsTrouves);
         });
 
 
 
         connecterButton.addEventListener('click', () => {
             nomJoueur = nomJoueurInput.value;
-            nombreDeck = TailleDeck.value;
-            tailleDeck = nombreDeck;
             console.log(nomJoueur)
-            console.log(nombreDeck)
-            if (nomJoueur && nombreDeck) {
-                socket.emit("connexionBSolitaire", nombreDeck)
+            if (nomJoueur) {
+                socket.emit("connexionSpeed", nomJoueur)
                 document.getElementById('nomJoueur').textContent = "Bonne Chance " + nomJoueur + " !"
             } else {
-                alert('Veuillez entrer un nom de joueur et la taille de votre deck');
+                alert('Veuillez entrer un nom de joueur');
             }
         });
 
 
-        socket.on('RetourPiocheSolitaire', (data) => {
+        socket.on('RetourPiocheSpeed', (data) => {
             //Ajoute au deck du joueur la carte piochée
-            carteTire = data
-            deck.push(carteTire)
-            const nouvelleCase = document.createElement('div');
-            nouvelleCase.classList.add('case');
-            nouvelleCase.style.backgroundColor = '#f0f0f0';
-            const nouvelleLettre = document.createElement('span');
-            nouvelleLettre.classList.add('lettre');
-            nouvelleLettre.textContent = carteTire;
-            nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
-            nouvelleCase.appendChild(nouvelleLettre);
-            caseModifiable.appendChild(nouvelleCase);
-            nouvelleLettre.setAttribute('draggable', 'true');
-            nouvelleLettre.addEventListener('dragstart', gererDragStart);
+            carteTire = data.carte
+            if (nomJoueur == data.Joueur) {
+                deck.push(carteTire)
+                const nouvelleCase = document.createElement('div');
+                nouvelleCase.classList.add('case');
+                nouvelleCase.style.backgroundColor = '#f0f0f0';
+                const nouvelleLettre = document.createElement('span');
+                nouvelleLettre.classList.add('lettre');
+                nouvelleLettre.textContent = carteTire;
+                nouvelleLettre.setAttribute('id', 'lettre' + Math.random());
+                nouvelleCase.appendChild(nouvelleLettre);
+                caseModifiable.appendChild(nouvelleCase);
+                nouvelleLettre.setAttribute('draggable', 'true');
+                nouvelleLettre.addEventListener('dragstart', gererDragStart);
+            }
         })
 
 
-        socket.on('MainDepart', (data) => {
+        socket.on('MainDepartSpeed', (data) => {
+            tailleDeck = data.length
             genererLettresInitiales(data)
             genererLettresCentre(["X"])
         })
 
+        socket.on('AlerteAutreJoueurSolitaire', (data) => {
+            if (nomJoueur != data) {
+                alert("Désolé mais " + data + " à été plus rapide")
+            }
+        })
 
 
-        socket.on('resultatValidationMotsSolitaire', (tousValides) => {
+
+        socket.on('resultatValidationMotsSpeed', (tousValides) => {
             //Appel de resetLettresPosees en fonction du booléen tousValides
             if (tousValides) {
 
@@ -417,6 +421,7 @@
 
                 if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
                     document.getElementById('nomJoueur').textContent = "Victoire !!!!"
+                    socket.emit('AlerteVictoireSolitaire', nomJoueur)
                     console.log("Victoire")
                 }
 
