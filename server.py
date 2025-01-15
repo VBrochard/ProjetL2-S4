@@ -479,7 +479,7 @@ def deckBanana(nbj):
 @socketio.on('connexionBSolitaire')
 def handle_connexionBSolitaire(data):
     mainDepart = genererUnDeck(cartes_regime,int(data))
-    socketio.emit('MainDepart', mainDepart)
+    socketio.emit('MainDepartBSolitaire', mainDepart)
 
 @socketio.on('DemandePiocheSolitaire')
 def handle_DemandePioche():
