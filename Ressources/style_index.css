@@ -12,7 +12,14 @@ body {
 }
 
 h1 {
-    margin-bottom: 40px;
+    text-align: center;
+    font-size: 4em; 
+    margin-top: 0;
+    padding-top: 10px;
+    background: linear-gradient(to right,#2dd37d,#eab308);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .button-container {
