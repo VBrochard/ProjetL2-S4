@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Ressources/style_BananaGramms.css">
+    <title>Menu des jeux</title>
+</head>
+
+<body>
+    <h1>Menu</h1>
+    <div class="button-container">
+        <button id="btn-banana-solitaire">Banana Solitaire</button>
+        <button id="btn-Banana-Speed">Banana Speed</button>
+        <button id="btn-menu">Menu Principal</button>
+    </div>
+
+    <script>
+
+        document.getElementById('btn-banana-solitaire').addEventListener('click', function () {
+            window.location.href = 'banana_solitaire.html';;
+        });
+
+        document.getElementById('btn-Banana-Speed').addEventListener('click', function () {
+            window.location.href = 'banana_speed.html';;
+        });
+
+        document.getElementById('btn-menu').addEventListener('click', function () {
+            window.location.href = 'index.html';;
+        });
+    </script>
+</body>
+
+</html>
