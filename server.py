@@ -202,6 +202,10 @@ def Arrivée():
     socketio.emit('connecté')
     return render_template('index.html')
 
+@app.route('/index.html')
+def returnMenu():
+    return render_template('index.html')
+
 @app.route('/le_plus_long.html')
 def LeMotlepluslong():
     return render_template('le_plus_long.html')
@@ -221,6 +225,10 @@ def Le_Compte_est_Bon():
 @app.route('/banana_speed.html')
 def Banana_Speed():
     return render_template('banana_speed.html')
+
+@app.route('/BananaGramms.html')
+def BananaGramms():
+    return render_template('BananaGramms.html')
 
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
@@ -479,7 +487,7 @@ def deckBanana(nbj):
 @socketio.on('connexionBSolitaire')
 def handle_connexionBSolitaire(data):
     mainDepart = genererUnDeck(cartes_regime,int(data))
-    socketio.emit('MainDepart', mainDepart)
+    socketio.emit('MainDepartBSolitaire', mainDepart)
 
 @socketio.on('DemandePiocheSolitaire')
 def handle_DemandePioche():
