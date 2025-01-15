@@ -475,21 +475,29 @@
 
         function envoiReponse(){
             listeOperateurs = []
-            listeOperandes = []
+            expression = ""
             
-            nomJoueur = nom.value;
-            desacBouton('valider')
+            
             var ligne = document.getElementById('ligne-2'); 
-            const cases = ligne.querySelectorAll('.case-vide');
-            cases.forEach(caseElement => {
-                const valeur = caseElement.textContent
-                listeOperandes.push(valeur)
-            })
-            console.log(listeOperandes)
+            
             
             const selects = ligne.querySelectorAll('select')
+            selects.forEach(select => {
+                const valeurOperateur = select.value;
+                if (valeurOperateur != " "){
+                    listeOperateurs.push(valeurOperateur)
+                }
+            })
+            const cases = ligne.querySelectorAll('.case')
+            
+            for (let i=0 ; i<listeOperateurs.lenghth; i++){
+                expression+=(cases[i].toString()+listeOperateurs[i]+cases[i+1].tostring());
+            }
+            console.log(expression)
             
 
+            nomJoueur = nom.value;
+            desacBouton('valider')
 
             ligne = ligne.replace(/\n/g, '');
             var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
