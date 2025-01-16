@@ -116,7 +116,7 @@
             activBouton('prochain')
             var NomMeilleurJoueur = data.nom
             var ListeJoueurs = data.ListeScore
-            var PointGagner = data.PointGagnée
+            var PointGagner = data.PointGagnée - nbIndices;
             var MeilleurPossible = data.meilleurPossible
             var MeilleurMotJoueur = data.MotGagnant
             var recapScore = ""
@@ -134,6 +134,7 @@
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            nbIndices = 0;
         })
 
         socket.on('retourIndice', (data) => {
@@ -225,7 +226,6 @@
 
         function EnvoieMot() {
             TokenValide = true
-            nbIndices = 0
             mot = ""
             desacBouton('valider')
             desacBouton('bouton-indice')
