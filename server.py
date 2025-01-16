@@ -232,6 +232,10 @@ def Banana_Speed():
 def BananaGramms():
     return render_template('BananaGramms.html')
 
+@app.route('/chiffre_lettre.html')
+def Des_Chiffres_et_des_Lettres():
+    return render_template('chiffre_lettre.html')
+
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
     global ListeJoueurs
