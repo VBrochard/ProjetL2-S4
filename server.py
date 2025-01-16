@@ -312,13 +312,14 @@ def handle_envoieMot(data):
     global listeMots
 
 
-    listePropositions.append([data.get("nom"),data.get("mot")])
+    listePropositions.append([data.get("nom"),data.get("mot"),data.get("nbIndices")])
     listeMots.append(data.get("mot"))
     
     TokenReponse += 1
     MeilleurPossible = motLePlusLong(deck)
     nomsVainqueurs = []
     scoresVainqueurs = []
+    malusApplique = 0
     if TokenReponse == nbrJoueur:
         
         tailleMotPlusGrand = motMax(listeMots)
@@ -326,10 +327,14 @@ def handle_envoieMot(data):
             if len(reponse[1]) == tailleMotPlusGrand and motExiste(reponse[1]):
                 MeilleurMotsJoueur.append(reponse[1])
                 NomMeilleursJoueurs.append(reponse[0])
+                malusApplique = tailleMotPlusGrand - reponse[2]
 
-        for joueur in ListeJoueurs:
-            if joueur[0] in NomMeilleursJoueurs: 
-                joueur[1] += tailleMotPlusGrand
+        for i in range(len(ListeJoueurs)):
+            if ListeJoueurs[i][0] in NomMeilleursJoueurs: 
+                ListeJoueurs[i][1] += tailleMotPlusGrand 
+                if ListeJoueurs[i][1]<0:
+                    ListeJoueurs[i][1] = 0
+
                 
 
         for joueur in ListeJoueurs:
@@ -343,7 +348,7 @@ def handle_envoieMot(data):
             socketio.emit('résultat', {
                 "nom" : retireDoublon(NomMeilleursJoueurs),
                 "ListeScore" : ListeJoueurs,
-                "PointGagnée" : tailleMotPlusGrand,
+                "PointGagnée" : tailleMotPlusGrand-malusApplique,
                 "meilleurPossible" : MeilleurPossible,
                 "MotGagnant" : retireDoublon(MeilleurMotsJoueur)
                 })
@@ -357,7 +362,12 @@ def handle_envoieMot(data):
 @socketio.on('indice')
 def handle_demandeIndice(data):
     global deck
+    global ListeJoueurs
+    for joueur in ListeJoueurs:
+        if joueur[0] == data.get("nomJoueur"):
+            joueur[1] -= 1
     listeIndices = recupInfoMot(motLePlusLong(deck))
+
     socketio.emit('retourIndice',{"indice":listeIndices[data.get("nbIndices")], "nomJoueur":data.get("nomJoueur")})
 
 @socketio.on('recommencerPartie')
