@@ -75,7 +75,7 @@
                 });
                 var msg =
                     "Joueurs présents dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n" +
-                    "Vous êtes au moins 2 joueurs, à l'initiative de "+ListeJoueur[0][0]+" la partie peut commencer..."
+                    "Vous êtes au moins 2 joueurs, à l'initiative de " + ListeJoueur[0][0] + " la partie peut commencer..."
 
                 messagesDiv.value += msg + '\n';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -108,10 +108,10 @@
         })
 
         socket.on('résultatCL', (data) => {
-            console.log("Data: "+data.nom)
+            console.log("Data: " + data.nom)
             var timer = document.getElementById('timer')
             timer.hidden = true;
-            
+
             desacBouton('bouton-indice')
             activBouton('prochain')
             var NomMeilleurJoueur = data.nom
@@ -138,10 +138,10 @@
         })
 
         socket.on('retourIndiceCL', (data) => {
-            if (data.nomJoueur == nomJoueur){
+            if (data.nomJoueur == nomJoueur) {
                 document.getElementById('Systeme').value += data.indice + "\n";
             }
-            
+
         })
 
         socket.on("retourAccueilCL", () => {
@@ -154,14 +154,14 @@
             document.getElementById("bouton-calcul").hidden = false
             deck = data.deck
             objectif = data.objectif
-            console.log("Deck: "+deck)
+            console.log("Deck: " + deck)
             initialiserGrilleLCB(deck)
             document.getElementById("objectif").innerHTML = "Objectif à atteindre: " + objectif + "\n"
             document.getElementById("Systeme").value = "A vous de jouer !"
             document.getElementById("bouton-valider").hidden = false
-            
+
         })
-        
+
 
     </script>
 </head>
@@ -169,7 +169,7 @@
 <body>
     <header>
         <div class="nav">
-            <button id="menu" onclick="window.location.href = '/'">Retour au menu</button>
+            <button id="menu" onclick="window.location.href = '/menu_chiffre_lettre'">Retour au menu</button>
         </div>
     </header>
     <h1>Des Chiffres et des Lettres</h1>
@@ -203,9 +203,9 @@
 
 
     <script>
-        let caseEnDeplacement = null; 
+        let caseEnDeplacement = null;
         let tempsRestant = 30; // Temps de départ en secondes
-        let timerInterval; 
+        let timerInterval;
         let Tour = false;
 
         function ProchainTour() {
@@ -213,7 +213,7 @@
             socket.emit('nouveauTourCL')
         }
 
-        function recommencerPartie(){
+        function recommencerPartie() {
             nomJoueur = ""
             ListeJoueur = []
             deck = []
@@ -235,10 +235,10 @@
             }
         }
 
-        function demandeIndice(){
-            socket.emit('indiceCL',{"nbIndices": nbIndices, "nomJoueur": nomJoueur});
+        function demandeIndice() {
+            socket.emit('indiceCL', { "nbIndices": nbIndices, "nomJoueur": nomJoueur });
             nbIndices++;
-            if (nbIndices == 4){
+            if (nbIndices == 4) {
                 document.getElementById("bouton-indice").hidden = "true";
             }
         }
@@ -246,20 +246,20 @@
 
         function EnvoieMot() {
             TokenValide = true
-            
+
             mot = ""
             desacBouton('valider')
             desacBouton('bouton-indice')
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
-            socket.emit('envoiMotCL', { "nom": nomJoueur, "mot": ligne, "nbIndices":nbIndices })
+            socket.emit('envoiMotCL', { "nom": nomJoueur, "mot": ligne, "nbIndices": nbIndices })
             var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
-            
+
+
         }
 
         function tirage(e) {
@@ -326,7 +326,7 @@
         }
 
         function gererDebutDeplacement(e) {
-            caseEnDeplacement = e.target; 
+            caseEnDeplacement = e.target;
             e.dataTransfer.setData('text/plain', e.target.textContent);
             e.target.classList.add('en-train-de-deplacer');
         }
@@ -334,9 +334,9 @@
         /*
         Gère la fin du déplacement d'une case
         */
-         
-         
-        function gererFinDeplacement(e) { 
+
+
+        function gererFinDeplacement(e) {
             e.target.classList.remove('en-train-de-deplacer');
         }
 
@@ -383,7 +383,7 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
-            
+
             tempsRestant = 30
             timerInterval = setInterval(function () {
                 tempsRestant--;
@@ -436,11 +436,11 @@
                 lancerPartie.hidden = true
                 return 0
             }
-            if (idBouton == 'bouton-indice'){
+            if (idBouton == 'bouton-indice') {
                 indice.hidden = true
                 return 0
             }
-            if (idBouton == 'recommencerPartie'){
+            if (idBouton == 'recommencerPartie') {
                 recommencer.hidden = true
                 return 0
             }
@@ -480,17 +480,17 @@
                 lancerPartie.hidden = false
                 return 0
             }
-            if (idBouton == 'bouton-indice'){
+            if (idBouton == 'bouton-indice') {
                 indice.hidden = false
                 return 0
             }
-            if (idBouton == 'recommencerPartie'){
+            if (idBouton == 'recommencerPartie') {
                 recommencer.hidden = false
                 return 0
             }
-            
+
         }
-        
+
         function calculer() {
             listeOperateurs = []
             expression = ""
@@ -545,11 +545,11 @@
             else {
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
-            
+
             expression = expression.replace(/\n/g, '');
             socket.emit("calculerLC", { "expression": expression, "Joueurs": nomJoueur })
         }
-        
+
         //Initialise les grilles avec les lettres et les cases vides
         function initialiserGrilleLCB(deck) {
             const ligne1 = document.getElementById('ligne-1');
@@ -598,7 +598,7 @@
             const caseVide = creerCaseVide();
             ligne2.appendChild(caseVide);
         }
-        
+
         function envoiReponse() {
             listeOperateurs = []
             expression = ""
@@ -665,34 +665,34 @@
 
             socket.emit('verificationCL', { "nom": nomJoueur, "proposition": expression })
         }
-        function retourNombre(){
+        function retourNombre() {
             const ligne = document.getElementById("ligne-1")
 
             const cases = ligne.querySelectorAll('.case')
-                console.log(cases)
-                console.log(cases.length)
-                for (var x = 0; x < cases.length-1; x++) {
-                    if (cases[x].innerText == "") {
-                        continue
-                    } else {
-                        mainCalcul.push(cases[x].innerText)
-                    }
+            console.log(cases)
+            console.log(cases.length)
+            for (var x = 0; x < cases.length - 1; x++) {
+                if (cases[x].innerText == "") {
+                    continue
+                } else {
+                    mainCalcul.push(cases[x].innerText)
                 }
-                console.log(mainCalcul)
-                mainCalcul = [...mainCalcul,...listeCoups[listeCoups.length-1]]
-                listeCoups.pop()
-                console.log("listeNombres: "+listeCoups)
-                console.log("mainCalcul: "+mainCalcul)
-                ligne.innerHTML = ""
-                mainCalcul.forEach(deck => {
-                    const caseLettre = creerCaseDeplacable(deck);
-                    ligne.appendChild(caseLettre);
-                })
-                mainCalcul = [];
-                document.getElementById("retour").hidden = (listeCoups.length == 0)
+            }
+            console.log(mainCalcul)
+            mainCalcul = [...mainCalcul, ...listeCoups[listeCoups.length - 1]]
+            listeCoups.pop()
+            console.log("listeNombres: " + listeCoups)
+            console.log("mainCalcul: " + mainCalcul)
+            ligne.innerHTML = ""
+            mainCalcul.forEach(deck => {
+                const caseLettre = creerCaseDeplacable(deck);
+                ligne.appendChild(caseLettre);
+            })
+            mainCalcul = [];
+            document.getElementById("retour").hidden = (listeCoups.length == 0)
         }
-                
-        
+
+
     </script>
 </body>
 

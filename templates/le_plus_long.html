@@ -75,7 +75,7 @@
                 });
                 var msg =
                     "Joueurs présents dans la partie actuellement : " + "\n\n" + RecapJoueurs + "\n\n" +
-                    "Vous êtes au moins 2 joueurs, à l'initiative de "+ListeJoueur[0][0]+" la partie peut commencer..."
+                    "Vous êtes au moins 2 joueurs, à l'initiative de " + ListeJoueur[0][0] + " la partie peut commencer..."
 
                 messagesDiv.value += msg + '\n';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -108,10 +108,10 @@
         })
 
         socket.on('résultat', (data) => {
-            console.log("Indices: "+nbIndices)
+            console.log("Indices: " + nbIndices)
             var timer = document.getElementById('timer')
             timer.hidden = true;
-            
+
             desacBouton('bouton-indice')
             activBouton('prochain')
             var NomMeilleurJoueur = data.nom
@@ -138,10 +138,10 @@
         })
 
         socket.on('retourIndice', (data) => {
-            if (data.nomJoueur == nomJoueur){
+            if (data.nomJoueur == nomJoueur) {
                 document.getElementById('Systeme').value += data.indice + "\n";
             }
-            
+
         })
 
         socket.on("retourAccueil", () => {
@@ -154,7 +154,7 @@
 <body>
     <header>
         <div class="nav">
-            <button id="menu" onclick="window.location.href = '/'">Retour au menu</button>
+            <button id="menu" onclick="window.location.href = '/menu_chiffre_lettre'">Retour au menu</button>
         </div>
     </header>
     <h1>Le Plus Long Mot</h1>
@@ -183,9 +183,9 @@
 
 
     <script>
-        let caseEnDeplacement = null; 
+        let caseEnDeplacement = null;
         let tempsRestant = 30; // Temps de départ en secondes
-        let timerInterval; 
+        let timerInterval;
         let Tour = false;
 
         function ProchainTour() {
@@ -193,7 +193,7 @@
             socket.emit('nouveauTour')
         }
 
-        function recommencerPartie(){
+        function recommencerPartie() {
             nomJoueur = ""
             ListeJoueur = []
             deck = []
@@ -215,10 +215,10 @@
             }
         }
 
-        function demandeIndice(){
-            socket.emit('indice',{"nbIndices": nbIndices, "nomJoueur": nomJoueur});
+        function demandeIndice() {
+            socket.emit('indice', { "nbIndices": nbIndices, "nomJoueur": nomJoueur });
             nbIndices++;
-            if (nbIndices == 4){
+            if (nbIndices == 4) {
                 document.getElementById("bouton-indice").hidden = "true";
             }
         }
@@ -226,20 +226,20 @@
 
         function EnvoieMot() {
             TokenValide = true
-            
+
             mot = ""
             desacBouton('valider')
             desacBouton('bouton-indice')
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
-            socket.emit('envoiMot', {"nom": nomJoueur, "mot": ligne , "nbIndices":nbIndices})
+            socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne, "nbIndices": nbIndices })
             var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            
-            
+
+
         }
 
         function tirage(e) {
@@ -306,7 +306,7 @@
         }
 
         function gererDebutDeplacement(e) {
-            caseEnDeplacement = e.target; 
+            caseEnDeplacement = e.target;
             e.dataTransfer.setData('text/plain', e.target.textContent);
             e.target.classList.add('en-train-de-deplacer');
         }
@@ -314,9 +314,9 @@
         /*
         Gère la fin du déplacement d'une case
         */
-         
-         
-        function gererFinDeplacement(e) { 
+
+
+        function gererFinDeplacement(e) {
             e.target.classList.remove('en-train-de-deplacer');
         }
 
@@ -363,7 +363,7 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
-            
+
             tempsRestant = 30
             timerInterval = setInterval(function () {
                 tempsRestant--;
@@ -416,11 +416,11 @@
                 lancerPartie.hidden = true
                 return 0
             }
-            if (idBouton == 'bouton-indice'){
+            if (idBouton == 'bouton-indice') {
                 indice.hidden = true
                 return 0
             }
-            if (idBouton == 'recommencerPartie'){
+            if (idBouton == 'recommencerPartie') {
                 recommencer.hidden = true
                 return 0
             }
@@ -460,11 +460,11 @@
                 lancerPartie.hidden = false
                 return 0
             }
-            if (idBouton == 'bouton-indice'){
+            if (idBouton == 'bouton-indice') {
                 indice.hidden = false
                 return 0
             }
-            if (idBouton == 'recommencerPartie'){
+            if (idBouton == 'recommencerPartie') {
                 recommencer.hidden = false
                 return 0
             }

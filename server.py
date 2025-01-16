@@ -225,6 +225,10 @@ def BananaGramms():
 def Des_Chiffres_et_des_Lettres():
     return render_template('chiffre_lettre.html')
 
+@app.route('/menu_chiffre_lettre')
+def MenuChiffreLettre():
+    return render_template('menu_chiffre_lettre.html')
+
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
     global ListeJoueurs
