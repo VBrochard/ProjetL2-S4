@@ -16,11 +16,11 @@
         let TokenValide = false
         let nbIndices = 0;
 
-        socket.on('EnvoieTailleDeck', (data) => {
+        socket.on('EnvoieTailleDeckCL', (data) => {
             tailleDeck = data
         })
 
-        socket.on('choixLettre', (data) => {
+        socket.on('choixLettreCL', (data) => {
             deck = data.deck
             initialiserGrille()
             if (data.joueur == nomJoueur) {
@@ -38,7 +38,7 @@
             }
         })
 
-        socket.on('victoire', (data) => {
+        socket.on('victoireCL', (data) => {
             activBouton("recommencerPartie")
             var ListeJoueur = data.tableauScores
             var recapScore = ""
@@ -53,7 +53,7 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
 
-        socket.on('ListePresence', (data) => {
+        socket.on('ListePresenceCL', (data) => {
             ListeJoueur = data
             console.log(ListeJoueur)
             messagesDiv = document.getElementById('Systeme');
@@ -83,13 +83,13 @@
         })
 
 
-        socket.on('Lancement', (data) => {
+        socket.on('LancementCL', (data) => {
             ListeJoueur = data
             var cacheboutton = document.getElementById('Lancement')
             cacheboutton.hidden = true;
         })
 
-        socket.on('tirageLettres', (data) => {
+        socket.on('tirageLettresCL', (data) => {
             demarrerCompteur();
             var timer = document.getElementById('timer')
             timer.hidden = false;
@@ -107,7 +107,7 @@
             deck = data.deck
         })
 
-        socket.on('résultat', (data) => {
+        socket.on('résultatCL', (data) => {
             
             var timer = document.getElementById('timer')
             timer.hidden = true;
@@ -136,14 +136,14 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
 
-        socket.on('retourIndice', (data) => {
+        socket.on('retourIndiceCL', (data) => {
             if (data.nomJoueur == nomJoueur){
                 document.getElementById('Systeme').value += data.indice + "\n";
             }
             
         })
 
-        socket.on("retourAccueil", () => {
+        socket.on("retourAccueilCL", () => {
             window.location.href = '/le_plus_long.html';
         })
 
@@ -189,7 +189,7 @@
 
         function ProchainTour() {
             desacBouton('prochain')
-            socket.emit('nouveauTour')
+            socket.emit('nouveauTourCL')
         }
 
         function recommencerPartie(){
@@ -197,7 +197,7 @@
             ListeJoueur = []
             deck = []
             TokenValide = false
-            socket.emit("recommencerPartie")
+            socket.emit("recommencerPartieCL")
             document.getElementById("recommencerPartie").hidden = "true";
         }
 
