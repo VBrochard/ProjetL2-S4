@@ -24,7 +24,6 @@
 
         socket.on('debut', (data) => {
             activBouton('bouton-calcul')
-            activBouton('retour');
             deck = data.deck
             objectif = data.objectif
             document.getElementById("objectif").innerHTML = "Objectif à atteindre: " + objectif + "\n"
@@ -262,7 +261,7 @@
         function calculer() {
             listeOperateurs = []
             expression = ""
-            
+            activBouton('retour')
 
 
             var ligne = document.getElementById('ligne-2');
@@ -697,6 +696,7 @@
                     ligne.appendChild(caseLettre);
                 })
                 mainCalcul = [];
+                document.getElementById("retour").hidden = (listeCoups.length == 0)
         }
 
     </script>
