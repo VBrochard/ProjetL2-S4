@@ -16,6 +16,7 @@
         let TokenValide = false
         let nbIndices = 0;
         let mainCalcul = []
+        let listeCoups = [];
 
         socket.on('EnvoieTailleDeck', (data) => {
             tailleDeck = data
@@ -23,6 +24,7 @@
 
         socket.on('debut', (data) => {
             activBouton('bouton-calcul')
+            activBouton('retour');
             deck = data.deck
             objectif = data.objectif
             document.getElementById("objectif").innerHTML = "Objectif à atteindre: " + objectif + "\n"
@@ -135,6 +137,10 @@
         })
 
         socket.on('retourCalcul', (data) => {
+            console.log(data.listeNombres)
+            console.log(listeCoups)
+            listeCoups.push(data.listeNombres)
+            socket.emit('test',listeCoups)
             const ligne = document.getElementById("ligne-1")
             if (data.Joueurs == nomJoueur) {
                 const caseLettre = creerCaseDeplacable(data.expression);
@@ -226,6 +232,7 @@
         <button id="bouton-calcul" onclick="calculer()" hidden="true">Calculer</button>
         <button id="newTour" onclick="ProchainTour()" hidden=true>Prêt pour le prochain</button>
         <button id="recommencerPartie" onclick="recommencerPartie()" hidden="true">Recommencer</button>
+        <button id="retour" onclick="retourNombre()" hidden="true">Retour</button>
     </div>
     <div class="voycons">
         <button id="voyelle" onclick="tirage('voyelle')" hidden=true>Tirer une voyelle</button>
@@ -308,6 +315,7 @@
             /*cases.forEach(elt => {
                 ligne.appendChild(creerCaseVide())
             })*/
+            expression = expression.replace(/\n/g, '');
             socket.emit("calculer", { "expression": expression, "Joueurs": nomJoueur })
         }
 
@@ -543,6 +551,9 @@
             if (idBouton == 'bouton-calcul') {
                 document.getElementById(idBouton).hidden = true
             }
+            if (idBouton == 'retour'){
+                document.getElementById(idBouton).hidden = true
+            }
         }
 
         function activBouton(idBouton) {
@@ -588,6 +599,9 @@
                 return 0
             }
             if (idBouton == 'bouton-calcul') {
+                document.getElementById(idBouton).hidden = false
+            }
+            if (idBouton == 'retour'){
                 document.getElementById(idBouton).hidden = false
             }
         }
@@ -658,7 +672,34 @@
             socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
         }
 
+        function retourNombre(){
+            const ligne = document.getElementById("ligne-1")
+
+            const cases = ligne.querySelectorAll('.case')
+                console.log(cases)
+                console.log(cases.length)
+                for (var x = 0; x < cases.length-1; x++) {
+                    if (cases[x].innerText == "") {
+                        continue
+                    } else {
+                        mainCalcul.push(cases[x].innerText)
+                    }
+                }
+                console.log(mainCalcul)
+                mainCalcul = [...mainCalcul,...listeCoups[listeCoups.length-1]]
+                listeCoups.pop()
+                console.log("listeNombres: "+listeCoups)
+                console.log("mainCalcul: "+mainCalcul)
+                ligne.innerHTML = ""
+                mainCalcul.forEach(deck => {
+                    const caseLettre = creerCaseDeplacable(deck);
+                    ligne.appendChild(caseLettre);
+                })
+                mainCalcul = [];
+        }
+
     </script>
 </body>
 
 </html>
+

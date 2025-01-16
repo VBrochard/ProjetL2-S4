@@ -7,6 +7,7 @@ import time
 import requests
 from bs4 import BeautifulSoup
 import math
+import re
 
 
 
@@ -613,6 +614,8 @@ def vainqueurs(listeProposition,objectif):
     
     return lstVainqueurs,score
   
+def retireEspaceVide(liste):
+    return [element for element in liste if element!=""]
 
 @socketio.on('AnnonceJoueurCB')
 def handle_AnnonceJoueur(data):
@@ -650,8 +653,9 @@ def handle_verificationCB(data):
     global listeVainqueurs
     global deck
     global listeJoueursCB
-
-    listeProp.append([data.get("nom"),construitOperation(data.get('proposition'))])
+    
+    resultat = construitOperation(data.get('proposition'))
+    listeProp.append([data.get("nom"),resultat])
     print("ListeProp",listeProp)
     if len(listeProp) == nbrJoueur:
         listeVainqueurs,points = vainqueurs(listeProp,objectif)
@@ -685,9 +689,16 @@ def handle_nouveauTourCB():
 
 @socketio.on('calculer')
 def handle_calculer(data):
+    print(data.get("expression"))
+    listeNombres = re.split('[+ \- * /]+',data.get('expression'))
+    listeNombres=retireEspaceVide(listeNombres)
+    resultat = construitOperation(data.get("expression"))
     print(data)
-    socketio.emit("retourCalcul",{"expression" :construitOperation(data.get("expression")),"Joueurs" : data.get("Joueurs")})
+    socketio.emit("retourCalcul",{"expression" :resultat,"Joueurs" : data.get("Joueurs"), "listeNombres":listeNombres})
 
+@socketio.on('test')
+def handle_test(data):
+    print(data)
 
 
 if __name__ == '__main__':

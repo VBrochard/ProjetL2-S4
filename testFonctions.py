@@ -350,8 +350,7 @@ def vainqueurs(listeProposition,objectif):
     
     return lstVainqueurs,score
   
-lst,score = vainqueurs([['P1', 448], ['P3', 8],['P2',186]],186)
-print(score)
+print(re.split('[+ \- * /\s]',"3-5*8    "))
 
 
 
