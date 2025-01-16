@@ -112,15 +112,28 @@ select {
     width: 150px;
 }
 
-.piocher-button:hover {
-    background-color: #218838;
+#menu{
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 150px;
 }
 
-.piocher-button-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
+#Reset{
+    background-color: #ff9800;
+    color: white;
+    padding: 10px 20px;
+    font-size: 14px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    margin-top: 10px;
+    width: 150px;
 }
 
 .valider-button {
@@ -134,6 +147,19 @@ select {
     margin-top: 10px;
     width: 150px;
 }
+
+.piocher-button:hover {
+    background-color: #218838;
+}
+
+.piocher-button-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+
 
 .valider-button:hover {
     background-color: #f57c00;
@@ -188,6 +214,11 @@ body {
     border: none;
     width: 150px;
     color: black; /* Ajouté : définit la couleur du texte du champ de saisie en noir */
+}
+
+#nomJoueur {
+    color: rgb(223, 223, 11);
+    font-size: 20px;
 }
 
 .connecter-button {
