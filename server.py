@@ -22,7 +22,7 @@ MeilleurMotsJoueur = []
 NomMeilleursJoueurs = []
 listePropositions = []
 MeilleurPossible = ""
-limiteScore = 2
+limiteScore = 10
 jetonPret = 0
 listeMots = []
 jetonTourTirage = 0
@@ -296,7 +296,7 @@ def handle_consonne():
 
 
 @socketio.on('nouveauTour')
-def handle_nouveauTour(data):
+def handle_nouveauTour():
     global jetonPret
     global deck
     deck = []

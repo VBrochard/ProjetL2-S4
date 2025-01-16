@@ -232,11 +232,12 @@
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
+            socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
             var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
+            
             
         }
 
