@@ -108,7 +108,7 @@
         })
 
         socket.on('résultat', (data) => {
-            
+            console.log("Indices: "+nbIndices)
             var timer = document.getElementById('timer')
             timer.hidden = true;
             
@@ -116,7 +116,7 @@
             activBouton('prochain')
             var NomMeilleurJoueur = data.nom
             var ListeJoueurs = data.ListeScore
-            var PointGagner = data.PointGagnée - nbIndices;
+            var PointGagner = data.PointGagnée
             var MeilleurPossible = data.meilleurPossible
             var MeilleurMotJoueur = data.MotGagnant
             var recapScore = ""
@@ -125,7 +125,7 @@
             });
             var msg =
                 "Le gagnant du tour est : " + NomMeilleurJoueur + '\n' +
-                "Il remporte " + PointGagner + " Points " +
+                "Il remporte " + PointGagner + " points " +
                 "avec le mot : " + MeilleurMotJoueur + "\n\n" +
                 "Le meilleur mot possible était : " + MeilleurPossible + "\n\n" +
                 "Récapitulatif des scores : " + "\n\n" +
@@ -134,7 +134,7 @@
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            nbIndices = 0;
+            nbIndices = 0
         })
 
         socket.on('retourIndice', (data) => {
@@ -163,7 +163,7 @@
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
     <div class="button-container">
-        <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice</button>
+        <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice (-1 point)</button>
         <button id="bouton-valider" onclick="EnvoieMot()" hidden=true>Valider</button>
         <button id="newTour" onclick="ProchainTour()" hidden=true>Prêt pour le prochain</button>
         <button id="recommencerPartie" onclick="recommencerPartie()" hidden="true">Recommencer</button>
@@ -226,13 +226,14 @@
 
         function EnvoieMot() {
             TokenValide = true
+            
             mot = ""
             desacBouton('valider')
             desacBouton('bouton-indice')
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
-            socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
+            socket.emit('envoiMot', {"nom": nomJoueur, "mot": ligne , "nbIndices":nbIndices})
             var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
