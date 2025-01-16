@@ -108,7 +108,7 @@
         })
 
         socket.on('résultatCL', (data) => {
-            
+            console.log("Data: "+data.nom)
             var timer = document.getElementById('timer')
             timer.hidden = true;
             
@@ -134,6 +134,7 @@
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            nbIndices = 0
         })
 
         socket.on('retourIndiceCL', (data) => {
@@ -147,6 +148,21 @@
             window.location.href = '/le_plus_long.html';
         })
 
+        socket.on("debutPartieLCB", (data) => {
+            document.getElementById("ligne-1").innerHTML = ""
+            document.getElementById("ligne-2").innerHTML = ""
+            document.getElementById("bouton-calcul").hidden = false
+            deck = data.deck
+            objectif = data.objectif
+            console.log("Deck: "+deck)
+            initialiserGrilleLCB(deck)
+            document.getElementById("objectif").innerHTML = "Objectif à atteindre: " + objectif + "\n"
+            document.getElementById("Systeme").value = "A vous de jouer !"
+            document.getElementById("bouton-valider").hidden = false
+            
+        })
+        
+
     </script>
 </head>
 
@@ -158,14 +174,19 @@
     </header>
     <h1>Des Chiffres et des Lettres</h1>
     <div id="timer" hidden="true"></div>
+    <div id="objectif"></div>
     <div id="tempsEcoule">Temps écoulé!</div>
     <div class="grille" id="ligne-1"></div>
     <div class="grille" id="ligne-2"></div>
+    <div id="warning"></div>
     <div class="button-container">
         <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice</button>
         <button id="bouton-valider" onclick="EnvoieMot()" hidden=true>Valider</button>
+        <button id="bouton-calcul" onclick="calculer()" hidden="true">Calculer</button>
+        <button id="bouton-validerLCB" onclick="envoiReponse()" hidden=true>Valider</button>
         <button id="newTour" onclick="ProchainTour()" hidden=true>Prêt pour le prochain</button>
         <button id="recommencerPartie" onclick="recommencerPartie()" hidden="true">Recommencer</button>
+        <button id="retour" onclick="retourNombre()" hidden="true">Retour</button>
     </div>
     <div class="voycons">
         <button id="voyelle" onclick="tirage('voyelle')" hidden=true>Tirer une voyelle</button>
@@ -177,7 +198,7 @@
         <textarea id="Systeme" rows="10" readonly></textarea>
     </div>
     <div>
-        <button id="Lancement" hidden="true" onclick="socket.emit('Declancheur')">Lancer la Partie</button>
+        <button id="Lancement" hidden="true" onclick="socket.emit('DeclancheurCL')">Lancer la Partie</button>
     </div>
 
 
@@ -198,7 +219,7 @@
             deck = []
             TokenValide = false
             socket.emit("recommencerPartieCL")
-            document.getElementById("recommencerPartie").hidden = "true";
+            document.getElementById("recommencerPartieCL").hidden = "true";
         }
 
         function ConnexionServeur() {
@@ -209,13 +230,13 @@
                 messagesDiv = document.getElementById('Systeme');
                 messagesDiv.value = msg + '\n';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                socket.emit('AnnonceJoueur', nomJoueur)
-                socket.emit('DemandeTailleDeck')
+                socket.emit('AnnonceJoueurCL', nomJoueur)
+                socket.emit('DemandeTailleDeckCL')
             }
         }
 
         function demandeIndice(){
-            socket.emit('indice',{"nbIndices": nbIndices, "nomJoueur": nomJoueur});
+            socket.emit('indiceCL',{"nbIndices": nbIndices, "nomJoueur": nomJoueur});
             nbIndices++;
             if (nbIndices == 4){
                 document.getElementById("bouton-indice").hidden = "true";
@@ -225,14 +246,14 @@
 
         function EnvoieMot() {
             TokenValide = true
-            nbIndices = 0
+            
             mot = ""
             desacBouton('valider')
             desacBouton('bouton-indice')
             var ligne = document.getElementById('ligne-2').innerText;
             nomJoueur = nom.value;
             ligne = ligne.replace(/\n/g, '');
-            socket.emit('envoiMot', { "nom": nomJoueur, "mot": ligne })
+            socket.emit('envoiMotCL', { "nom": nomJoueur, "mot": ligne, "nbIndices":nbIndices })
             var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
             messagesDiv = document.getElementById('Systeme');
             messagesDiv.value = msg + '\n';
@@ -243,10 +264,10 @@
 
         function tirage(e) {
             if (e == 'voyelle') {
-                socket.emit('voyelle')
+                socket.emit('voyelleCL')
             }
             if (e == 'consonne') {
-                socket.emit('consonne')
+                socket.emit('consonneCL')
             }
             desacBouton('voyelle')
             desacBouton('consonne')
@@ -467,7 +488,211 @@
                 recommencer.hidden = false
                 return 0
             }
+            
         }
+        
+        function calculer() {
+            listeOperateurs = []
+            expression = ""
+            document.getElementById('retour').hidden = false
+
+
+            var ligne = document.getElementById('ligne-2');
+
+
+            const selects = ligne.querySelectorAll('select')
+            selects.forEach(select => {
+                const valeurOperateur = select.value;
+                if (valeurOperateur) {
+                    listeOperateurs.push(valeurOperateur)
+                }
+            })
+            const cases = ligne.querySelectorAll('.case')
+            //Teste la validité
+            estValide = true;
+            for (let i = 0; i < listeOperateurs.length; i++) {
+                console.log(i + ": " + cases[i].innerText, listeOperateurs[i], cases[i + 1].innerText)
+                if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
+                    console.log("Cas 1")
+                    estValide = false
+                    break
+                }
+                if (listeOperateurs[i] == " " && cases[i].innerText != "" && cases[i + 1].innerText != "") {
+                    console.log("Cas 2")
+                    estValide = false
+                    break
+                }
+                if (listeOperateurs[i] != " " && cases[i].innerText != "" && cases[i + 1].innerText == "") {
+                    console.log("Cas 3")
+                    estValide = false
+                    break
+                }
+            }
+            console.log(estValide)
+            if (estValide) {
+                //Vider la liste opérateurs de ses ""
+
+                //Récupère l'expression sous forme de string
+                for (var i = 0; i < listeOperateurs.length; i++) {
+                    if (i == listeOperateurs.length - 1) {
+                        expression += cases[i].innerText + listeOperateurs[i] + cases[i + 1].innerText
+                        break
+                    }
+                    expression += cases[i].innerText + listeOperateurs[i]
+                }
+                document.getElementById("warning").innerHTML = "<h3></h3>"
+            }
+            else {
+                document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
+            }
+            
+            expression = expression.replace(/\n/g, '');
+            socket.emit("calculerLC", { "expression": expression, "Joueurs": nomJoueur })
+        }
+        
+        //Initialise les grilles avec les lettres et les cases vides
+        function initialiserGrilleLCB(deck) {
+            const ligne1 = document.getElementById('ligne-1');
+            const ligne2 = document.getElementById('ligne-2');
+
+            ligne1.innerHTML = ""
+            deck.forEach(deck => {
+                const caseLettre = creerCaseDeplacable(deck);
+                ligne1.appendChild(caseLettre);
+            });
+            // Remplit la deuxième ligne avec des cases vides
+            ligne2.innerHTML = ""
+            for (let i = 0; i < 4; i++) {
+                const caseVide = creerCaseVide();
+                ligne2.appendChild(caseVide);
+
+                const select = document.createElement('select')
+
+                const option1 = document.createElement('option')
+                option1.value = ' '
+                option1.textContent = ''
+                select.appendChild(option1)
+
+                const option2 = document.createElement('option')
+                option2.value = '+'
+                option2.textContent = '+'
+                select.appendChild(option2)
+
+                const option3 = document.createElement('option')
+                option3.value = '-'
+                option3.textContent = '-'
+                select.appendChild(option3)
+
+                const option4 = document.createElement('option')
+                option4.value = '*'
+                option4.textContent = '*'
+                select.appendChild(option4)
+
+                const option5 = document.createElement('option')
+                option5.value = '/'
+                option5.textContent = '/'
+                select.appendChild(option5)
+
+                ligne2.appendChild(select)
+            }
+            const caseVide = creerCaseVide();
+            ligne2.appendChild(caseVide);
+        }
+        
+        function envoiReponse() {
+            listeOperateurs = []
+            expression = ""
+
+
+            var ligne = document.getElementById('ligne-2');
+
+
+            const selects = ligne.querySelectorAll('select')
+            selects.forEach(select => {
+                const valeurOperateur = select.value;
+                if (valeurOperateur) {
+                    listeOperateurs.push(valeurOperateur)
+                }
+            })
+            const cases = ligne.querySelectorAll('.case')
+            //Teste la validité
+            estValide = true;
+            for (let i = 0; i < listeOperateurs.length; i++) {
+                console.log(i + ": " + cases[i].innerText, listeOperateurs[i], cases[i + 1].innerText)
+                if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
+                    console.log("Cas 1")
+                    estValide = false
+                    break
+                }
+                if (listeOperateurs[i] == " " && cases[i].innerText != "" && cases[i + 1].innerText != "") {
+                    console.log("Cas 2")
+                    estValide = false
+                    break
+                }
+                if (listeOperateurs[i] != " " && cases[i].innerText != "" && cases[i + 1].innerText == "") {
+                    console.log("Cas 3")
+                    estValide = false
+                    break
+                }
+            }
+
+            if (estValide) {
+                //Vider la liste opérateurs de ses ""
+                for (let i = 0; i < listeOperateurs.length; i++) {
+                    if (listeOperateurs[i] == "") {
+                        listeOperateurs.splice(i, 1)
+                    }
+                }
+                //Récupère l'expression sous forme de string
+                for (var i = 0; i < listeOperateurs.length; i++) {
+                    if (i == listeOperateurs.length - 1) {
+                        expression += cases[i].innerText + listeOperateurs[i] + cases[i + 1].innerText
+                        break
+                    }
+                    expression += cases[i].innerText + listeOperateurs[i]
+                }
+                document.getElementById("warning").innerHTML = "<h3></h3>"
+                desacBouton('valider')
+            }
+            else {
+                document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
+            }
+            nomJoueur = nom.value;
+            var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            socket.emit('verificationCL', { "nom": nomJoueur, "proposition": expression })
+        }
+        function retourNombre(){
+            const ligne = document.getElementById("ligne-1")
+
+            const cases = ligne.querySelectorAll('.case')
+                console.log(cases)
+                console.log(cases.length)
+                for (var x = 0; x < cases.length-1; x++) {
+                    if (cases[x].innerText == "") {
+                        continue
+                    } else {
+                        mainCalcul.push(cases[x].innerText)
+                    }
+                }
+                console.log(mainCalcul)
+                mainCalcul = [...mainCalcul,...listeCoups[listeCoups.length-1]]
+                listeCoups.pop()
+                console.log("listeNombres: "+listeCoups)
+                console.log("mainCalcul: "+mainCalcul)
+                ligne.innerHTML = ""
+                mainCalcul.forEach(deck => {
+                    const caseLettre = creerCaseDeplacable(deck);
+                    ligne.appendChild(caseLettre);
+                })
+                mainCalcul = [];
+                document.getElementById("retour").hidden = (listeCoups.length == 0)
+        }
+                
+        
     </script>
 </body>
 

@@ -42,6 +42,7 @@ if len(sys.argv) != 3:
 if len(sys.argv) == 3:
     try:
         nbrJoueur = int(sys.argv[1])
+        nbrJoueurCL = int(sys.argv[1])
         print("Le serveur est configuré pour",nbrJoueur,"joueurs")
         taille_deck = int(sys.argv[2])
         print("Le serveur est configuré pour un deck de",taille_deck,"cartes")
@@ -383,7 +384,6 @@ def handle_recommencerPartioe():
     ListeJoueurs = []
     voyelles = [carte for carte, freq in lettres_freq.items() if carte in "AEIOUY" for i in range(freq)]
     consonnes = [carte for carte, freq in lettres_freq.items() if carte not in "AEIOUY" for i in range(freq)]
-    print("Passage socket serveur")
     socketio.emit("retourAccueil")
 
 
@@ -719,17 +719,20 @@ MeilleurPossibleCL = ""
 listePropositionsCL = []
 listeMotsCL = []
 TokenReponseCL = 0
+nbPartiesLPLM = 0
+
 
 
 @socketio.on('AnnonceJoueurCL')
 def handle_AnnonceJoueurCL(data):
-    global ListeJoueursCL
-    ListeJoueursCL.append([str(data),0])
+    global listeJoueursCL
+    listeJoueursCL.append([str(data),0])
     print(data, "Rejoint la partie")
-    if len(ListeJoueurs) == nbrJoueur:
+    print(len(ListeJoueurs),nbrJoueurCL)
+    if len(listeJoueursCL) == nbrJoueurCL:
         socketio.emit('LancementCL',ListeJoueurs)
         time.sleep(0.5)
-        socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":ListeJoueursCL[jetonTourTirage][0]})
+        socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirageCL][0]})
     else:
         socketio.emit('ListePresenceCL',listeJoueursCL)
 
@@ -737,12 +740,12 @@ def handle_AnnonceJoueurCL(data):
 @socketio.on('DeclancheurCL')
 def handle_declancheurCL():
         global nbrJoueur
-        nbrJoueur = len(listeJoueursCL)
-        socketio.emit('LancementCL',ListeJoueursCL)
+        nbrJoueurCL = len(listeJoueursCL)
+        socketio.emit('LancementCL',listeJoueursCL)
         time.sleep(0.5)
         socketio.emit('afficheLettresCL',deckCL)
         time.sleep(0.5)
-        socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirage][0]})
+        socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirageCL][0]})
 
 
 @socketio.on('DemandeTailleDeckCL')
@@ -755,17 +758,17 @@ def handle_voyelle():
     global deckCL
     global listeJoueursCL
     global jetonTourTirageCL
-    global nbrJoueur
+    global nbrJoueurCL
     b = tirageCarteVoyelle()
     deckCL += b
     retireUneVoyelle_lplm(b)
     jetonTourTirageCL += 1
-    if jetonTourTirageCL == nbrJoueur:
+    if jetonTourTirageCL == nbrJoueurCL:
         jetonTourTirageCL = 0
     if len(deckCL) == taille_deck:
         socketio.emit('tirageLettresCL',{"deck" : deckCL, "TokenComplet" : len(deckCL)== taille_deck})
     else:
-        socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirage][0]})
+        socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirageCL][0]})
 
 @socketio.on('consonneCL')
 def handle_consonneCL():
@@ -776,7 +779,7 @@ def handle_consonneCL():
     deckCL += a
     retireUneConsonne_lplm(a)
     jetonTourTirageCL += 1
-    if jetonTourTirageCL == nbrJoueur:
+    if jetonTourTirageCL == nbrJoueurCL:
         jetonTourTirageCL = 0
     if len(deckCL) == taille_deck:
         socketio.emit('tirageLettresCL',{"deck" : deckCL, "TokenComplet" : len(deckCL)== taille_deck})
@@ -789,12 +792,23 @@ def handle_consonneCL():
 def handle_nouveauTourCL():
     global jetonPretCL
     global deckCL
+    global nbPartiesLPLM
+    
     deckCL = []
     
     jetonPretCL+=1
-    if jetonPretCL == nbrJoueur:
-        socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirageCL][0]})
-        jetonPretCL = 0
+    if jetonPretCL == nbrJoueurCL:
+        if nbPartiesLPLM < 1:
+            nbPartiesLPLM+=1
+            socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirageCL][0]})
+            jetonPretCL = 0
+        else:
+            deckCL = construireMainNombres(creerListeNombres())
+            objectif = randint(101,999)
+            print(deckCL,objectif)
+            socketio.emit('debutPartieLCB',{"deck":deckCL, "objectif":objectif})
+            jetonPretCL = 0
+            
 
 
 @socketio.on('envoiMotCL')
@@ -807,24 +821,24 @@ def handle_envoiMotCL(data):
     global MeilleurPossibleCL
     global listePropositionsCL
     global listeMotsCL
+    global nbrJoueurCL
 
 
     listePropositionsCL.append([data.get("nom"),data.get("mot"),data.get("nbIndices")])
-    listeMots.append(data.get("mot"))
+    listeMotsCL.append(data.get("mot"))
     
     TokenReponseCL += 1
     MeilleurPossibleCL = motLePlusLong(deckCL)
     nomsVainqueurs = []
     scoresVainqueurs = []
     malusApplique = 0
-    if TokenReponseCL == nbrJoueur:
-        
+    if TokenReponseCL == nbrJoueurCL:
+        print("résultat")
         tailleMotPlusGrand = motMax(listeMotsCL)
         for reponse in listePropositionsCL:
             if len(reponse[1]) == tailleMotPlusGrand and motExiste(reponse[1]):
                 MeilleurMotsJoueurCL.append(reponse[1])
                 NomMeilleursJoueursCL.append(reponse[0])
-                malusApplique = tailleMotPlusGrand - reponse[2]
 
         for i in range(len(listeJoueursCL)):
             if listeJoueursCL[i][0] in NomMeilleursJoueursCL: 
@@ -832,13 +846,13 @@ def handle_envoiMotCL(data):
                 if listeJoueursCL[i][1]<0:
                     listeJoueursCL[i][1] = 0
 
-
-        socketio.emit('résultat', {
-            "nom" : retireDoublon(NomMeilleursJoueurs),
-            "ListeScore" : ListeJoueurs,
-            "PointGagnée" : tailleMotPlusGrand-malusApplique,
-            "meilleurPossible" : MeilleurPossible,
-            "MotGagnant" : retireDoublon(MeilleurMotsJoueur)
+        print(ListeJoueurs)
+        socketio.emit('résultatCL', {
+            "nom" : retireDoublon(NomMeilleursJoueursCL),
+            "ListeScore" : listeJoueursCL,
+            "PointGagnée" : tailleMotPlusGrand,
+            "meilleurPossible" : MeilleurPossibleCL,
+            "MotGagnant" : retireDoublon(MeilleurMotsJoueurCL)
             })
 
         TokenReponseCL = 0
@@ -858,6 +872,46 @@ def handle_demandeIndiceCL(data):
 
     socketio.emit('retourIndiceCL',{"indice":listeIndices[data.get("nbIndices")], "nomJoueur":data.get("nomJoueur")})
 
+@socketio.on('verificationCL')
+def handle_verificationCB(data):
+    global objectif
+    global nbrJoueur
+    global listePropositionsCL
+    global listeVainqueurs
+    global deck
+    global listeJoueursCB
+    
+    resultat = construitOperation(data.get('proposition'))
+    listePropositionsCL.append([data.get("nom"),resultat])
+    print("ListeProp",listePropositionsCL)
+    if len(listePropositionsCL) == nbrJoueur:
+        listeVainqueurs,points = vainqueurs(listePropositionsCL,objectif)
+
+        noms = []
+        scoreVainqueur = listeVainqueurs[0][1]
+        for elt in listeVainqueurs:
+            noms.append(elt[0])
+        
+        for elt in listeJoueursCB:
+            if elt[0] in noms:
+                elt[1]+=points
+
+
+        socketio.emit('resultatLCB',{"noms":noms,"scoreVainqueur":scoreVainqueur,"tableau":listeJoueursCB})
+        listeVainqueurs = []
+        listeProp = []
+        deck = []
+
+
+
+@socketio.on('calculerCL')
+def handle_calculer(data):
+    print(data.get("expression"))
+    listeNombres = re.split('[+ \- * /]+',data.get('expression'))
+    listeNombres=retireEspaceVide(listeNombres)
+    resultat = construitOperation(data.get("expression"))
+    print(data)
+    socketio.emit("retourCalculCL",{"expression" :resultat,"Joueurs" : data.get("Joueurs"), "listeNombres":listeNombres})
 
 
 
