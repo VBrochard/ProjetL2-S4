@@ -12,6 +12,14 @@
     user-select: none;
 }
 
+select {
+    width : 40px;
+    height : 40px;
+    background-color: #07885d;
+    text-align: center;
+    font-size: large;
+}
+
 .case {
     background-color: transparent;
     border: 1px solid #c4c4c4;

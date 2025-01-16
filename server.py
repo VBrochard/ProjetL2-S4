@@ -8,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup
 import math
 import re
+import random
 
 
 
@@ -29,11 +30,12 @@ listeMots = []
 jetonTourTirage = 0
 nbrJoueur = 0
 nbrBananaSpeed = 0
+difficulteRand=[]
 
 
 
 
-if len(sys.argv) < 3 or len(sys.argv) > 5:
+if len(sys.argv) != 3:
     print("Veuillez spécifier en argument le nombre de joueurs et la taille du deck")
     sys.exit(1)
 
@@ -47,20 +49,6 @@ if len(sys.argv) == 3:
     except ValueError:
         print("Veuillez entrer un nombre valide pour le nombre de joueurs et la taille du deck")
         sys.exit(1)
-
-if len(sys.argv) == 4:
-    try:
-        nbrJoueur = int(sys.argv[1])
-        print("Le serveur est configuré pour",nbrJoueur,"joueurs")
-        taille_deck = int(sys.argv[2])
-        print("Le serveur est configuré pour un deck de",taille_deck,"cartes")
-        nbrBananaSpeed = int(sys.argv[3])
-        print("Banana Speed est configuré pour un deck de",nbrBananaSpeed,"cartes")
-        
-    except ValueError:
-        print("Veuillez entrer un nombre valide pour le nombre de joueurs et la taille du deck")
-        sys.exit(1)
-
 
 lettres_freq = {"A": 9, "B": 2, "C": 2, "D":3, "E":15, "F":2, "G": 2, "H": 2, "I":8,"J":1, "K":1, "L":5, "M":3, "N":6, "O":6, "P":2, "Q":1, "R":6, "S":6, "T":6, "U":6,
 "V": 2, "W": 1, "X": 1, "Y" : 1, "Z": 2}
@@ -537,9 +525,13 @@ def genererUnDeckSpeed(cartes, taille):
 def handle_connexionBSpeed(data):
     global nbrJoueurSpeed
     global listeJoueursSpeed
+    global nbrBananaSpeed
+    global difficulteRand
     nbrJoueurSpeed += 1
-    listeJoueursSpeed.append(data)
+    listeJoueursSpeed.append(data.get("joueur"))
+    difficulteRand.append(data.get("difficulté"))
     if(nbrJoueurSpeed == 2):
+        nbrBananaSpeed = int(difficulteRand[random.randint(0, 1)])
         mainDepart = genererUnDeckSpeed(cartes_regime_speed,nbrBananaSpeed)
         socketio.emit('MainDepartSpeed', mainDepart)
 
@@ -559,6 +551,8 @@ def ResetPartieSpeed():
     global cartes_regime_speed
     global nbrJoueurSpeed
     global listeJoueursSpeed
+    global nbrBananaSpeed
+    nbrBananaSpeed = 0
     nbrJoueurSpeed = 0
     listeJoueursSpeed = []
     cartes_regime_speed = [carte for carte, freq in lettres_regime_speed.items() for i in range(freq)]
