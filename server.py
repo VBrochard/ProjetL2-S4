@@ -908,14 +908,14 @@ def handle_verificationCB(data):
 
 
 
-@socketio.on('calculerCL')
+@socketio.on('calculerLC')
 def handle_calculer(data):
     print(data.get("expression"))
     listeNombres = re.split('[+ \- * /]+',data.get('expression'))
     listeNombres=retireEspaceVide(listeNombres)
     resultat = construitOperation(data.get("expression"))
     print(data)
-    socketio.emit("retourCalculCL",{"expression" :resultat,"Joueurs" : data.get("Joueurs"), "listeNombres":listeNombres})
+    socketio.emit("retourCalculLC",{"expression" :resultat,"Joueurs" : data.get("Joueurs"), "listeNombres":listeNombres})
 
 
 

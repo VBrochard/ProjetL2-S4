@@ -15,6 +15,8 @@
         let nomJoueur;
         let TokenValide = false
         let nbIndices = 0;
+        let listeCoups = []
+        let mainCalcul = []
 
         socket.on('EnvoieTailleDeckCL', (data) => {
             tailleDeck = data
@@ -547,7 +549,7 @@
             }
 
             expression = expression.replace(/\n/g, '');
-            socket.emit("calculerLC", { "expression": expression, "Joueurs": nomJoueur })
+            socket.emit("calculerLC", {"expression": expression, "Joueurs": nomJoueur })
         }
 
         //Initialise les grilles avec les lettres et les cases vides
@@ -691,6 +693,77 @@
             mainCalcul = [];
             document.getElementById("retour").hidden = (listeCoups.length == 0)
         }
+        socket.on('retourCalculLC', (data) => {
+            console.log(data.listeNombres)
+            console.log(listeCoups)
+            listeCoups.push(data.listeNombres)
+            const ligne = document.getElementById("ligne-1")
+            if (data.Joueurs == nomJoueur) {
+                const caseLettre = creerCaseDeplacable(data.expression);
+                ligne.appendChild(caseLettre);
+                const ligne2 = document.getElementById('ligne-2');
+                ligne2.innerHTML = ""
+                for (let i = 0; i < 4; i++) {
+                    const caseVide = creerCaseVide();
+                    ligne2.appendChild(caseVide);
+
+                    const select = document.createElement('select')
+
+                    const option1 = document.createElement('option')
+                    option1.value = ' '
+                    option1.textContent = ''
+                    select.appendChild(option1)
+
+                    const option2 = document.createElement('option')
+                    option2.value = '+'
+                    option2.textContent = '+'
+                    select.appendChild(option2)
+
+                    const option3 = document.createElement('option')
+                    option3.value = '-'
+                    option3.textContent = '-'
+                    select.appendChild(option3)
+
+                    const option4 = document.createElement('option')
+                    option4.value = '*'
+                    option4.textContent = '*'
+                    select.appendChild(option4)
+
+                    const option5 = document.createElement('option')
+                    option5.value = '/'
+                    option5.textContent = '/'
+                    select.appendChild(option5)
+
+                    ligne2.appendChild(select)
+                }
+                const caseVide = creerCaseVide();
+                ligne2.appendChild(caseVide);
+
+                const cases = ligne.querySelectorAll('.case')
+                console.log(cases)
+                console.log(cases.length)
+                for (var x = 0; x < cases.length; x++) {
+                    if (cases[x].innerText == "") {
+                        continue
+                    } else {
+                        mainCalcul.push(cases[x].innerText)
+                    }
+                }
+                console.log(mainCalcul)
+
+
+                ligne.innerHTML = ""
+                mainCalcul.forEach(deck => {
+                    const caseLettre = creerCaseDeplacable(deck);
+                    ligne.appendChild(caseLettre);
+
+
+
+
+                })
+                mainCalcul = [];
+            }
+        })
 
 
     </script>
