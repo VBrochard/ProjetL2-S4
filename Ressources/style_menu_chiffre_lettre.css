@@ -63,6 +63,8 @@ body {
     top: 5%;
     left: 50%;
     transform: translateX(-50%);
+    width: 20%;
+    height: auto;
     }
 
 

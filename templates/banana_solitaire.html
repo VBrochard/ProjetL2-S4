@@ -26,10 +26,10 @@
 
             </div>
             <div class="piocher-button-wrapper">
-                <button class="piocher-button" id="piocherButton">Piocher</button>
-                <button class="valider-button" id="validerButton">Valider</button>
+                <button class="piocher-button" id="piocherButton" hidden="true">Piocher</button>
+                <button class="valider-button" id="validerButton" hidden="true">Valider</button>
                 <button id="menu" onclick="returMenu()">Retour au menu</button>
-                <button id="Reset" onclick="ResetPartie()">Reset</button>
+                <button id="Reset" onclick="ResetPartie()" hidden=true>Reset</button>
             </div>
         </div>
 
@@ -68,6 +68,11 @@
 
         function ResetPartie() {
             socket.emit('ResetPartieSolitaire')
+            document.getElementById('ConnexionDiv').hidden = false
+            document.getElementById('piocherButton').hidden = true
+            document.getElementById('validerButton').hidden = true
+            document.getElementById('menu').hidden = false
+            document.getElementById('Reset').hidden = true
             deck = []
             tailleDeck = 0
             carte.innerHTML = '';
@@ -370,6 +375,10 @@
 
 
         connecterButton.addEventListener('click', () => {
+            document.getElementById('ConnexionDiv').hidden = true
+            document.getElementById('menu').hidden = true
+            document.getElementById('piocherButton').hidden = false
+            document.getElementById('validerButton').hidden = false
             nomJoueur = nomJoueurInput.value;
             nombreDeck = TailleDeck.value;
             tailleDeck = nombreDeck;
@@ -405,6 +414,8 @@
         socket.on('MainDepartBSolitaire', (data) => {
             genererLettresInitiales(data)
             genererLettresCentre(["X"])
+            document.getElementById('piocherButton').hidden = false
+            document.getElementById('validerButton').hidden = false
         })
 
 
@@ -422,6 +433,9 @@
 
                 if (document.querySelectorAll("#case-modifiable .lettre").length == 0) {
                     document.getElementById('nomJoueur').textContent = "Victoire !!!!"
+                    document.getElementById('Reset').hidden = false
+                    document.getElementById('piocherButton').hidden = true
+                    document.getElementById('validerButton').hidden = true
                     console.log("Victoire")
                 }
 

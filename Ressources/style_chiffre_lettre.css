@@ -71,8 +71,10 @@ body {
 h1 {
     position:absolute;
     margin-top: -300px;
-    margin-bottom: 200px;
-    font-size: 50px;
+    margin-bottom: 275px;
+    font-size: 45px;
+    color: rgb(235, 236, 245);
+    text-shadow: 2px 2px 4px rgb(0, 0, 161);
 }
 
 button {

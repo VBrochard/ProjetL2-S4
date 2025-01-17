@@ -570,6 +570,7 @@ def ResetPartieSpeed():
     nbrJoueurSpeed = 0
     listeJoueursSpeed = []
     cartes_regime_speed = [carte for carte, freq in lettres_regime_speed.items() for i in range(freq)]
+    socketio.emit('ResetOrdreSpeed')
 
 @socketio.on('AlerteVictoireSolitaire')
 def AlerteVictoire(data):
