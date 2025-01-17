@@ -5,6 +5,7 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import math
+import random
 
 def ouvrirDico():
     with open("Ressources/Dico.txt", 'r', encoding='utf-8') as fichier:
@@ -349,8 +350,12 @@ def vainqueurs(listeProposition,objectif):
         lstVainqueurs.append(listeProposition[elt])
     
     return lstVainqueurs,score
-  
-print(re.split('[+ \- * /\s]',"3-5*8    "))
+
+
+
+random_integer = random.randint(0, 1)
+
+
 
 
 

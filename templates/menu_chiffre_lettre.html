@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/Ressources/style_menu_chiffre_lettre.css">
+    <title>Menu des Chiffre et des Lettres</title>
+</head>
+
+<body>
+    <img src="Ressources/Logo_Des_.png" alt="Image" class="top-image">
+    <div class="return-menu">
+        <button id="btn-menu">Menu Principal</button>
+    </div>
+
+    <button id="btn-chiffre-lettre">Des Chiffres et des Lettres</button>
+    <div class="button-container">
+        <button id="btn-le_plus_long_mot">Le plus long Mot</button>
+        <button id="btn-le_compte_est_bon">Le compte est bon</button>
+
+
+    </div>
+
+    <script>
+
+        document.getElementById('btn-chiffre-lettre').addEventListener('click', function () {
+            window.location.href = 'chiffre_lettre.html';;
+        });
+
+        document.getElementById('btn-le_plus_long_mot').addEventListener('click', function () {
+            window.location.href = 'le_plus_long.html';;
+        });
+
+        document.getElementById('btn-le_compte_est_bon').addEventListener('click', function () {
+            window.location.href = 'le_compte_est_bon.html';;
+        });
+
+        document.getElementById('btn-menu').addEventListener('click', function () {
+            window.location.href = 'index.html';;
+        });
+    </script>
+</body>
+
+</html>

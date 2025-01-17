@@ -139,7 +139,7 @@
             console.log(data.listeNombres)
             console.log(listeCoups)
             listeCoups.push(data.listeNombres)
-            socket.emit('test',listeCoups)
+            socket.emit('test', listeCoups)
             const ligne = document.getElementById("ligne-1")
             if (data.Joueurs == nomJoueur) {
                 const caseLettre = creerCaseDeplacable(data.expression);
@@ -215,7 +215,7 @@
 <body>
     <header>
         <div class="nav">
-            <button id="menu" onclick="window.location.href = '/'">Retour au menu</button>
+            <button id="menu" onclick="window.location.href = '/menu_chiffre_lettre'">Retour au menu</button>
         </div>
     </header>
     <h1>Le Compte est Bon</h1>
@@ -551,7 +551,7 @@
             if (idBouton == 'bouton-calcul') {
                 document.getElementById(idBouton).hidden = true
             }
-            if (idBouton == 'retour'){
+            if (idBouton == 'retour') {
                 document.getElementById(idBouton).hidden = true
             }
         }
@@ -601,7 +601,7 @@
             if (idBouton == 'bouton-calcul') {
                 document.getElementById(idBouton).hidden = false
             }
-            if (idBouton == 'retour'){
+            if (idBouton == 'retour') {
                 document.getElementById(idBouton).hidden = false
             }
         }
@@ -672,35 +672,34 @@
             socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
         }
 
-        function retourNombre(){
+        function retourNombre() {
             const ligne = document.getElementById("ligne-1")
 
             const cases = ligne.querySelectorAll('.case')
-                console.log(cases)
-                console.log(cases.length)
-                for (var x = 0; x < cases.length-1; x++) {
-                    if (cases[x].innerText == "") {
-                        continue
-                    } else {
-                        mainCalcul.push(cases[x].innerText)
-                    }
+            console.log(cases)
+            console.log(cases.length)
+            for (var x = 0; x < cases.length - 1; x++) {
+                if (cases[x].innerText == "") {
+                    continue
+                } else {
+                    mainCalcul.push(cases[x].innerText)
                 }
-                console.log(mainCalcul)
-                mainCalcul = [...mainCalcul,...listeCoups[listeCoups.length-1]]
-                listeCoups.pop()
-                console.log("listeNombres: "+listeCoups)
-                console.log("mainCalcul: "+mainCalcul)
-                ligne.innerHTML = ""
-                mainCalcul.forEach(deck => {
-                    const caseLettre = creerCaseDeplacable(deck);
-                    ligne.appendChild(caseLettre);
-                })
-                mainCalcul = [];
-                document.getElementById("retour").hidden = (listeCoups.length == 0)
+            }
+            console.log(mainCalcul)
+            mainCalcul = [...mainCalcul, ...listeCoups[listeCoups.length - 1]]
+            listeCoups.pop()
+            console.log("listeNombres: " + listeCoups)
+            console.log("mainCalcul: " + mainCalcul)
+            ligne.innerHTML = ""
+            mainCalcul.forEach(deck => {
+                const caseLettre = creerCaseDeplacable(deck);
+                ligne.appendChild(caseLettre);
+            })
+            mainCalcul = [];
+            document.getElementById("retour").hidden = (listeCoups.length == 0)
         }
 
     </script>
 </body>
 
 </html>
-

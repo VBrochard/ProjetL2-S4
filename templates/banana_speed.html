@@ -41,6 +41,12 @@
         <div class="nom-joueur-container" id="ConnexionDiv">
             <div>Connexion Serveur : </div>
             <input type="text" id="nomJoueurInput" placeholder="Nom">
+            <select name="numbers" id="numberSelector">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
             <button class="connecter-button" id="connecterButton" onclick="desacConnexion()">Se connecter</button>
 
 
@@ -363,10 +369,12 @@
 
 
         connecterButton.addEventListener('click', () => {
+            var select = document.getElementById("numberSelector");
+            var selectedValue = select.value;
             nomJoueur = nomJoueurInput.value;
             console.log(nomJoueur)
             if (nomJoueur) {
-                socket.emit("connexionSpeed", nomJoueur)
+                socket.emit("connexionSpeed", { "joueur": nomJoueur, "difficulté": selectedValue })
                 document.getElementById('nomJoueur').textContent = "Bonne Chance " + nomJoueur + " !"
             } else {
                 alert('Veuillez entrer un nom de joueur');
@@ -398,6 +406,7 @@
             tailleDeck = data.length
             genererLettresInitiales(data)
             genererLettresCentre(["X"])
+            alert("La difficulté choisie entre vos 2 choix à été de " + tailleDeck + " cartes")
         })
 
         socket.on('AlerteAutreJoueurSolitaire', (data) => {
