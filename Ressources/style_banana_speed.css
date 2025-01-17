@@ -87,7 +87,7 @@ select {
 }
 
 .boutons-zoom button {
-    background-color: #007BFF;
+    background-color: #28a745;
     color: white;
     padding: 10px 15px;
     font-size: 20px;
@@ -173,7 +173,7 @@ body {
     align-items: center;
     margin: 0;
     height: 100vh;
-    background: linear-gradient(135deg, #4caf50, #3f51b5);
+    background: linear-gradient(to bottom, #55bc6b, #b69227);
     overflow: hidden;
 }
 
