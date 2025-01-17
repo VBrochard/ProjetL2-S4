@@ -728,6 +728,7 @@ TokenReponseCL = 0
 nbPartiesLPLM = 1
 nbRounds = 0
 objectifCL = 0
+listeCoups = []
 
 def envoiGagnants(listeScores):
     res = []
@@ -745,7 +746,9 @@ def envoiGagnants(listeScores):
 @socketio.on('AnnonceJoueurCL')
 def handle_AnnonceJoueurCL(data):
     global listeJoueursCL
+    global listeCoups
     listeJoueursCL.append([str(data),0])
+    listeCoups.append([str(data)])
     print(data, "Rejoint la partie")
     print(len(ListeJoueurs),nbrJoueurCL)
     if len(listeJoueursCL) == nbrJoueurCL:
@@ -934,16 +937,32 @@ def handle_verificationCL(data):
         
         objectifCL = 0
 
-
-
-@socketio.on('calculerLC')
-def handle_calculer(data):
-    print(data.get("expression"))
+@socketio.on("calculerCL")
+def handle_calculerCL(data):
+    global listeCoups
     listeNombres = re.split('[+ \- * /]+',data.get('expression'))
     listeNombres=retireEspaceVide(listeNombres)
+    for elt in listeCoups:
+        if elt[0] == data.get("Joueurs"):
+            print(elt[0])
+            elt.append(listeNombres)
     resultat = construitOperation(data.get("expression"))
-    print(data)
-    socketio.emit("retourCalculLC",{"expression" :resultat,"Joueurs" : data.get("Joueurs"), "listeNombres":listeNombres})
+    socketio.emit('retourCalculCL',{"expression" :resultat,"Joueurs" : data.get("Joueurs"), "listeNombres":listeNombres})
+
+@socketio.on('demandeDernierCoup')
+def handle_dernierCoup(data):
+    global listeCoups
+    vide = False
+    for elt in listeCoups:
+        if elt[0] == data:
+            aEnvoyer = elt.pop()
+            print(aEnvoyer)
+            if len(elt) == 1:
+                vide = True
+                socketio.emit("retourneDernierCoup",{"nom":data, "vide":vide, "tab":aEnvoyer})
+            else:
+                socketio.emit("retourneDernierCoup",{"nom":data, "vide":vide, "tab":aEnvoyer})
+               
 
 
 

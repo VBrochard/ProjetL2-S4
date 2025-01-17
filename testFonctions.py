@@ -363,10 +363,6 @@ def envoiGagnants(listeScores):
             res.append(elt)
     return res
 
-print(envoiGagnants([['P1',42],['P2',25],['P3',42]]))
-
-
-
-
-
-
+liste = []
+liste.append([])
+print(liste)

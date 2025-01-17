@@ -15,7 +15,7 @@
         let nomJoueur;
         let TokenValide = false
         let nbIndices = 0;
-        let listeCoups = []
+        const listeCoups = []
         let mainCalcul = []
 
         socket.on('EnvoieTailleDeckCL', (data) => {
@@ -62,7 +62,6 @@
 
         socket.on('ListePresenceCL', (data) => {
             ListeJoueur = data
-            console.log(ListeJoueur)
             messagesDiv = document.getElementById('Systeme');
             var RecapJoueurs = ""
             if (ListeJoueur.length == 2 && ListeJoueur[0][0] == nomJoueur) {
@@ -115,7 +114,6 @@
         })
 
         socket.on('résultatCL', (data) => {
-            console.log("Data: " + data.nom)
             var timer = document.getElementById('timer')
             timer.hidden = true;
 
@@ -130,7 +128,6 @@
             ListeJoueurs.forEach(item => {
                 recapScore += item[0] + " : " + item[1] + " points\n";
             });
-            console.log(recapScore)
             var msg =
                 "Le gagnant du tour est : " + NomMeilleurJoueur + '\n' +
                 "Il remporte " + PointGagner + " Points " +
@@ -164,7 +161,6 @@
             document.getElementById("bouton-calcul").hidden = false
             deck = data.deck
             objectif = data.objectif
-            console.log("Deck: " + deck)
             initialiserGrilleLCB(deck)
             document.getElementById("objectif").innerHTML = "Objectif à atteindre: " + objectif + "\n"
             document.getElementById("Systeme").value = "A vous de jouer !"
@@ -181,7 +177,6 @@
         tableau.forEach(item => {
             recapScoreLCB += item[0] + " : " + item[1] + " points.\n";
         })
-        console.log(recapScoreLCB)
         socket.on("victoirePartie", (data) => {
             tab = data
             tab.forEach(item => {
@@ -200,6 +195,8 @@
         messagesDiv.value = msg + '\n';
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
+
+        socket
 
 
     </script>
@@ -550,13 +547,7 @@
         function calculer() {
             listeOperateurs = []
             expression = ""
-            console.log(listeCoups)
-            document.getElementById('retour').hidden = (listeCoups.length == 0)
-
-
             var ligne = document.getElementById('ligne-2');
-
-
             const selects = ligne.querySelectorAll('select')
             selects.forEach(select => {
                 const valeurOperateur = select.value;
@@ -568,7 +559,6 @@
             //Teste la validité
             estValide = true;
             for (let i = 0; i < listeOperateurs.length; i++) {
-                console.log(i + ": " + cases[i].innerText, listeOperateurs[i], cases[i + 1].innerText)
                 if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
                     estValide = false
@@ -584,7 +574,17 @@
                     estValide = false
                     break
                 }
+                if (listeOperateurs[i] == "/" && cases[i+1].innerText == '0'){
+                    estValide = false
+                    break
+                }
+                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == ""){
+                    estValide = false
+                    break
+                }
             }
+            if (listeOperateurs[0] == " ") estValide = false;
+
             console.log(estValide)
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
@@ -598,13 +598,12 @@
                     expression += cases[i].innerText + listeOperateurs[i]
                 }
                 document.getElementById("warning").innerHTML = "<h3></h3>"
+                socket.emit("calculerCL", {"expression": expression, "Joueurs": nomJoueur })
             }
             else {
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
-
-            expression = expression.replace(/\n/g, '');
-            socket.emit("calculerLC", {"expression": expression, "Joueurs": nomJoueur })
+            
         }
 
         //Initialise les grilles avec les lettres et les cases vides
@@ -675,7 +674,6 @@
             //Teste la validité
             estValide = true;
             for (let i = 0; i < listeOperateurs.length; i++) {
-                console.log(i + ": " + cases[i].innerText, listeOperateurs[i], cases[i + 1].innerText)
                 if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
                     estValide = false
@@ -723,37 +721,39 @@
             socket.emit('verificationCL', { "nom": nomJoueur, "proposition": expression })
         }
         function retourNombre() {
-            const ligne = document.getElementById("ligne-1")
-
-            const cases = ligne.querySelectorAll('.case')
-            console.log(cases)
-            console.log(cases.length)
-            for (var x = 0; x < cases.length - 1; x++) {
-                if (cases[x].innerText == "") {
-                    continue
-                } else {
-                    mainCalcul.push(cases[x].innerText)
-                }
-            }
-            console.log(mainCalcul)
-            mainCalcul = [...mainCalcul, ...listeCoups[listeCoups.length - 1]]
-            listeCoups.pop()
-            console.log("listeNombres: " + listeCoups)
-            console.log("mainCalcul: " + mainCalcul)
-            ligne.innerHTML = ""
-            mainCalcul.forEach(deck => {
-                const caseLettre = creerCaseDeplacable(deck);
-                ligne.appendChild(caseLettre);
-            })
-            mainCalcul = [];
-            document.getElementById("retour").hidden = (listeCoups.length == 0)
+            socket.emit("demandeDernierCoup",nomJoueur)
         }
-        socket.on('retourCalculLC', (data) => {
-            console.log(data.listeNombres)
-            console.log(listeCoups)
-            listeCoups.push(data.listeNombres)
+
+        socket.on("retourneDernierCoup", (data) =>{
+            if (data.nom == nomJoueur){
+                dernierCoup = data.tab
+                historiqueVide = data.vide
+                document.getElementById('retour').hidden = historiqueVide
+                const ligne = document.getElementById("ligne-1")
+                const cases = ligne.querySelectorAll('.case')
+                for (var x = 0; x < cases.length - 1; x++) {
+                    if (cases[x].innerText == "") {
+                        continue
+                    } else {
+                        mainCalcul.push(cases[x].innerText)
+                    }
+                }
+                mainCalcul = [...mainCalcul, ...dernierCoup]
+                ligne.innerHTML = ""
+                mainCalcul.forEach(deck => {
+                    const caseLettre = creerCaseDeplacable(deck);
+                    ligne.appendChild(caseLettre);
+                })
+                mainCalcul = [];
+                
+            }
+                }
+                
+            )
+        socket.on('retourCalculCL', (data) => {
             const ligne = document.getElementById("ligne-1")
             if (data.Joueurs == nomJoueur) {
+                document.getElementById("retour").hidden = false
                 const caseLettre = creerCaseDeplacable(data.expression);
                 ligne.appendChild(caseLettre);
                 const ligne2 = document.getElementById('ligne-2');
@@ -795,8 +795,6 @@
                 ligne2.appendChild(caseVide);
 
                 const cases = ligne.querySelectorAll('.case')
-                console.log(cases)
-                console.log(cases.length)
                 for (var x = 0; x < cases.length; x++) {
                     if (cases[x].innerText == "") {
                         continue
@@ -804,7 +802,6 @@
                         mainCalcul.push(cases[x].innerText)
                     }
                 }
-                console.log(mainCalcul)
 
 
                 ligne.innerHTML = ""
@@ -819,6 +816,12 @@
                 mainCalcul = [];
             }
         })
+
+        socket.on("retourBouton", (data) => {
+                if (nomJoueur == data){
+                    document.getElementById('retour').hidden = (listeCoups.length == 0)
+                }
+            })
 
 
     </script>

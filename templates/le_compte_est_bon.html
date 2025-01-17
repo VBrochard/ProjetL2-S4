@@ -15,7 +15,7 @@
         let nomJoueur;
         let TokenValide = false
         let nbIndices = 0;
-        let mainCalcul = []
+        let mainCalcul= []
         let listeCoups = [];
 
         socket.on('EnvoieTailleDeck', (data) => {
@@ -278,7 +278,7 @@
             //Teste la validité
             estValide = true;
             for (let i = 0; i < listeOperateurs.length; i++) {
-                console.log(i + ": " + cases[i].innerText, listeOperateurs[i], cases[i + 1].innerText)
+                console.log(i + ": " +listeOperateurs[i] == "/")
                 if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
                     estValide = false
@@ -294,7 +294,17 @@
                     estValide = false
                     break
                 }
+                if (listeOperateurs[i] == "/" && cases[i+1].innerText == 0){
+                    estValide = false
+                    break
+                }
+                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == ""){
+                    estValide = false
+                    break
+                }
             }
+            if (listeOperateurs[0] == " ") estValide = false;
+            
             console.log(estValide)
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
@@ -308,15 +318,13 @@
                     expression += cases[i].innerText + listeOperateurs[i]
                 }
                 document.getElementById("warning").innerHTML = "<h3></h3>"
+                expression = expression.replace(/\n/g, '');
+                socket.emit("calculer", { "expression": expression, "Joueurs": nomJoueur })
             }
             else {
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
-            /*cases.forEach(elt => {
-                ligne.appendChild(creerCaseVide())
-            })*/
-            expression = expression.replace(/\n/g, '');
-            socket.emit("calculer", { "expression": expression, "Joueurs": nomJoueur })
+            
         }
 
 
@@ -640,7 +648,17 @@
                     estValide = false
                     break
                 }
+                if (listeOperateurs[i] == "/" && cases[i].innerText == "0"){
+                    estValide = false
+                    break
+                }
+                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == ""){
+                    estValide = false
+                    break
+                }
             }
+            if (listeOperateurs[0] == " "){ estValide = false; }
+            
 
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
@@ -670,8 +688,8 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
             socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
+        
         }
-
         function retourNombre() {
             const ligne = document.getElementById("ligne-1")
 
@@ -688,6 +706,7 @@
             console.log(mainCalcul)
             mainCalcul = [...mainCalcul, ...listeCoups[listeCoups.length - 1]]
             listeCoups.pop()
+            document.getElementById('retour').hidden = (listeCoups.length == 0)
             console.log("listeNombres: " + listeCoups)
             console.log("mainCalcul: " + mainCalcul)
             ligne.innerHTML = ""
