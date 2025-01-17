@@ -176,7 +176,7 @@
         noms = data.noms
         score = data.scoreVainqueur
         tableau = data.tableau
-        recapScoreLCB = ""
+        recapScoreFinal = ""
 
         tableau.forEach(item => {
             recapScoreLCB += item[0] + " : " + item[1] + " points.\n";
@@ -550,7 +550,8 @@
         function calculer() {
             listeOperateurs = []
             expression = ""
-            document.getElementById('retour').hidden = false
+            console.log(listeCoups)
+            document.getElementById('retour').hidden = (listeCoups.length == 0)
 
 
             var ligne = document.getElementById('ligne-2');
