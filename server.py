@@ -722,9 +722,23 @@ NomMeilleursJoueursCL = []
 MeilleurPossibleCL = ""
 listePropositionsCL = []
 listeMotsCL = []
+listeVainqueursCL = []
 TokenReponseCL = 0
-nbPartiesLPLM = 0
+nbPartiesLPLM = 1
+nbRounds = 0
+objectifCL = 0
 
+def envoiGagnants(listeScores):
+    res = []
+    max = 0
+    for elt in listeScores:
+        if elt[1] > max:
+            max = elt[1]
+            res = []
+            res.append(elt)
+        elif elt[1] == max:
+            res.append(elt)
+    return res
 
 
 @socketio.on('AnnonceJoueurCL')
@@ -797,21 +811,23 @@ def handle_nouveauTourCL():
     global jetonPretCL
     global deckCL
     global nbPartiesLPLM
+    global objectifCL
     
     deckCL = []
     
     jetonPretCL+=1
     if jetonPretCL == nbrJoueurCL:
-        if nbPartiesLPLM < 1:
+        if nbPartiesLPLM < 2:
             nbPartiesLPLM+=1
             socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirageCL][0]})
             jetonPretCL = 0
         else:
             deckCL = construireMainNombres(creerListeNombres())
-            objectif = randint(101,999)
-            print(deckCL,objectif)
-            socketio.emit('debutPartieLCB',{"deck":deckCL, "objectif":objectif})
+            objectifCL = randint(101,999)
+            print(deckCL,objectifCL)
+            socketio.emit('debutPartieLCB',{"deck":deckCL, "objectif":objectifCL})
             jetonPretCL = 0
+            nbPartiesLPLM = 0
             
 
 
@@ -837,7 +853,7 @@ def handle_envoiMotCL(data):
     scoresVainqueurs = []
     malusApplique = 0
     if TokenReponseCL == nbrJoueurCL:
-        print("résultat")
+        print("ListeCL",listeJoueursCL)
         tailleMotPlusGrand = motMax(listeMotsCL)
         for reponse in listePropositionsCL:
             if len(reponse[1]) == tailleMotPlusGrand and motExiste(reponse[1]):
@@ -877,34 +893,45 @@ def handle_demandeIndiceCL(data):
     socketio.emit('retourIndiceCL',{"indice":listeIndices[data.get("nbIndices")], "nomJoueur":data.get("nomJoueur")})
 
 @socketio.on('verificationCL')
-def handle_verificationCB(data):
-    global objectif
+def handle_verificationCL(data):
+    global objectifCL
     global nbrJoueur
     global listePropositionsCL
-    global listeVainqueurs
-    global deck
-    global listeJoueursCB
+    global listeVainqueursCL
+    global deckCL
+    global listeJoueursCL
+    global nbRounds
     
     resultat = construitOperation(data.get('proposition'))
     listePropositionsCL.append([data.get("nom"),resultat])
-    print("ListeProp",listePropositionsCL)
-    if len(listePropositionsCL) == nbrJoueur:
-        listeVainqueurs,points = vainqueurs(listePropositionsCL,objectif)
+    print("ListeProp",listePropositionsCL, nbrJoueurCL)
+    if len(listePropositionsCL) == nbrJoueurCL:
+        listeVainqueursCL,points = vainqueurs(listePropositionsCL,objectifCL)
 
         noms = []
-        scoreVainqueur = listeVainqueurs[0][1]
-        for elt in listeVainqueurs:
+        scoreVainqueur = listeVainqueursCL[0][1]
+        for elt in listeVainqueursCL:
             noms.append(elt[0])
         
-        for elt in listeJoueursCB:
+        for elt in listeJoueursCL:
             if elt[0] in noms:
                 elt[1]+=points
 
-
-        socketio.emit('resultatLCB',{"noms":noms,"scoreVainqueur":scoreVainqueur,"tableau":listeJoueursCB})
+        #Limite du nombre de rounds
+        if nbRounds == 1:
+            gagnants = envoiGagnants(listeJoueursCL)
+            socketio.emit("victoirePartie",gagnants)
+            nbRounds = 0
+        else:
+            nbRounds+=1
+            socketio.emit('resultatLCB',{"noms":noms,"scoreVainqueur":scoreVainqueur,"tableau":listeJoueursCL})
+            
         listeVainqueurs = []
         listeProp = []
-        deck = []
+        deckCL = []
+        listePropositionsCL = []
+        
+        objectifCL = 0
 
 
 

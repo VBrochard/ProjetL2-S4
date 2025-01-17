@@ -351,9 +351,19 @@ def vainqueurs(listeProposition,objectif):
     
     return lstVainqueurs,score
 
+def envoiGagnants(listeScores):
+    res = []
+    max = 0
+    for elt in listeScores:
+        if elt[1] > max:
+            max = elt[1]
+            res = []
+            res.append(elt)
+        elif elt[1] == max:
+            res.append(elt)
+    return res
 
-
-random_integer = random.randint(0, 1)
+print(envoiGagnants([['P1',42],['P2',25],['P3',42]]))
 
 
 

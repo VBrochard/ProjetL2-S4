@@ -23,6 +23,11 @@
         })
 
         socket.on('choixLettreCL', (data) => {
+            document.getElementById("warning").innerHTML = "<h3></h3>"
+            document.getElementById("objectif").innerHTML = ""
+            desacBouton("bouton-validerLCB")
+            desacBouton("bouton-calcul")
+            activBouton("bouton-valider")
             deck = data.deck
             initialiserGrille()
             if (data.joueur == nomJoueur) {
@@ -92,7 +97,7 @@
         })
 
         socket.on('tirageLettresCL', (data) => {
-            demarrerCompteur();
+            demarrerCompteur(30);
             var timer = document.getElementById('timer')
             timer.hidden = false;
             TokenValide = false;
@@ -125,6 +130,7 @@
             ListeJoueurs.forEach(item => {
                 recapScore += item[0] + " : " + item[1] + " points\n";
             });
+            console.log(recapScore)
             var msg =
                 "Le gagnant du tour est : " + NomMeilleurJoueur + '\n' +
                 "Il remporte " + PointGagner + " Points " +
@@ -151,6 +157,8 @@
         })
 
         socket.on("debutPartieLCB", (data) => {
+            desacBouton('valider')
+            activBouton("bouton-validerLCB")
             document.getElementById("ligne-1").innerHTML = ""
             document.getElementById("ligne-2").innerHTML = ""
             document.getElementById("bouton-calcul").hidden = false
@@ -160,8 +168,37 @@
             initialiserGrilleLCB(deck)
             document.getElementById("objectif").innerHTML = "Objectif à atteindre: " + objectif + "\n"
             document.getElementById("Systeme").value = "A vous de jouer !"
-            document.getElementById("bouton-valider").hidden = false
+            
 
+        })
+        socket.on('resultatLCB', (data) => {
+
+        noms = data.noms
+        score = data.scoreVainqueur
+        tableau = data.tableau
+        recapScoreLCB = ""
+
+        tableau.forEach(item => {
+            recapScoreLCB += item[0] + " : " + item[1] + " points.\n";
+        })
+        console.log(recapScoreLCB)
+        socket.on("victoirePartie", (data) => {
+            tab = data
+            tab.forEach(item => {
+                recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
+            })
+            document.getElementById("Systeme").value = "Les gagnants sont: \n"+recapScoreFinal
+        })
+
+        activBouton('prochain')
+        var msg =
+            "Les gagnants sont: " + noms + '\n' +
+            "Il a obtenu le nombre: " + score + "\n\n" +
+            "Récapitulatif des scores: \n" + recapScoreLCB +
+            "Appuyer sur le bouton prêt pour passer au prochain tour"
+        messagesDiv = document.getElementById('Systeme');
+        messagesDiv.value = msg + '\n';
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
 
 
@@ -184,6 +221,7 @@
     <div class="button-container">
         <button id="bouton-indice" onclick="demandeIndice()" hidden="true">Indice</button>
         <button id="bouton-valider" onclick="EnvoieMot()" hidden=true>Valider</button>
+        <button id="bouton-validerLCB" onclick="envoiReponse()" hidden=true>Valider</button>
         <button id="bouton-calcul" onclick="calculer()" hidden="true">Calculer</button>
         <button id="bouton-validerLCB" onclick="envoiReponse()" hidden=true>Valider</button>
         <button id="newTour" onclick="ProchainTour()" hidden=true>Prêt pour le prochain</button>
@@ -384,9 +422,9 @@
         /**
          * Démarre le compte à rebours de 30 secondes
          */
-        function demarrerCompteur() {
+        function demarrerCompteur(temps) {
 
-            tempsRestant = 30
+            tempsRestant = temps
             timerInterval = setInterval(function () {
                 tempsRestant--;
                 document.getElementById('timer').textContent = tempsRestant;
@@ -446,6 +484,14 @@
                 recommencer.hidden = true
                 return 0
             }
+            if (idBouton == "bouton-validerLCB"){
+                document.getElementById(idBouton).hidden = true
+                return 0
+            }
+            if (idBouton == "bouton-calcul"){
+                document.getElementById(idBouton).hidden = true
+                return 0
+            }
         }
 
         function activBouton(idBouton) {
@@ -488,6 +534,14 @@
             }
             if (idBouton == 'recommencerPartie') {
                 recommencer.hidden = false
+                return 0
+            }
+            if (idBouton == "bouton-validerLCB"){
+                document.getElementById(idBouton).hidden = false
+                return 0
+            }
+            if (idBouton == "bouton-calcul"){
+                document.getElementById(idBouton).hidden = false
                 return 0
             }
 
