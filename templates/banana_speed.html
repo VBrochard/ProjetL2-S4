@@ -26,10 +26,10 @@
 
             </div>
             <div class="piocher-button-wrapper">
-                <button class="piocher-button" id="piocherButton">Piocher</button>
-                <button class="valider-button" id="validerButton">Valider</button>
+                <button class="piocher-button" id="piocherButton" hidden=true>Piocher</button>
+                <button class="valider-button" id="validerButton" hidden=true>Valider</button>
                 <button id="menu" onclick="window.location.href = 'BananaGramms.html'">Retour au menu</button>
-                <button id="Reset" onclick="ResetPartie()">Reset</button>
+                <button id="Reset" onclick="ResetPartie()" hidden='true'>Reset</button>
             </div>
         </div>
 
@@ -73,12 +73,21 @@
 
         function ResetPartie() {
             socket.emit('ResetPartieSpeed')
+        }
+
+        socket.on('ResetOrdreSpeed', (data) => {
+            document.getElementById('ConnexionDiv').hidden = false
+            document.getElementById('piocherButton').hidden = true
+            document.getElementById('validerButton').hidden = true
+            document.getElementById('menu').hidden = false
             deck = []
             carte.innerHTML = '';
             genererGrille()
             remiseenmain()
             document.getElementById('nomJoueur').textContent = "Reconnectez vous pour relancer une partie"
-        }
+        })
+
+
 
         function genererGrille() {
             for (let i = 0; i < 32 * 32; i++) {
@@ -374,6 +383,9 @@
             nomJoueur = nomJoueurInput.value;
             console.log(nomJoueur)
             if (nomJoueur) {
+                document.getElementById('ConnexionDiv').hidden = true
+                document.getElementById('menu').hidden = true
+                document.getElementById('Reset').hidden = true
                 socket.emit("connexionSpeed", { "joueur": nomJoueur, "difficulté": selectedValue })
                 document.getElementById('nomJoueur').textContent = "Bonne Chance " + nomJoueur + " !"
             } else {
@@ -404,14 +416,19 @@
 
         socket.on('MainDepartSpeed', (data) => {
             tailleDeck = data.length
+            document.getElementById('piocherButton').hidden = false
+            document.getElementById('validerButton').hidden = false
             genererLettresInitiales(data)
             genererLettresCentre(["X"])
             alert("La difficulté choisie entre vos 2 choix à été de " + tailleDeck + " cartes")
         })
 
         socket.on('AlerteAutreJoueurSolitaire', (data) => {
+            document.getElementById('Reset').hidden = false
             if (nomJoueur != data) {
                 alert("Désolé mais " + data + " à été plus rapide")
+                document.getElementById('nomJoueur').textContent = "Victoire de " + data
+
             }
         })
 
