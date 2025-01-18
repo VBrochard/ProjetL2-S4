@@ -15,7 +15,7 @@
         let nomJoueur;
         let TokenValide = false
         let nbIndices = 0;
-        let mainCalcul= []
+        let mainCalcul = []
         let listeCoups = [];
 
         socket.on('EnvoieTailleDeck', (data) => {
@@ -30,6 +30,9 @@
             initialiserGrille()
             document.getElementById("Systeme").value = "A vous de jouer !"
             activBouton("valider")
+            demarrerCompteur();
+            var timer = document.getElementById('timer')
+            timer.hidden = false;
 
         })
 
@@ -278,7 +281,7 @@
             //Teste la validité
             estValide = true;
             for (let i = 0; i < listeOperateurs.length; i++) {
-                console.log(i + ": " +listeOperateurs[i] == "/")
+                console.log(i + ": " + listeOperateurs[i] == "/")
                 if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
                     estValide = false
@@ -294,17 +297,17 @@
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] == "/" && cases[i+1].innerText == 0){
+                if (listeOperateurs[i] == "/" && cases[i + 1].innerText == 0) {
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == ""){
+                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == "") {
                     estValide = false
                     break
                 }
             }
             if (listeOperateurs[0] == " ") estValide = false;
-            
+
             console.log(estValide)
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
@@ -324,7 +327,7 @@
             else {
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
-            
+
         }
 
 
@@ -496,18 +499,24 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
+            if (timerInterval) {
+                clearInterval(timerInterval); // Arrêter l'ancien intervalle s'il existe.
+            }
 
-            tempsRestant = 30
+            tempsRestant = 45
             timerInterval = setInterval(function () {
                 tempsRestant--;
                 document.getElementById('timer').textContent = tempsRestant;
-                if (tempsRestant == 0) {
+                if (tempsRestant <= 0) {
                     if (TokenValide == true) {
                         clearInterval(timerInterval);
                         document.getElementById('timer').hidden = true;
                         return 0
                     }
-                    desacBouton('bouton-indice')
+                    envoiReponse();
+                    desacBouton('bouton-calcul')
+                    desacBouton('retour')
+                    desacBouton('valider')
                     clearInterval(timerInterval);
                     document.getElementById('timer').hidden = true;
                 }
@@ -614,6 +623,10 @@
             }
         }
         function envoiReponse() {
+            TokenValide = true
+            desacBouton('bouton-validerLCB')
+            desacBouton('bouton-calcul')
+            desacBouton('retour')
             listeOperateurs = []
             expression = ""
 
@@ -648,17 +661,17 @@
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] == "/" && cases[i].innerText == "0"){
+                if (listeOperateurs[i] == "/" && cases[i].innerText == "0") {
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == ""){
+                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == "") {
                     estValide = false
                     break
                 }
             }
-            if (listeOperateurs[0] == " "){ estValide = false; }
-            
+            if (listeOperateurs[0] == " ") { estValide = false; }
+
 
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
@@ -688,7 +701,7 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
             socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
-        
+
         }
         function retourNombre() {
             const ligne = document.getElementById("ligne-1")
