@@ -96,7 +96,7 @@
         })
 
         socket.on('tirageLettresCL', (data) => {
-            demarrerCompteur(30);
+            demarrerCompteur(30, 'LPM');
             var timer = document.getElementById('timer')
             timer.hidden = false;
             TokenValide = false;
@@ -154,6 +154,7 @@
         })
 
         socket.on("debutPartieLCB", (data) => {
+            TokenValide = false
             desacBouton('valider')
             activBouton("bouton-validerLCB")
             document.getElementById("ligne-1").innerHTML = ""
@@ -164,39 +165,40 @@
             initialiserGrilleLCB(deck)
             document.getElementById("objectif").innerHTML = "Objectif à atteindre: " + objectif + "\n"
             document.getElementById("Systeme").value = "A vous de jouer !"
-            
+            demarrerCompteur(45, 'LCB')
+            var timer = document.getElementById('timer')
+            timer.hidden = false;
+
 
         })
         socket.on('resultatLCB', (data) => {
 
-        noms = data.noms
-        score = data.scoreVainqueur
-        tableau = data.tableau
-        recapScoreFinal = ""
+            noms = data.noms
+            score = data.scoreVainqueur
+            tableau = data.tableau
+            recapScoreFinal = ""
 
-        tableau.forEach(item => {
-            recapScoreLCB += item[0] + " : " + item[1] + " points.\n";
-        })
-        socket.on("victoirePartie", (data) => {
-            tab = data
-            tab.forEach(item => {
+            tableau.forEach(item => {
                 recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
             })
-            document.getElementById("Systeme").value = "Les gagnants sont: \n"+recapScoreFinal
-        })
+            socket.on("victoirePartie", (data) => {
+                tab = data
+                tab.forEach(item => {
+                    recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
+                })
+                document.getElementById("Systeme").value = "Les gagnants sont: \n" + recapScoreFinal
+            })
 
-        activBouton('prochain')
-        var msg =
-            "Les gagnants sont: " + noms + '\n' +
-            "Il a obtenu le nombre: " + score + "\n\n" +
-            "Récapitulatif des scores: \n" + recapScoreLCB +
-            "Appuyer sur le bouton prêt pour passer au prochain tour"
-        messagesDiv = document.getElementById('Systeme');
-        messagesDiv.value = msg + '\n';
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            activBouton('prochain')
+            var msg =
+                "Les gagnants sont: " + noms + '\n' +
+                "Il a obtenu le nombre: " + score + "\n\n" +
+                "Récapitulatif des scores: \n" + recapScoreFinal +
+                "Appuyer sur le bouton prêt pour passer au prochain tour"
+            messagesDiv = document.getElementById('Systeme');
+            messagesDiv.value = msg + '\n';
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
-
-        socket
 
 
     </script>
@@ -417,22 +419,30 @@
             }
         }
         /**
-         * Démarre le compte à rebours de 30 secondes
+         * Démarre le compte à rebours de 'temps' secondes
          */
-        function demarrerCompteur(temps) {
+        function demarrerCompteur(temps, jeu) {
+            if (timerInterval) {
+                clearInterval(timerInterval); // Arrêter l'ancien intervalle s'il existe.
+            }
 
             tempsRestant = temps
             timerInterval = setInterval(function () {
                 tempsRestant--;
                 document.getElementById('timer').textContent = tempsRestant;
-                if (tempsRestant == 0) {
+                if (tempsRestant <= 0) {
                     if (TokenValide == true) {
                         clearInterval(timerInterval);
                         document.getElementById('timer').hidden = true;
                         return 0
                     }
-                    EnvoieMot();
-                    desacBouton('bouton-indice')
+                    if (jeu == 'LPM') {
+                        EnvoieMot();
+                        desacBouton('bouton-indice')
+                    }
+                    if (jeu == 'LCB') {
+                        envoiReponse();
+                    }
                     clearInterval(timerInterval);
                     document.getElementById('timer').hidden = true;
                 }
@@ -481,13 +491,16 @@
                 recommencer.hidden = true
                 return 0
             }
-            if (idBouton == "bouton-validerLCB"){
+            if (idBouton == "bouton-validerLCB") {
                 document.getElementById(idBouton).hidden = true
                 return 0
             }
-            if (idBouton == "bouton-calcul"){
+            if (idBouton == "bouton-calcul") {
                 document.getElementById(idBouton).hidden = true
                 return 0
+            }
+            if (idBouton == "retour") {
+                document.getElementById(idBouton.hidden = true)
             }
         }
 
@@ -533,11 +546,11 @@
                 recommencer.hidden = false
                 return 0
             }
-            if (idBouton == "bouton-validerLCB"){
+            if (idBouton == "bouton-validerLCB") {
                 document.getElementById(idBouton).hidden = false
                 return 0
             }
-            if (idBouton == "bouton-calcul"){
+            if (idBouton == "bouton-calcul") {
                 document.getElementById(idBouton).hidden = false
                 return 0
             }
@@ -574,11 +587,11 @@
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] == "/" && cases[i+1].innerText == '0'){
+                if (listeOperateurs[i] == "/" && cases[i + 1].innerText == '0') {
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == ""){
+                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == "") {
                     estValide = false
                     break
                 }
@@ -598,12 +611,12 @@
                     expression += cases[i].innerText + listeOperateurs[i]
                 }
                 document.getElementById("warning").innerHTML = "<h3></h3>"
-                socket.emit("calculerCL", {"expression": expression, "Joueurs": nomJoueur })
+                socket.emit("calculerCL", { "expression": expression, "Joueurs": nomJoueur })
             }
             else {
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
-            
+
         }
 
         //Initialise les grilles avec les lettres et les cases vides
@@ -656,6 +669,10 @@
         }
 
         function envoiReponse() {
+            TokenValide = true
+            desacBouton('bouton-validerLCB')
+            desacBouton('bouton-calcul')
+            desacBouton('retour')
             listeOperateurs = []
             expression = ""
 
@@ -721,11 +738,11 @@
             socket.emit('verificationCL', { "nom": nomJoueur, "proposition": expression })
         }
         function retourNombre() {
-            socket.emit("demandeDernierCoup",nomJoueur)
+            socket.emit("demandeDernierCoup", nomJoueur)
         }
 
-        socket.on("retourneDernierCoup", (data) =>{
-            if (data.nom == nomJoueur){
+        socket.on("retourneDernierCoup", (data) => {
+            if (data.nom == nomJoueur) {
                 dernierCoup = data.tab
                 historiqueVide = data.vide
                 document.getElementById('retour').hidden = historiqueVide
@@ -745,11 +762,11 @@
                     ligne.appendChild(caseLettre);
                 })
                 mainCalcul = [];
-                
+
             }
-                }
-                
-            )
+        }
+
+        )
         socket.on('retourCalculCL', (data) => {
             const ligne = document.getElementById("ligne-1")
             if (data.Joueurs == nomJoueur) {
@@ -818,10 +835,10 @@
         })
 
         socket.on("retourBouton", (data) => {
-                if (nomJoueur == data){
-                    document.getElementById('retour').hidden = (listeCoups.length == 0)
-                }
-            })
+            if (nomJoueur == data) {
+                document.getElementById('retour').hidden = (listeCoups.length == 0)
+            }
+        })
 
 
     </script>

@@ -599,6 +599,8 @@ def construireMainNombres(lstNombres):
     return main
 
 def construitOperation(calcul):
+    if calcul == "":
+        calcul = "0"
     return math.floor(eval(calcul))
 
 def toutIndex(lst,cible):
