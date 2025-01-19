@@ -41,6 +41,7 @@
 
         //Affichage des vainqueurs et leurs scores
         socket.on('victoire', (data) => {
+            document.getElementById("timer").hidden = true
             activBouton("recommencerPartie")
             var ListeJoueur = data.tableauScores
             var recapScore = ""

@@ -336,7 +336,6 @@ def handle_envoieMot(data):
             if len(reponse[1]) == tailleMotPlusGrand and motExiste(reponse[1]):
                 MeilleurMotsJoueur.append(reponse[1])
                 NomMeilleursJoueurs.append(reponse[0])
-                m
 
         for i in range(len(ListeJoueurs)): #Mise à jour des scores
             if ListeJoueurs[i][0] in NomMeilleursJoueurs: 
@@ -355,7 +354,7 @@ def handle_envoieMot(data):
             socketio.emit('résultat', {
                 "nom" : retireDoublon(NomMeilleursJoueurs),
                 "ListeScore" : ListeJoueurs,
-                "PointGagnée" : tailleMotPlusGrand-malusApplique,
+                "PointGagnée" : tailleMotPlusGrand,
                 "meilleurPossible" : MeilleurPossible,
                 "MotGagnant" : retireDoublon(MeilleurMotsJoueur)
                 })
@@ -381,7 +380,7 @@ def handle_demandeIndice(data):
 
 #Réinitialisation des variables pour démarrer une nouvelle partie
 @socketio.on('recommencerPartie')
-def handle_recommencerPartioe():
+def handle_recommencerPartie():
     global ListeJoueurs 
     global voyelles
     global consonnes
@@ -612,6 +611,8 @@ def construireMainNombres(lstNombres):
 
 def construitOperation(calcul): 
     #Prends en paramètre un string d'une opération arithmétique valide et évalue son résultat
+    if calcul[0] == " ":
+        calcul = "0"
     return math.floor(eval(calcul))
 
 def toutIndex(lst,cible): 
@@ -727,6 +728,33 @@ def handle_calculer(data):
     resultat = construitOperation(data.get("expression"))
     print(data)
     socketio.emit("retourCalcul",{"expression" :resultat,"Joueurs" : data.get("Joueurs"), "listeNombres":listeNombres})
+
+@socketio.on("recommencerPartieLCB")
+def handle_recommencerLCB():
+    global listeJoueursCB
+    listeJoueursCB = []
+
+    global deckCB
+    deckCB = []
+
+    global listeGlobale
+    listeGlobale = creerListeNombres()
+
+    global objectif
+    objectif = 0
+
+    global listeProp
+    listeProp = []
+
+    global listeVainqueurs
+    listeVainqueurs = []
+
+    global jetonPretCB
+    jetonPretCB = 0
+
+    socketio.emit("retourAccueilLCB")
+
+
 
 ###############################################################################
 #Des chiffres et des lettres
@@ -908,9 +936,7 @@ def handle_demandeIndiceCL(data):
     global listeJoueursCL
     for joueur in listeJoueursCL:
         if joueur[0] == data.get("nomJoueur"):
-            joueur[1] -= 1
-            if joueur[1] < 0:
-                joueur[1] = 0
+            joueur[1] -= 1 
     listeIndices = recupInfoMot(motLePlusLong(deckCL))
     socketio.emit('retourIndiceCL',{"indice":listeIndices[data.get("nbIndices")], "nomJoueur":data.get("nomJoueur")})
 
@@ -926,6 +952,7 @@ def handle_verificationCL(data):
     global nbRounds
     
     resultat = construitOperation(data.get('proposition'))
+
     listePropositionsCL.append([data.get("nom"),resultat])
     print("ListeProp",listePropositionsCL, nbrJoueurCL)
     if len(listePropositionsCL) == nbrJoueurCL:
@@ -948,7 +975,6 @@ def handle_verificationCL(data):
         else:
             nbRounds+=1
             socketio.emit('resultatLCB',{"noms":noms,"scoreVainqueur":scoreVainqueur,"tableau":listeJoueursCL})
-            
         listeVainqueurs = []
         listeProp = []
         deckCL = []
@@ -984,6 +1010,60 @@ def handle_dernierCoup(data):
             else:
                 socketio.emit("retourneDernierCoup",{"nom":data, "vide":vide, "tab":aEnvoyer})
                
+@socketio.on("recommencerPartieCL")
+def handle_recommencerPartieCL():
+    global listeJoueursCL
+    listeJoueursCL = []
+
+    global deckLettres
+    deckLettres = []
+
+    global deckNombres
+    deckNombres = []
+
+    global deckCL
+    deckCL = []
+
+    global jetonTourTirageCL
+    jetonTourTirageCL = 0
+
+    global jetonPretCL 
+    jetonPretCL = 0
+    global MeilleurMotsJoueurCL
+    MeilleurMotsJoueurCL = []
+
+    global NomMeilleursJoueursCL
+    NomMeilleursJoueursCL = []
+
+    global MeilleurPossibleCL
+    MeilleurPossibleCL = ""
+
+    global listePropositionsCL
+    listePropositionsCL = []
+
+    global listeMotsCL
+    listeMotsCL = []
+
+    global listeVainqueursCL
+    listeVainqueursCL = []
+    
+    global TokenReponseCL
+    TokenReponseCL = 0
+
+    global nbPartiesLPLM
+    nbPartiesLPLM = 1
+
+    global nbRounds
+    nbRounds = 0
+
+    global objectifCL
+    objectifCL = 0
+
+    global listeCoups
+    listeCoups = []
+
+    socketio.emit("retourAccueilCL")
+
 
 if __name__ == '__main__':
     socketio.run(app, host= '0.0.0.0', port=5000, debug=True)

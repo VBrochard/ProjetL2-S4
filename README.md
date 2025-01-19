@@ -25,6 +25,6 @@ A faire avant l'oral:
     -Vérifier s'il reste des fonctions inutiles
     -Ajout de la fonction "recommencer" pour tous les jeux
     -Test complet de tous les jeux
-    -Ajouter la difficulté à côté des nombres pour le banana speed
+
 
 
