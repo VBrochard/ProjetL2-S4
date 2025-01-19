@@ -623,8 +623,10 @@ def toutIndex(lst,cible):
             res.append(i)
     return res
 
+
+#Vérifie les propositions des joueurs et renvoie le(s) vainqueur(s) avec leur score
+
 def vainqueurs(listeProposition,objectif):
-    #Vérifie les propositions des joueurs et renvoie le(s) vainqueur(s) avec leur score
     lstVainqueurs = []
     lstScores = []
     score = 0
@@ -788,6 +790,11 @@ def envoiGagnants(listeScores):
         elif elt[1] == max:
             res.append(elt)
     return res
+
+
+def inverseListe(liste):
+    liste[0],liste[1] = liste[1],liste[0]
+    return liste
 
 #Connexion d'un joueur
 @socketio.on('AnnonceJoueurCL')

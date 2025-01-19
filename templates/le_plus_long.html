@@ -369,6 +369,9 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
+            if (timerInterval) {
+                clearInterval(timerInterval); // Arrêter l'ancien intervalle s'il existe.
+            }
 
             tempsRestant = 30
             timerInterval = setInterval(function () {

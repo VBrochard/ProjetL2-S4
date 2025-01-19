@@ -91,7 +91,7 @@
             cacheboutton.hidden = true;
         })
 
-        
+
         socket.on('tirageLettres', (data) => {
             demarrerCompteur();
             var timer = document.getElementById('timer')
@@ -153,6 +153,7 @@
             const ligne = document.getElementById("ligne-1")
             if (data.Joueurs == nomJoueur) {
                 const caseLettre = creerCaseDeplacable(data.expression);
+                listeAnnexeIntermediaire.push(data.expression)
                 ligne.appendChild(caseLettre);
                 const ligne2 = document.getElementById('ligne-2');
                 ligne2.innerHTML = ""
@@ -282,7 +283,7 @@
             //Teste la validité
             estValide = true;
             for (let i = 0; i < listeOperateurs.length; i++) {
-                console.log(i + ": " +listeOperateurs[i] == "/")
+                console.log(i + ": " + listeOperateurs[i] == "/")
                 //S'il y a un nombre seul à droite d'un opérateur vide
                 if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
@@ -700,13 +701,13 @@
                 messagesDiv.value = msg + '\n';
                 messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-            socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
+                socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
             }
             else {
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
             nomJoueur = nom.value;
-            
+
 
         }
         function retourNombre() {
@@ -737,7 +738,7 @@
             document.getElementById("retour").hidden = (listeCoups.length == 0)
         }
 
-        socket.on("retourAccueilLCB", () =>{
+        socket.on("retourAccueilLCB", () => {
             window.location.href = '/le_compte_est_bon.html';
         })
 

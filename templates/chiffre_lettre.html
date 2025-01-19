@@ -174,7 +174,7 @@
             tableau.forEach(item => {
                 recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
             })
-            
+
             activBouton('prochain')
             var msg =
                 "Les gagnants sont: " + noms + '\n' +
@@ -189,15 +189,15 @@
         //Affichage des vainqueurs avec leurs scores
         socket.on("victoirePartie", (data) => {
             document.getElementById("timer").hidden = true
-                tab = data
-                recapScoreFinal = ""
-                tab.forEach(item => {
-                    recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
-                })
-                document.getElementById("Systeme").value = "Les gagnants sont: \n" + recapScoreFinal
-                document.getElementById("recommencerPartie").hidden = false
+            tab = data
+            recapScoreFinal = ""
+            tab.forEach(item => {
+                recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
             })
-        
+            document.getElementById("Systeme").value = "Les gagnants sont: \n" + recapScoreFinal
+            document.getElementById("recommencerPartie").hidden = false
+        })
+
 
 
     </script>
@@ -245,6 +245,7 @@
         let tempsRestant = 30; // Temps de départ en secondes
         let timerInterval;
         let Tour = false;
+        let listeAnnexeIntermediaire = []
 
         function ProchainTour() {
             desacBouton('prochain')
@@ -714,7 +715,7 @@
                     break
                 }
             }
-            
+
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
                 for (let i = 0; i < listeOperateurs.length; i++) {
@@ -746,18 +747,55 @@
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
             nomJoueur = nom.value;
-            
-            
+
+
         }
         //Demande au serveur les nombres qui ont servis au dernier calcul intermédiaire
         function retourNombre() {
             socket.emit("demandeDernierCoup", nomJoueur)
         }
 
+        function swapWithLast(arr, value) {
+            const index = arr.indexOf(value);
+            if (index !== -1 && index !== arr.length - 1) {
+                const lastIndex = arr.length - 1;
+                const temp = arr[lastIndex];
+                arr[lastIndex] = arr[index];
+                arr[index] = temp;
+            }
+            return arr;
+        }
+
+        function reacreate(list, index) {
+            var retour = []
+            for (var i = 0; i < list.length; i++) {
+                if (i != index) {
+                    retour.push(list[i])
+                }
+            }
+            return retour
+        }
+
+
         //Affichage des nombres utilisés pour le dernier calcul intermédiaire et suppression du dernier résultat intermédiaire
         socket.on("retourneDernierCoup", (data) => {
             if (data.nom == nomJoueur) {
                 dernierCoup = data.tab
+                console.log(listeAnnexeIntermediaire)
+                console.log(dernierCoup)
+                if (listeAnnexeIntermediaire.length > 2 && listeAnnexeIntermediaire[listeAnnexeIntermediaire.length - 2] != dernierCoup[dernierCoup.length - 1]) {
+                    var orientation = listeAnnexeIntermediaire[listeAnnexeIntermediaire.length - 2]
+                    listeAnnexeIntermediaire = reacreate(listeAnnexeIntermediaire, listeAnnexeIntermediaire.length - 2)
+                    dernierCoup = swapWithLast(dernierCoup, orientation.toString())
+                } else {
+                    if (listeAnnexeIntermediaire.length == 2 && listeAnnexeIntermediaire[0] != dernierCoup[dernierCoup.length - 1]) {
+                        var orientation = listeAnnexeIntermediaire[listeAnnexeIntermediaire.length - 1]
+                        listeAnnexeIntermediaire = reacreate(listeAnnexeIntermediaire, listeAnnexeIntermediaire.length - 1)
+                        dernierCoup = [dernierCoup[0], dernierCoup[1]] = [dernierCoup[1], dernierCoup[0]]
+                    }
+                }
+                console.log(listeAnnexeIntermediaire)
+                console.log(dernierCoup)
                 historiqueVide = data.vide
                 document.getElementById('retour').hidden = historiqueVide
                 const ligne = document.getElementById("ligne-1")
@@ -787,6 +825,7 @@
             if (data.Joueurs == nomJoueur) {
                 document.getElementById("retour").hidden = false
                 const caseLettre = creerCaseDeplacable(data.expression);
+                listeAnnexeIntermediaire.push(data.expression)
                 ligne.appendChild(caseLettre);
                 const ligne2 = document.getElementById('ligne-2');
                 ligne2.innerHTML = ""
