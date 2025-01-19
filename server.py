@@ -336,7 +336,6 @@ def handle_envoieMot(data):
             if len(reponse[1]) == tailleMotPlusGrand and motExiste(reponse[1]):
                 MeilleurMotsJoueur.append(reponse[1])
                 NomMeilleursJoueurs.append(reponse[0])
-                m
 
         for i in range(len(ListeJoueurs)): #Mise à jour des scores
             if ListeJoueurs[i][0] in NomMeilleursJoueurs: 
@@ -355,7 +354,7 @@ def handle_envoieMot(data):
             socketio.emit('résultat', {
                 "nom" : retireDoublon(NomMeilleursJoueurs),
                 "ListeScore" : ListeJoueurs,
-                "PointGagnée" : tailleMotPlusGrand-malusApplique,
+                "PointGagnée" : tailleMotPlusGrand,
                 "meilleurPossible" : MeilleurPossible,
                 "MotGagnant" : retireDoublon(MeilleurMotsJoueur)
                 })
@@ -612,6 +611,8 @@ def construireMainNombres(lstNombres):
 
 def construitOperation(calcul): 
     #Prends en paramètre un string d'une opération arithmétique valide et évalue son résultat
+    if calcul == '':
+        calcul ='0'
     return math.floor(eval(calcul))
 
 def toutIndex(lst,cible): 
@@ -622,8 +623,10 @@ def toutIndex(lst,cible):
             res.append(i)
     return res
 
+
+#Vérifie les propositions des joueurs et renvoie le(s) vainqueur(s) avec leur score
+
 def vainqueurs(listeProposition,objectif):
-    #Vérifie les propositions des joueurs et renvoie le(s) vainqueur(s) avec leur score
     lstVainqueurs = []
     lstScores = []
     score = 0
@@ -760,6 +763,11 @@ def envoiGagnants(listeScores):
         elif elt[1] == max:
             res.append(elt)
     return res
+
+
+def inverseListe(liste):
+    liste[0],liste[1] = liste[1],liste[0]
+    return liste
 
 #Connexion d'un joueur
 @socketio.on('AnnonceJoueurCL')
@@ -983,7 +991,6 @@ def handle_dernierCoup(data):
                 socketio.emit("retourneDernierCoup",{"nom":data, "vide":vide, "tab":aEnvoyer})
             else:
                 socketio.emit("retourneDernierCoup",{"nom":data, "vide":vide, "tab":aEnvoyer})
-               
 
 if __name__ == '__main__':
     socketio.run(app, host= '0.0.0.0', port=5000, debug=True)

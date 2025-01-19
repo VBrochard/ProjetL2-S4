@@ -363,6 +363,11 @@ def envoiGagnants(listeScores):
             res.append(elt)
     return res
 
-liste = []
-liste.append([])
-print(liste)
+liste = [1,2]
+
+def inverseListe(liste):
+    liste[0],liste[1] = liste[1],liste[0]
+    return liste
+
+
+print(inverseListe(liste))
