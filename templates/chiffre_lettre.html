@@ -174,7 +174,7 @@
             tableau.forEach(item => {
                 recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
             })
-            
+
             activBouton('prochain')
             var msg =
                 "Les gagnants sont: " + noms + '\n' +
@@ -189,15 +189,15 @@
         //Affichage des vainqueurs avec leurs scores
         socket.on("victoirePartie", (data) => {
             document.getElementById("timer").hidden = true
-                tab = data
-                recapScoreFinal = ""
-                tab.forEach(item => {
-                    recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
-                })
-                document.getElementById("Systeme").value = "Les gagnants sont: \n" + recapScoreFinal
-                document.getElementById("recommencerPartie").hidden = false
+            tab = data
+            recapScoreFinal = ""
+            tab.forEach(item => {
+                recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
             })
-        
+            document.getElementById("Systeme").value = "Les gagnants sont: \n" + recapScoreFinal
+            document.getElementById("recommencerPartie").hidden = false
+        })
+
 
 
     </script>
@@ -715,7 +715,7 @@
                     break
                 }
             }
-            
+
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
                 for (let i = 0; i < listeOperateurs.length; i++) {
@@ -747,8 +747,8 @@
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
             nomJoueur = nom.value;
-            
-            
+
+
         }
         //Demande au serveur les nombres qui ont servis au dernier calcul intermédiaire
         function retourNombre() {
@@ -756,19 +756,13 @@
         }
 
         function swapWithLast(arr, value) {
-            // Trouver l'index de la valeur dans le tableau
             const index = arr.indexOf(value);
-
-            // Vérifier si la valeur existe dans le tableau et si ce n'est pas déjà la dernière
             if (index !== -1 && index !== arr.length - 1) {
-                // Échanger la valeur avec la dernière valeur
                 const lastIndex = arr.length - 1;
                 const temp = arr[lastIndex];
                 arr[lastIndex] = arr[index];
                 arr[index] = temp;
             }
-
-            // Retourner le tableau modifié
             return arr;
         }
 
