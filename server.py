@@ -93,6 +93,7 @@ def retireDoublon(liste):
     return listeRes
 
 def motLePlusLong(s):
+    #Recherche le mot le plus long qu'il est possible d'écrire avec la string s
     max_mot = ""
     for i in range(len(s), 0, -1): 
         for combi in permutations(s, i):
@@ -129,6 +130,8 @@ def splitUpper(txt):
     return res
 
 def recupInfoMot(mot):
+    #Récupère touts les types d'indices pour un mot donné:
+    #Longueur, nature, première lettre, définition
     mot = mot.lower()
     nature = ""
     definition = ""
@@ -229,19 +232,20 @@ def Des_Chiffres_et_des_Lettres():
 def MenuChiffreLettre():
     return render_template('menu_chiffre_lettre.html')
 
+#Réception du nom du joueur qui vient de se connecter
 @socketio.on('AnnonceJoueur')
 def handle_AnnonceJoueur(data):
     global ListeJoueurs
-    ListeJoueurs.append([str(data),0])
+    ListeJoueurs.append([str(data),0]) #Ajout du joueur à la liste et initialisation de son score à 0
     print(data, "Rejoint la partie")
-    if len(ListeJoueurs) == nbrJoueur:
+    if len(ListeJoueurs) == nbrJoueur: #Lancement de la partie si nombre de joueurs max atteint
         socketio.emit('Lancement',ListeJoueurs)
         time.sleep(0.5)
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
     else:
-        socketio.emit('ListePresence',ListeJoueurs)
+        socketio.emit('ListePresence',ListeJoueurs) #Envoi de la possibilité de démarrer la partie avant le nombre de joueurs max atteint
 
-
+#Début de la partie déclenchée par le maître du jeu
 @socketio.on('Declancheur')
 def handle_declancheur():
         global nbrJoueur
@@ -257,7 +261,7 @@ def handle_declancheur():
 def handle_DemandeTailleDeck():
     socketio.emit('EnvoieTailleDeck',taille_deck)
 
-
+#Ajout d'une voyelle au deck
 @socketio.on('voyelle')
 def handle_voyelle():
     global deck
@@ -275,6 +279,7 @@ def handle_voyelle():
     else:
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
+#Ajout d'une consonne au deck
 @socketio.on('consonne')
 def handle_consonne():
     global deck
@@ -292,7 +297,7 @@ def handle_consonne():
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
 
 
-
+#Démarre le nouveau tour dès que tous les joueurs ont appuyé sur le bouton prêt
 @socketio.on('nouveauTour')
 def handle_nouveauTour():
     global jetonPret
@@ -304,7 +309,7 @@ def handle_nouveauTour():
         socketio.emit('choixLettre',{"deck":deck,"joueur":ListeJoueurs[jetonTourTirage][0]})
         jetonPret = 0
 
-
+#Récupération des propositions de mots des joueurs et recherche du/des mots vainqueur(s)
 @socketio.on('envoiMot')
 def handle_envoieMot(data):
     global deck
@@ -317,39 +322,36 @@ def handle_envoieMot(data):
     global listeMots
 
 
-    listePropositions.append([data.get("nom"),data.get("mot"),data.get("nbIndices")])
+    listePropositions.append([data.get("nom"),data.get("mot")])
     listeMots.append(data.get("mot"))
     
     TokenReponse += 1
     MeilleurPossible = motLePlusLong(deck)
     nomsVainqueurs = []
     scoresVainqueurs = []
-    malusApplique = 0
-    if TokenReponse == nbrJoueur:
-        
-        tailleMotPlusGrand = motMax(listeMots)
-        for reponse in listePropositions:
+    if TokenReponse == nbrJoueur: #Si tous les joueurs ont envoyé leur réponse
+        tailleMotPlusGrand = motMax(listeMots) #Récupère la longueur du plus long mot qui existe dans les propositions
+
+        for reponse in listePropositions: #Recherche de tous les mots de même longueur que tailleMotPlusGrand
             if len(reponse[1]) == tailleMotPlusGrand and motExiste(reponse[1]):
                 MeilleurMotsJoueur.append(reponse[1])
                 NomMeilleursJoueurs.append(reponse[0])
-                malusApplique = tailleMotPlusGrand - reponse[2]
+                m
 
-        for i in range(len(ListeJoueurs)):
+        for i in range(len(ListeJoueurs)): #Mise à jour des scores
             if ListeJoueurs[i][0] in NomMeilleursJoueurs: 
                 ListeJoueurs[i][1] += tailleMotPlusGrand 
                 if ListeJoueurs[i][1]<0:
                     ListeJoueurs[i][1] = 0
 
-                
-
-        for joueur in ListeJoueurs:
+        for joueur in ListeJoueurs: #Vérification de présence de vainqueur(s) ayant atteint la limite de score
             if joueur[1]>=limiteScore:
                 nomsVainqueurs.append(joueur[0])
                 scoresVainqueurs.append(joueur[1])
 
-        if len(nomsVainqueurs)>0:
+        if len(nomsVainqueurs)>0: #S'il existe un vainqueur, fin de partie
             socketio.emit('victoire',{"nomsVainqueurs":nomsVainqueurs,"tableauScores":ListeJoueurs})
-        else:
+        else: #Aucun vainqueur donc début du nouveau tour
             socketio.emit('résultat', {
                 "nom" : retireDoublon(NomMeilleursJoueurs),
                 "ListeScore" : ListeJoueurs,
@@ -364,6 +366,7 @@ def handle_envoieMot(data):
         listePropositions = []
         listeMots = []
 
+#Demande d'indice d'un joueur
 @socketio.on('indice')
 def handle_demandeIndice(data):
     global deck
@@ -371,10 +374,12 @@ def handle_demandeIndice(data):
     for joueur in ListeJoueurs:
         if joueur[0] == data.get("nomJoueur"):
             joueur[1] -= 1
+            if joueur[1] < 0:
+                joueur[1] = 0
     listeIndices = recupInfoMot(motLePlusLong(deck))
-
     socketio.emit('retourIndice',{"indice":listeIndices[data.get("nbIndices")], "nomJoueur":data.get("nomJoueur")})
 
+#Réinitialisation des variables pour démarrer une nouvelle partie
 @socketio.on('recommencerPartie')
 def handle_recommencerPartioe():
     global ListeJoueurs 
@@ -491,23 +496,26 @@ def deckBanana(nbj):
         return genererUnDeck(cartes_regime, 11)
     return "Erreur, le nombre de joueurs doit être compris entre 2 et 8 inclus "
 
-
+#Génération du deck du nombre de cartes demandé par le joueur
 @socketio.on('connexionBSolitaire')
 def handle_connexionBSolitaire(data):
     mainDepart = genererUnDeck(cartes_regime,int(data))
     socketio.emit('MainDepartBSolitaire', mainDepart)
 
+#Ajout d'une carte de la pioche au deck du joueur
 @socketio.on('DemandePiocheSolitaire')
 def handle_DemandePioche():
     carte = genererUnDeck(cartes_regime,1)[0]
     socketio.emit('RetourPiocheSolitaire', carte )
 
+#Vérifiaction de la validité de tous les mots de la grille
 @socketio.on('verifierMotsSolitaire')
 def verifier_mots(mots):
     # Valider tous les mots
     tous_valides = all(motExiste(mot) for mot in mots)
     emit('resultatValidationMotsSolitaire', tous_valides)
 
+#Regénération des cartes du régime
 @socketio.on('ResetPartieSolitaire')
 def ResetPartieSolitaire():
     global cartes_regime
@@ -534,7 +542,7 @@ def genererUnDeckSpeed(cartes, taille):
         cartes.remove(lettre)
     return deck
 
-
+#Connexion d'un nouveau joueur
 @socketio.on('connexionSpeed')
 def handle_connexionBSpeed(data):
     global nbrJoueurSpeed
@@ -549,17 +557,20 @@ def handle_connexionBSpeed(data):
         mainDepart = genererUnDeckSpeed(cartes_regime_speed,nbrBananaSpeed)
         socketio.emit('MainDepartSpeed', mainDepart)
 
+#Ajout d'une carte au deck du joueur qui pioche
 @socketio.on('DemandePiocheSpeed')
 def handle_DemandePioche(data):
     carte = genererUnDeck(cartes_regime_speed,1)[0]
     socketio.emit('RetourPiocheSpeed', {"carte" : carte,"Joueur" : data} )
 
+#Vérification des mots de la grille
 @socketio.on('verifierMotsSpeed')
 def verifier_mots(mots):
     # Valider tous les mots
     tous_valides = all(motExiste(mot) for mot in mots)
     emit('resultatValidationMotsSpeed', tous_valides)
 
+#Réinitialisation des variables pour recommencer une partie
 @socketio.on('ResetPartieSpeed')
 def ResetPartieSpeed():
     global cartes_regime_speed
@@ -572,6 +583,7 @@ def ResetPartieSpeed():
     cartes_regime_speed = [carte for carte, freq in lettres_regime_speed.items() for i in range(freq)]
     socketio.emit('ResetOrdreSpeed')
 
+#Envoi de l'alerte de fin de partie en cas de victoire d'un joueur
 @socketio.on('AlerteVictoireSolitaire')
 def AlerteVictoire(data):
     socketio.emit('AlerteAutreJoueurSolitaire',data)
@@ -598,12 +610,12 @@ def construireMainNombres(lstNombres):
         main.append(lstNombres[indiceRandom])
     return main
 
-def construitOperation(calcul):
-    if calcul == "":
-        calcul = "0"
+def construitOperation(calcul): 
+    #Prends en paramètre un string d'une opération arithmétique valide et évalue son résultat
     return math.floor(eval(calcul))
 
-def toutIndex(lst,cible):
+def toutIndex(lst,cible): 
+    #Renvoie tous les indices de la cible dans la liste
     res = []
     for i in range(len(lst)):
         if lst[i] == cible:
@@ -611,6 +623,7 @@ def toutIndex(lst,cible):
     return res
 
 def vainqueurs(listeProposition,objectif):
+    #Vérifie les propositions des joueurs et renvoie le(s) vainqueur(s) avec leur score
     lstVainqueurs = []
     lstScores = []
     score = 0
@@ -632,15 +645,16 @@ def vainqueurs(listeProposition,objectif):
 def retireEspaceVide(liste):
     return [element for element in liste if element!=""]
 
+#Connexion d'un joueur
 @socketio.on('AnnonceJoueurCB')
 def handle_AnnonceJoueur(data):
     global listeJoueursCB
     global deckCB
     global objectif
-
     listeJoueursCB.append([str(data),0])
     print(data, "Rejoint la partie")
     if len(listeJoueursCB) == nbrJoueur:
+        #Construction du deck et génération aléatoire de l'objectif à atteindre
         socketio.emit('Lancement',listeJoueursCB)
         deckCB = construireMainNombres(listeGlobale)
         objectif = randint(101,999)
@@ -649,7 +663,7 @@ def handle_AnnonceJoueur(data):
     else:
         socketio.emit('ListePresence',listeJoueursCB)
 
-
+#Début de partie demandée par le maître du jeu
 @socketio.on('DeclancheurCB')
 def handle_declancheur():
         global nbrJoueur
@@ -660,6 +674,7 @@ def handle_declancheur():
         time.sleep(0.5)
         socketio.emit('debut',{"deck":deck,"objectif":objectif})
 
+#Récupère les propositions des joueurs et vérifie qui a remporté cette manche
 @socketio.on('verificationCB')
 def handle_verificationCB(data):
     global objectif
@@ -690,6 +705,7 @@ def handle_verificationCB(data):
         listeProp = []
         deck = []
 
+#Début du nouveau tour quand tous les joueurs sont prêts
 @socketio.on('nouveauTourCB')
 def handle_nouveauTourCB():
     global jetonPretCB
@@ -702,6 +718,7 @@ def handle_nouveauTourCB():
         socketio.emit('debut',{"deck":deck, "objectif":objectif})
         jetonPretCB = 0
 
+#Renvoie le résultat du calcul intermédiaire fait par un joueur
 @socketio.on('calculer')
 def handle_calculer(data):
     print(data.get("expression"))
@@ -744,7 +761,7 @@ def envoiGagnants(listeScores):
             res.append(elt)
     return res
 
-
+#Connexion d'un joueur
 @socketio.on('AnnonceJoueurCL')
 def handle_AnnonceJoueurCL(data):
     global listeJoueursCL
@@ -760,7 +777,7 @@ def handle_AnnonceJoueurCL(data):
     else:
         socketio.emit('ListePresenceCL',listeJoueursCL)
 
-
+#Début de partie demandé par le maître du jeu
 @socketio.on('DeclancheurCL')
 def handle_declancheurCL():
         global nbrJoueur
@@ -776,7 +793,7 @@ def handle_declancheurCL():
 def handle_DemandeTailleDeckCL():
     socketio.emit('EnvoieTailleDeckCL',taille_deck)
 
-
+#Ajout d'une voyelle au dekc
 @socketio.on('voyelleCL')
 def handle_voyelle():
     global deckCL
@@ -794,6 +811,7 @@ def handle_voyelle():
     else:
         socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirageCL][0]})
 
+#Ajout d'une consonne au deck
 @socketio.on('consonneCL')
 def handle_consonneCL():
     global deckCL
@@ -811,23 +829,21 @@ def handle_consonneCL():
         socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirageCL][0]})
 
 
-
+#Nouveau tour quand tous les joueurs sont prêts
 @socketio.on('nouveauTourCL')
 def handle_nouveauTourCL():
     global jetonPretCL
     global deckCL
     global nbPartiesLPLM
     global objectifCL
-    
     deckCL = []
-    
     jetonPretCL+=1
     if jetonPretCL == nbrJoueurCL:
-        if nbPartiesLPLM < 2:
+        if nbPartiesLPLM < 2: #Si 2 rounds du "mot le plus long" n'ont pas encore été joués, on reste sur ce jeu
             nbPartiesLPLM+=1
             socketio.emit('choixLettreCL',{"deck":deckCL,"joueur":listeJoueursCL[jetonTourTirageCL][0]})
             jetonPretCL = 0
-        else:
+        else: #Si 2 rounds du "mot le plus long" ont été joués, on lance un round du "compte est bon"
             deckCL = construireMainNombres(creerListeNombres())
             objectifCL = randint(101,999)
             print(deckCL,objectifCL)
@@ -836,7 +852,7 @@ def handle_nouveauTourCL():
             nbPartiesLPLM = 0
             
 
-
+#Vérification des propositions de mots des joueurs
 @socketio.on('envoiMotCL')
 def handle_envoiMotCL(data):
     global deckCL
@@ -849,10 +865,8 @@ def handle_envoiMotCL(data):
     global listeMotsCL
     global nbrJoueurCL
 
-
     listePropositionsCL.append([data.get("nom"),data.get("mot"),data.get("nbIndices")])
     listeMotsCL.append(data.get("mot"))
-    
     TokenReponseCL += 1
     MeilleurPossibleCL = motLePlusLong(deckCL)
     nomsVainqueurs = []
@@ -887,6 +901,7 @@ def handle_envoiMotCL(data):
         listePropositionsCL = []
         listeMotsCL = []
 
+#Envoi d'un indice au joueur qui le demande et baisse de son score
 @socketio.on('indiceCL')
 def handle_demandeIndiceCL(data):
     global deckCL
@@ -894,10 +909,12 @@ def handle_demandeIndiceCL(data):
     for joueur in listeJoueursCL:
         if joueur[0] == data.get("nomJoueur"):
             joueur[1] -= 1
+            if joueur[1] < 0:
+                joueur[1] = 0
     listeIndices = recupInfoMot(motLePlusLong(deckCL))
-
     socketio.emit('retourIndiceCL',{"indice":listeIndices[data.get("nbIndices")], "nomJoueur":data.get("nomJoueur")})
 
+#Vérification des propositions de nombre des joueurs
 @socketio.on('verificationCL')
 def handle_verificationCL(data):
     global objectifCL
@@ -939,6 +956,7 @@ def handle_verificationCL(data):
         
         objectifCL = 0
 
+#Envoi du résultat d'un calcul intermédiaire demandé par le joueur
 @socketio.on("calculerCL")
 def handle_calculerCL(data):
     global listeCoups
@@ -951,6 +969,7 @@ def handle_calculerCL(data):
     resultat = construitOperation(data.get("expression"))
     socketio.emit('retourCalculCL',{"expression" :resultat,"Joueurs" : data.get("Joueurs"), "listeNombres":listeNombres})
 
+#Annule le dernier calcul intermédiaire fait et renvoie ses opérandes
 @socketio.on('demandeDernierCoup')
 def handle_dernierCoup(data):
     global listeCoups
@@ -965,23 +984,6 @@ def handle_dernierCoup(data):
             else:
                 socketio.emit("retourneDernierCoup",{"nom":data, "vide":vide, "tab":aEnvoyer})
                
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 if __name__ == '__main__':
     socketio.run(app, host= '0.0.0.0', port=5000, debug=True)

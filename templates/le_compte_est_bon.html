@@ -22,6 +22,7 @@
             tailleDeck = data
         })
 
+        //Récéeption signal de début de partie
         socket.on('debut', (data) => {
             activBouton('bouton-calcul')
             deck = data.deck
@@ -33,6 +34,7 @@
 
         })
 
+        //Affichage des vainqueurs et leurs scores
         socket.on('victoire', (data) => {
             activBouton("recommencerPartie")
             var ListeJoueur = data.tableauScores
@@ -48,6 +50,7 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
 
+        //Affichage de tous les joueurs connectés
         socket.on('ListePresence', (data) => {
             ListeJoueur = data
             console.log(ListeJoueur)
@@ -78,12 +81,14 @@
         })
 
 
+        //Possibilité de lancement pour le maître du jeu
         socket.on('Lancement', (data) => {
             ListeJoueur = data
             var cacheboutton = document.getElementById('Lancement')
             cacheboutton.hidden = true;
         })
 
+        
         socket.on('tirageLettres', (data) => {
             demarrerCompteur();
             var timer = document.getElementById('timer')
@@ -102,6 +107,7 @@
             deck = data.deck
         })
 
+        //Affichage du résultat de la manche
         socket.on('resultat', (data) => {
 
             noms = data.noms
@@ -135,6 +141,7 @@
             window.location.href = '/le_plus_long.html';
         })
 
+        //Réception du résultat du calcul intermédiaire
         socket.on('retourCalcul', (data) => {
             console.log(data.listeNombres)
             console.log(listeCoups)
@@ -199,10 +206,6 @@
                 mainCalcul.forEach(deck => {
                     const caseLettre = creerCaseDeplacable(deck);
                     ligne.appendChild(caseLettre);
-
-
-
-
                 })
                 mainCalcul = [];
             }
@@ -258,15 +261,13 @@
             socket.emit('nouveauTourCB')
         }
 
+        //Récupération de l'opération écrite par le joueur, si elle est valide envoi au serveur pour calcul intermédiaire
         function calculer() {
             listeOperateurs = []
             expression = ""
             activBouton('retour')
 
-
             var ligne = document.getElementById('ligne-2');
-
-
             const selects = ligne.querySelectorAll('select')
             selects.forEach(select => {
                 const valeurOperateur = select.value;
@@ -279,26 +280,31 @@
             estValide = true;
             for (let i = 0; i < listeOperateurs.length; i++) {
                 console.log(i + ": " +listeOperateurs[i] == "/")
+                //S'il y a un nombre seul à droite d'un opérateur vide
                 if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
                     estValide = false
                     break
                 }
+                //S'il y a un nombre seul à gauche d'un opérateur vide
                 if (listeOperateurs[i] == " " && cases[i].innerText != "" && cases[i + 1].innerText != "") {
                     console.log("Cas 2")
                     estValide = false
                     break
                 }
+                //S'il y a uniquement un nombre à gauche d'un opérateur non vide
                 if (listeOperateurs[i] != " " && cases[i].innerText != "" && cases[i + 1].innerText == "") {
                     console.log("Cas 3")
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] == "/" && cases[i+1].innerText == 0){
+                //S'il y a division par 0
+                if (listeOperateurs[i] == "/" && cases[i + 1].innerText == '0') {
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == ""){
+                //S'il y a un opérateur et aucun nombre autour
+                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == "") {
                     estValide = false
                     break
                 }
@@ -307,7 +313,6 @@
             
             console.log(estValide)
             if (estValide) {
-                //Vider la liste opérateurs de ses ""
 
                 //Récupère l'expression sous forme de string
                 for (var i = 0; i < listeOperateurs.length; i++) {
@@ -613,14 +618,11 @@
                 document.getElementById(idBouton).hidden = false
             }
         }
+        //Récupération de l'opération écrite par le joueur si elle est valide envoi au serveur en tant que réponse définitive
         function envoiReponse() {
             listeOperateurs = []
             expression = ""
-
-
             var ligne = document.getElementById('ligne-2');
-
-
             const selects = ligne.querySelectorAll('select')
             selects.forEach(select => {
                 const valeurOperateur = select.value;
@@ -633,26 +635,31 @@
             estValide = true;
             for (let i = 0; i < listeOperateurs.length; i++) {
                 console.log(i + ": " + cases[i].innerText, listeOperateurs[i], cases[i + 1].innerText)
+                //S'il y a un nombre seul à droite d'un opérateur vide
                 if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
                     estValide = false
                     break
                 }
+                //S'il y a un nombre seul à gauche d'un opérateur vide
                 if (listeOperateurs[i] == " " && cases[i].innerText != "" && cases[i + 1].innerText != "") {
                     console.log("Cas 2")
                     estValide = false
                     break
                 }
+                //S'il y a uniquement un nombre à gauche d'un opérateur non vide
                 if (listeOperateurs[i] != " " && cases[i].innerText != "" && cases[i + 1].innerText == "") {
                     console.log("Cas 3")
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] == "/" && cases[i].innerText == "0"){
+                //S'il y a division par 0
+                if (listeOperateurs[i] == "/" && cases[i + 1].innerText == '0') {
                     estValide = false
                     break
                 }
-                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == ""){
+                //S'il y a un opérateur et aucun nombre autour
+                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == "") {
                     estValide = false
                     break
                 }

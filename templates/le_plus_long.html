@@ -20,6 +20,7 @@
             tailleDeck = data
         })
 
+        //Choix de la lettre pour le joueur qui doit choisir
         socket.on('choixLettre', (data) => {
             deck = data.deck
             initialiserGrille()
@@ -38,6 +39,7 @@
             }
         })
 
+        //Affichage des vainqueurs et leurs scores
         socket.on('victoire', (data) => {
             activBouton("recommencerPartie")
             var ListeJoueur = data.tableauScores
@@ -53,6 +55,7 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
 
+        //Affichage des joueurs connectés
         socket.on('ListePresence', (data) => {
             ListeJoueur = data
             console.log(ListeJoueur)
@@ -82,13 +85,14 @@
             }
         })
 
-
+        //Possibilité pour le maître du jeu de lancer la partie
         socket.on('Lancement', (data) => {
             ListeJoueur = data
             var cacheboutton = document.getElementById('Lancement')
             cacheboutton.hidden = true;
         })
 
+        //Activation de la possibilité de réponse pour les joueurs avec timer, bouton indice et bouton pour valider sa réponse
         socket.on('tirageLettres', (data) => {
             demarrerCompteur();
             var timer = document.getElementById('timer')
@@ -107,11 +111,11 @@
             deck = data.deck
         })
 
+        //Affichage des résultats de la manche
         socket.on('résultat', (data) => {
             console.log("Indices: " + nbIndices)
             var timer = document.getElementById('timer')
             timer.hidden = true;
-
             desacBouton('bouton-indice')
             activBouton('prochain')
             var NomMeilleurJoueur = data.nom
@@ -137,6 +141,7 @@
             nbIndices = 0
         })
 
+        //Récupération de l'indice envoyé par le serveur
         socket.on('retourIndice', (data) => {
             if (data.nomJoueur == nomJoueur) {
                 document.getElementById('Systeme').value += data.indice + "\n";

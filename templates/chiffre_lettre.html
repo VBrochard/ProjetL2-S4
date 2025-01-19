@@ -22,6 +22,7 @@
             tailleDeck = data
         })
 
+        //Active le choix voyelle/consonne pour le joueur qui doit choisir
         socket.on('choixLettreCL', (data) => {
             document.getElementById("warning").innerHTML = "<h3></h3>"
             document.getElementById("objectif").innerHTML = ""
@@ -45,6 +46,7 @@
             }
         })
 
+        //Affichage des vainqueurs avec leurs scores 
         socket.on('victoireCL', (data) => {
             activBouton("recommencerPartie")
             var ListeJoueur = data.tableauScores
@@ -60,6 +62,7 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
 
+        //Affichage des joueurs présents dans la partie
         socket.on('ListePresenceCL', (data) => {
             ListeJoueur = data
             messagesDiv = document.getElementById('Systeme');
@@ -88,13 +91,14 @@
             }
         })
 
-
+        //Activation de la possibilité de démarrer la partie par le maître du jeu
         socket.on('LancementCL', (data) => {
             ListeJoueur = data
             var cacheboutton = document.getElementById('Lancement')
             cacheboutton.hidden = true;
         })
 
+        //Activation de la possibilité de réponse pour les joueurs avec timer, bouton indice et bouton pour valider sa réponse
         socket.on('tirageLettresCL', (data) => {
             demarrerCompteur(30, 'LPM');
             var timer = document.getElementById('timer')
@@ -113,10 +117,10 @@
             deck = data.deck
         })
 
+        //Affichage des résultats de la manche
         socket.on('résultatCL', (data) => {
             var timer = document.getElementById('timer')
             timer.hidden = true;
-
             desacBouton('bouton-indice')
             activBouton('prochain')
             var NomMeilleurJoueur = data.nom
@@ -142,6 +146,7 @@
             nbIndices = 0
         })
 
+        //Affichage de l'indice demandé par le joueur
         socket.on('retourIndiceCL', (data) => {
             if (data.nomJoueur == nomJoueur) {
                 document.getElementById('Systeme').value += data.indice + "\n";
@@ -153,6 +158,7 @@
             window.location.href = '/le_plus_long.html';
         })
 
+        //Début de partie pour "le compte est bon"
         socket.on("debutPartieLCB", (data) => {
             TokenValide = false
             desacBouton('valider')
@@ -171,13 +177,13 @@
 
 
         })
-        socket.on('resultatLCB', (data) => {
 
+        //Affichage des résultats (le compte est bon)
+        socket.on('resultatLCB', (data) => {
             noms = data.noms
             score = data.scoreVainqueur
             tableau = data.tableau
             recapScoreFinal = ""
-
             tableau.forEach(item => {
                 recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
             })
@@ -188,7 +194,6 @@
                 })
                 document.getElementById("Systeme").value = "Les gagnants sont: \n" + recapScoreFinal
             })
-
             activBouton('prochain')
             var msg =
                 "Les gagnants sont: " + noms + '\n' +
@@ -284,8 +289,8 @@
 
 
         function EnvoieMot() {
+            //Récupération du mot soumis par le joueur et envoi au serveur
             TokenValide = true
-
             mot = ""
             desacBouton('valider')
             desacBouton('bouton-indice')
@@ -556,7 +561,7 @@
             }
 
         }
-
+        //Récupération de l'opération envoyée par le joueur, si elle est valide envoi au serveur pour un calcul intermédiaire
         function calculer() {
             listeOperateurs = []
             expression = ""
@@ -572,36 +577,40 @@
             //Teste la validité
             estValide = true;
             for (let i = 0; i < listeOperateurs.length; i++) {
+                //S'il y a un nombre seul à droite d'un opérateur vide
                 if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
                     estValide = false
                     break
                 }
+                //S'il y a un nombre seul à gauche d'un opérateur vide
                 if (listeOperateurs[i] == " " && cases[i].innerText != "" && cases[i + 1].innerText != "") {
                     console.log("Cas 2")
                     estValide = false
                     break
                 }
+                //S'il y a uniquement un nombre à gauche d'un opérateur non vide
                 if (listeOperateurs[i] != " " && cases[i].innerText != "" && cases[i + 1].innerText == "") {
                     console.log("Cas 3")
                     estValide = false
                     break
                 }
+                //S'il y a division par 0
                 if (listeOperateurs[i] == "/" && cases[i + 1].innerText == '0') {
                     estValide = false
                     break
                 }
+                //S'il y a un opérateur et aucun nombre autour
                 if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == "") {
                     estValide = false
                     break
                 }
             }
+            //Si le premier opérateur est vide
             if (listeOperateurs[0] == " ") estValide = false;
 
             console.log(estValide)
             if (estValide) {
-                //Vider la liste opérateurs de ses ""
-
                 //Récupère l'expression sous forme de string
                 for (var i = 0; i < listeOperateurs.length; i++) {
                     if (i == listeOperateurs.length - 1) {
@@ -668,6 +677,7 @@
             ligne2.appendChild(caseVide);
         }
 
+        //Récupération de l'opération envoyée par le joueur, si elle est valide envoi au serveur pour vérification de la proximité avec l'objectif
         function envoiReponse() {
             TokenValide = true
             desacBouton('bouton-validerLCB')
@@ -675,11 +685,7 @@
             desacBouton('retour')
             listeOperateurs = []
             expression = ""
-
-
             var ligne = document.getElementById('ligne-2');
-
-
             const selects = ligne.querySelectorAll('select')
             selects.forEach(select => {
                 const valeurOperateur = select.value;
@@ -691,18 +697,31 @@
             //Teste la validité
             estValide = true;
             for (let i = 0; i < listeOperateurs.length; i++) {
+                //S'il y a un nombre seul à droite d'un opérateur vide
                 if (listeOperateurs[i] == " " && cases[i].innerText == "" && cases[i + 1].innerText != "") {
                     console.log("Cas 1")
                     estValide = false
                     break
                 }
+                //S'il y a un nombre seul à gauche d'un opérateur vide
                 if (listeOperateurs[i] == " " && cases[i].innerText != "" && cases[i + 1].innerText != "") {
                     console.log("Cas 2")
                     estValide = false
                     break
                 }
+                //S'il y a uniquement un nombre à gauche d'un opérateur non vide
                 if (listeOperateurs[i] != " " && cases[i].innerText != "" && cases[i + 1].innerText == "") {
                     console.log("Cas 3")
+                    estValide = false
+                    break
+                }
+                //S'il y a division par 0
+                if (listeOperateurs[i] == "/" && cases[i + 1].innerText == '0') {
+                    estValide = false
+                    break
+                }
+                //S'il y a un opérateur et aucun nombre autour
+                if (listeOperateurs[i] != " " && cases[i].innerText == "" && cases[i + 1].innerText == "") {
                     estValide = false
                     break
                 }
@@ -737,10 +756,12 @@
 
             socket.emit('verificationCL', { "nom": nomJoueur, "proposition": expression })
         }
+        //Demande au serveur les nombres qui ont servis au dernier calcul intermédiaire
         function retourNombre() {
             socket.emit("demandeDernierCoup", nomJoueur)
         }
 
+        //Affichage des nombres utilisés pour le dernier calcul intermédiaire et suppression du dernier résultat intermédiaire
         socket.on("retourneDernierCoup", (data) => {
             if (data.nom == nomJoueur) {
                 dernierCoup = data.tab
@@ -767,6 +788,7 @@
         }
 
         )
+        //Récupération du résultat du calcul intermédiaire envoyé par le client
         socket.on('retourCalculCL', (data) => {
             const ligne = document.getElementById("ligne-1")
             if (data.Joueurs == nomJoueur) {

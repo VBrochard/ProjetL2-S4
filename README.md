@@ -21,6 +21,10 @@ Pour lancer le serveur, écrire dans un terminal:
         - aller à l'adresse http://127.0.0.1:5000/ pour l'interface graphique
         - Le plus long mot se lance à l'initiative du premier joueur qui a rejoint ou s'il le nombre maximum de joueur est atteint.
 
-
+A faire avant l'oral:
+    -Vérifier s'il reste des fonctions inutiles
+    -Ajout de la fonction "recommencer" pour tous les jeux
+    -Test complet de tous les jeux
+    -Ajouter la difficulté à côté des nombres pour le banana speed
 
 

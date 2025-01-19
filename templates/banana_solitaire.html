@@ -66,6 +66,7 @@
         let positionsLettresPosees = [];
         var nomJoueur;
 
+        //Réinitialisation de la partie
         function ResetPartie() {
             socket.emit('ResetPartieSolitaire')
             document.getElementById('ConnexionDiv').hidden = false
@@ -134,6 +135,7 @@
         }
 
         function FindPremierIndice() {
+            //Renvoie l'indice de la première lettre trouvée sur la grille
             const cellules = document.querySelectorAll('.case');
             var index = 0
             for (index; index < 1024; index++) {
@@ -152,6 +154,7 @@
             return [point + 1, point - 1, point + 32, point - 32];
         }
         function parcoursLargeur(pointDepart) {
+            //Parcours en largeur depuis le point de départ
             const cellules = document.querySelectorAll('.case');
             aTraiter = []
             chemin = []
@@ -169,6 +172,7 @@
         }
 
         function construitMotsHorizontaux(listeIndices) {
+            //Crée une liste de sous-listes chacune contenant les id des lettres d'un mot horizontal
             listeIndices.sort();
             listeTemp = [];
             res = [];
@@ -188,6 +192,7 @@
         }
 
         function construitMotsVerticaux(listeIndices) {
+            //Crée une liste de sous-listes chacune contenant les id des lettres d'un mot vertical
             listeIndices.sort();
             i = 0;
             res = [];
@@ -213,22 +218,22 @@
         function analyserGrille() {
             const cellules = document.querySelectorAll('.case')
             tab = parcoursLargeur(FindPremierIndice())
-            var valide = tab.length == tailleDeck;
+            var valide = tab.length == tailleDeck; //Vérifie si le bloc de lettres trouvé contient bien toutes les lettres du deck du joueur (un seul bloc de lettres)
             if (valide) {
                 var idMotsVerticaux = construitMotsVerticaux(tab);
                 var idMotsHorizontaux = construitMotsHorizontaux(tab);
                 console.log("Vertical: " + idMotsVerticaux + '\nHorizontal: ' + idMotsHorizontaux + "\nParcours: " + tab);
-                var listeTotale = idMotsHorizontaux.concat(idMotsVerticaux)
+                var listeTotale = idMotsHorizontaux.concat(idMotsVerticaux) //Liste de sous-listes d'id de tous les mots de la grille
                 var listeMots = [];
                 for (elt of listeTotale) {
                     var mot = "";
                     for (lettre of elt) {
-                        mot += cellules[lettre].textContent;
+                        mot += cellules[lettre].textContent; //Récupère la lettre correspondant à l'id pour reconstruire les mots
                     }
                     listeMots.push(mot)
                 }
                 console.log(listeMots)
-                socket.emit('verifierMotsSolitaire', listeMots)
+                socket.emit('verifierMotsSolitaire', listeMots) //Envoi des mots au serveur pour vérifier leur existence
             }
             else {
                 document.getElementById('nomJoueur').textContent = "Il faut placer toute tes lettres et en un même bloc"
@@ -254,6 +259,7 @@
         }
 
         function remiseenmain() {
+            //Renvoie les cartes posées dans la main du joueur
             caseModifiable.innerHTML = '';
             for (i of deck) {
                 const nouvelleCase = document.createElement('div');
@@ -273,7 +279,6 @@
 
 
         function resetLettresPosees(valeur) {
-
             if (valeur == 0) {
                 positionsLettresPosees = [];
                 return 0;
