@@ -24,6 +24,7 @@
 
         //Active le choix voyelle/consonne pour le joueur qui doit choisir
         socket.on('choixLettreCL', (data) => {
+            document.getElementById("retour").hidden = true
             document.getElementById("warning").innerHTML = "<h3></h3>"
             document.getElementById("objectif").innerHTML = ""
             desacBouton("bouton-validerLCB")
@@ -46,21 +47,6 @@
             }
         })
 
-        //Affichage des vainqueurs avec leurs scores 
-        socket.on('victoireCL', (data) => {
-            activBouton("recommencerPartie")
-            var ListeJoueur = data.tableauScores
-            var recapScore = ""
-            ListeJoueur.forEach(item => {
-                recapScore += item[0] + " : " + item[1] + " points\n";
-            });
-            var msg =
-                "Félicitations à " + data.nomsVainqueurs + " qui remporte la partie" + "\n\n" +
-                "Récapitulatif final des scores : \n\n" + recapScore
-            messagesDiv = document.getElementById('Systeme');
-            messagesDiv.value = msg + '\n';
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        })
 
         //Affichage des joueurs présents dans la partie
         socket.on('ListePresenceCL', (data) => {
@@ -180,6 +166,7 @@
 
         //Affichage des résultats (le compte est bon)
         socket.on('resultatLCB', (data) => {
+            document.getElementById("timer").hidden = true
             noms = data.noms
             score = data.scoreVainqueur
             tableau = data.tableau
@@ -187,13 +174,7 @@
             tableau.forEach(item => {
                 recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
             })
-            socket.on("victoirePartie", (data) => {
-                tab = data
-                tab.forEach(item => {
-                    recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
-                })
-                document.getElementById("Systeme").value = "Les gagnants sont: \n" + recapScoreFinal
-            })
+            
             activBouton('prochain')
             var msg =
                 "Les gagnants sont: " + noms + '\n' +
@@ -204,6 +185,19 @@
             messagesDiv.value = msg + '\n';
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         })
+
+        //Affichage des vainqueurs avec leurs scores
+        socket.on("victoirePartie", (data) => {
+            document.getElementById("timer").hidden = true
+                tab = data
+                recapScoreFinal = ""
+                tab.forEach(item => {
+                    recapScoreFinal += item[0] + " : " + item[1] + " points.\n";
+                })
+                document.getElementById("Systeme").value = "Les gagnants sont: \n" + recapScoreFinal
+                document.getElementById("recommencerPartie").hidden = false
+            })
+        
 
 
     </script>
@@ -264,7 +258,7 @@
             deck = []
             TokenValide = false
             socket.emit("recommencerPartieCL")
-            document.getElementById("recommencerPartieCL").hidden = "true";
+            document.getElementById("recommencerPartie").hidden = true;
         }
 
         function ConnexionServeur() {
@@ -607,9 +601,6 @@
                     break
                 }
             }
-            //Si le premier opérateur est vide
-            if (listeOperateurs[0] == " ") estValide = false;
-
             console.log(estValide)
             if (estValide) {
                 //Récupère l'expression sous forme de string
@@ -681,9 +672,6 @@
         //Récupération de l'opération envoyée par le joueur, si elle est valide envoi au serveur pour vérification de la proximité avec l'objectif
         function envoiReponse() {
             TokenValide = true
-            desacBouton('bouton-validerLCB')
-            desacBouton('bouton-calcul')
-            desacBouton('retour')
             listeOperateurs = []
             expression = ""
             var ligne = document.getElementById('ligne-2');
@@ -727,7 +715,7 @@
                     break
                 }
             }
-
+            
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
                 for (let i = 0; i < listeOperateurs.length; i++) {
@@ -744,18 +732,23 @@
                     expression += cases[i].innerText + listeOperateurs[i]
                 }
                 document.getElementById("warning").innerHTML = "<h3></h3>"
-                desacBouton('valider')
+                desacBouton('bouton-validerLCB')
+                desacBouton('bouton-calcul')
+                desacBouton('retour')
+                expression = expression.replace(/\n/g, ' ');
+                socket.emit('verificationCL', { "nom": nomJoueur, "proposition": expression })
+                var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
             }
             else {
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
             nomJoueur = nom.value;
-            var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
-            messagesDiv = document.getElementById('Systeme');
-            messagesDiv.value = msg + '\n';
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            socket.emit('verificationCL', { "nom": nomJoueur, "proposition": expression })
+            
+            
         }
         //Demande au serveur les nombres qui ont servis au dernier calcul intermédiaire
         function retourNombre() {
@@ -905,6 +898,10 @@
             if (nomJoueur == data) {
                 document.getElementById('retour').hidden = (listeCoups.length == 0)
             }
+        })
+
+        socket.on("retourAccueilCL", () => {
+            window.location.href = '/chiffre_lettre.html';
         })
 
 

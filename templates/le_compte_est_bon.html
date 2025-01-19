@@ -112,7 +112,7 @@
 
         //Affichage du résultat de la manche
         socket.on('resultat', (data) => {
-
+            document.getElementById("timer") = true
             noms = data.noms
             score = data.scoreVainqueur
             tableau = data.tableau
@@ -679,7 +679,6 @@
             }
             if (listeOperateurs[0] == " ") { estValide = false; }
 
-
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
                 for (let i = 0; i < listeOperateurs.length; i++) {
@@ -697,17 +696,18 @@
                 }
                 document.getElementById("warning").innerHTML = "<h3></h3>"
                 desacBouton('valider')
+                var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
+                messagesDiv = document.getElementById('Systeme');
+                messagesDiv.value = msg + '\n';
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
             }
             else {
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
             nomJoueur = nom.value;
-            var msg = "Votre réponse à été envoyée \n\n" + "En attente de la réponse des autres joueurs..."
-            messagesDiv = document.getElementById('Systeme');
-            messagesDiv.value = msg + '\n';
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-
-            socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
+            
 
         }
         function retourNombre() {
@@ -737,6 +737,10 @@
             mainCalcul = [];
             document.getElementById("retour").hidden = (listeCoups.length == 0)
         }
+
+        socket.on("retourAccueilLCB", () =>{
+            window.location.href = '/le_compte_est_bon.html';
+        })
 
     </script>
 </body>
