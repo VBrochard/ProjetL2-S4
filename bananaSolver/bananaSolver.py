@@ -37,7 +37,7 @@ def search_for(letters):
         return search_for1(letters)
 
 def load_dictionary():
-    infile = open('bananaSolver\Dico.txt', 'r')
+    infile = open('Ressources/Dico.txt', 'r')
     wc = 0
     while True:
         line = infile.readline()
@@ -109,7 +109,6 @@ def remplirHorizontal2(grille, mot, ligne, colonne):
     else:
         remplirHorizontal(grille, mot, ligne, colonne)
     
-
 def afficherGrille(grille):
     for i, liste in enumerate(grille):
         print(f"[{', '.join(liste)}]")    
@@ -307,5 +306,3 @@ def bananaSolver(s):
     afficherGrille(grille)
     return grille
 
-
-bananaSolver("STAVNEQSMGUSAHCIFLIUNVMEEBAYOPSHETYUCMNA")
