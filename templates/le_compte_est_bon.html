@@ -15,7 +15,7 @@
         let nomJoueur;
         let TokenValide = false
         let nbIndices = 0;
-        let mainCalcul= []
+        let mainCalcul = []
         let listeCoups = [];
 
         socket.on('EnvoieTailleDeck', (data) => {
@@ -31,6 +31,9 @@
             initialiserGrille()
             document.getElementById("Systeme").value = "A vous de jouer !"
             activBouton("valider")
+            demarrerCompteur();
+            var timer = document.getElementById('timer')
+            timer.hidden = false;
 
         })
 
@@ -310,7 +313,7 @@
                 }
             }
             if (listeOperateurs[0] == " ") estValide = false;
-            
+
             console.log(estValide)
             if (estValide) {
 
@@ -329,7 +332,7 @@
             else {
                 document.getElementById("warning").innerHTML = "<h3> Expression invalide </h3>"
             }
-            
+
         }
 
 
@@ -501,18 +504,24 @@
          * Démarre le compte à rebours de 30 secondes
          */
         function demarrerCompteur() {
+            if (timerInterval) {
+                clearInterval(timerInterval); // Arrêter l'ancien intervalle s'il existe.
+            }
 
-            tempsRestant = 30
+            tempsRestant = 45
             timerInterval = setInterval(function () {
                 tempsRestant--;
                 document.getElementById('timer').textContent = tempsRestant;
-                if (tempsRestant == 0) {
+                if (tempsRestant <= 0) {
                     if (TokenValide == true) {
                         clearInterval(timerInterval);
                         document.getElementById('timer').hidden = true;
                         return 0
                     }
-                    desacBouton('bouton-indice')
+                    envoiReponse();
+                    desacBouton('bouton-calcul')
+                    desacBouton('retour')
+                    desacBouton('valider')
                     clearInterval(timerInterval);
                     document.getElementById('timer').hidden = true;
                 }
@@ -620,6 +629,10 @@
         }
         //Récupération de l'opération écrite par le joueur si elle est valide envoi au serveur en tant que réponse définitive
         function envoiReponse() {
+            TokenValide = true
+            desacBouton('bouton-validerLCB')
+            desacBouton('bouton-calcul')
+            desacBouton('retour')
             listeOperateurs = []
             expression = ""
             var ligne = document.getElementById('ligne-2');
@@ -664,8 +677,8 @@
                     break
                 }
             }
-            if (listeOperateurs[0] == " "){ estValide = false; }
-            
+            if (listeOperateurs[0] == " ") { estValide = false; }
+
 
             if (estValide) {
                 //Vider la liste opérateurs de ses ""
@@ -695,7 +708,7 @@
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
             socket.emit('verificationCB', { "nom": nomJoueur, "proposition": expression })
-        
+
         }
         function retourNombre() {
             const ligne = document.getElementById("ligne-1")
