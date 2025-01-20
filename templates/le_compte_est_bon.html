@@ -153,7 +153,6 @@
             const ligne = document.getElementById("ligne-1")
             if (data.Joueurs == nomJoueur) {
                 const caseLettre = creerCaseDeplacable(data.expression);
-                listeAnnexeIntermediaire.push(data.expression)
                 ligne.appendChild(caseLettre);
                 const ligne2 = document.getElementById('ligne-2');
                 ligne2.innerHTML = ""
