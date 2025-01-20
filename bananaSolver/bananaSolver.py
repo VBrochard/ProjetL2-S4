@@ -37,7 +37,7 @@ def search_for(letters):
         return search_for1(letters)
 
 def load_dictionary():
-    infile = open('Ressources/Dico.txt', 'r')
+    infile = open('Dico.txt', 'r')
     wc = 0
     while True:
         line = infile.readline()
@@ -306,3 +306,5 @@ def bananaSolver(s):
     afficherGrille(grille)
     return grille
 
+
+bananaSolver("STAVNEQSMGUSAHCIFLIUNVMEE")
