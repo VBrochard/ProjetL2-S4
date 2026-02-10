@@ -1,18 +1,15 @@
 # projetProgGroupe22
 
 
-Dhia et Samy
+Projet de fin de Licence 2 consistant à créer une site de mini jeux.
 
-Banana Solver
+Deux grosses parties : 
 
+- Des Chiffres et des Lettres
+- Banagrammes ainsi que des dérivés.
 
-Bastien :
+Présence aussi d'un banana solver, on donne une liste de lettres et il créer une grille de Scrabbles valide.
 
-Des chiffres et des lettres
-
-Vincent :
-
-Banana et dérivées.
 
 Pour lancer le serveur, écrire dans un terminal:
     
