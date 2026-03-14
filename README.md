@@ -81,4 +81,5 @@ projet/
 Quelque faiblesses : 
     - BananaSolver fonctionne totalement jusqu'a 60 lettres, comportement aléatoire avec plus.
     - Le client CLI a quelque soucis de synchronisation mais est fonctionnel.
+    - Opti mot et les bananas sont assez bancales, la personne devant la developper ayant abbandonnée tôt le projet.
 
